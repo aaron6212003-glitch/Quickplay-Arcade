@@ -32,6 +32,16 @@ if (game) {
   // Color the header emoji background
   const [c1, c2] = game.gradient;
   document.getElementById('game-header').style.borderColor = c1 + '55';
+
+  // Load specific game logic if it exists
+  if (gameId === 'battle-ball') {
+    document.getElementById('coming-soon').style.display = 'none';
+    document.getElementById('game-container').style.display = 'block';
+    import('./games/battle-ball.js').then(module => {
+      module.init(document.getElementById('game-container'));
+    });
+  }
+
 } else {
   titleEl.textContent = 'Game Not Found';
   descEl.textContent  = 'This game does not exist yet.';
