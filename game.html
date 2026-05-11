@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Game — QuickPlay Arcade</title>
+  <meta name="description" content="Play mini games on QuickPlay Arcade." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Outfit:wght@400;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body class="game-page">
+
+<!-- NAV -->
+<header class="nav" id="top-nav">
+  <div class="nav__inner">
+    <a href="index.html" class="nav__logo">
+      <span class="nav__logo-icon">🕹️</span>
+      <span>QuickPlay<strong>Arcade</strong></span>
+    </a>
+    <nav class="nav__links">
+      <a href="index.html" class="nav__link">Home</a>
+      <a href="index.html#games" class="nav__link">Games</a>
+      <a href="index.html#daily" class="nav__link">Daily</a>
+      <a href="index.html#leaderboard" class="nav__link">Leaderboard</a>
+    </nav>
+    <button class="btn btn--random" id="random-btn">🎲 Random</button>
+  </div>
+</header>
+
+<!-- GAME CONTENT -->
+<main class="game-main" id="game-main">
+  <div class="container">
+    <a href="index.html" class="back-link">← Back to Arcade</a>
+
+    <!-- Game header — filled by JS -->
+    <div class="game-header" id="game-header">
+      <div class="game-header__emoji" id="game-emoji">🎮</div>
+      <div class="game-header__info">
+        <h1 class="game-header__title" id="game-title">Loading...</h1>
+        <p class="game-header__desc" id="game-desc"></p>
+        <div class="game-header__meta" id="game-meta"></div>
+      </div>
+    </div>
+
+    <!-- Coming soon card -->
+    <div class="coming-soon-card" id="coming-soon">
+      <div class="coming-soon__icon">🚧</div>
+      <h2 class="coming-soon__title">Coming Soon!</h2>
+      <p class="coming-soon__desc">This game is being built right now.<br/>Check back soon — it's going to be fire. 🔥</p>
+      <div class="coming-soon__actions">
+        <a href="index.html" class="btn btn--primary btn--lg">← Browse Other Games</a>
+        <button class="btn btn--outline btn--lg" id="random-game-btn">🎲 Random Game</button>
+      </div>
+      <div class="coming-soon__share">
+        <p>Follow us for launch updates:</p>
+        <div class="share-row">
+          <a href="#" class="social-btn social-btn--tiktok">TikTok</a>
+          <a href="#" class="social-btn social-btn--instagram">Instagram</a>
+          <a href="#" class="social-btn social-btn--youtube">YouTube</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- More games -->
+    <div class="more-games-section">
+      <h3 class="more-games__title">🎮 Play More Games</h3>
+      <div class="games-grid" id="more-games-grid"></div>
+    </div>
+  </div>
+</main>
+
+<!-- MOBILE BOTTOM NAV -->
+<nav class="bottom-nav" id="bottom-nav">
+  <a href="index.html" class="bottom-nav__item">
+    <span class="bottom-nav__icon">🏠</span>
+    <span class="bottom-nav__label">Home</span>
+  </a>
+  <a href="index.html#games" class="bottom-nav__item">
+    <span class="bottom-nav__icon">🎮</span>
+    <span class="bottom-nav__label">Games</span>
+  </a>
+  <a href="index.html#daily" class="bottom-nav__item">
+    <span class="bottom-nav__icon">🔥</span>
+    <span class="bottom-nav__label">Daily</span>
+  </a>
+  <a href="index.html#leaderboard" class="bottom-nav__item">
+    <span class="bottom-nav__icon">🏆</span>
+    <span class="bottom-nav__label">Scores</span>
+  </a>
+</nav>
+
+<script type="module" src="js/game.js"></script>
+</body>
+</html>
