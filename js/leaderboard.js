@@ -145,7 +145,7 @@ window.loadLeaderboard = async function(gameFilter = 'all') {
   table.innerHTML = '<div style="text-align:center; padding:20px; color:#94a3b8;">Loading live rankings...</div>';
 
   try {
-    let allScores = [];
+    let rawScores = [];
 
     if (activeRankingsTab === 'daily') {
       const { dateString } = getDailyGame();
@@ -155,20 +155,29 @@ window.loadLeaderboard = async function(gameFilter = 'all') {
         where("dateString", "==", dateString)
       );
       const querySnapshot = await getDocs(q);
-      querySnapshot.forEach(doc => allScores.push(doc.data()));
-      allScores.sort((a, b) => b.score - a.score);
-      allScores = allScores.slice(0, 10);
+      querySnapshot.forEach(doc => rawScores.push(doc.data()));
     } else {
-      const q = query(collection(db, "scores"), orderBy("score", "desc"), limit(100));
+      const q = query(collection(db, "scores"), orderBy("score", "desc"), limit(300));
       const querySnapshot = await getDocs(q);
-      querySnapshot.forEach(doc => allScores.push(doc.data()));
+      querySnapshot.forEach(doc => rawScores.push(doc.data()));
       
       if (gameFilter !== 'all') {
-        allScores = allScores.filter(data => data.game === gameFilter).slice(0, 10);
-      } else {
-        allScores = allScores.slice(0, 10);
+        rawScores = rawScores.filter(data => data.game === gameFilter);
       }
     }
+
+    // Deduplicate: Keep only the highest score for each unique player (uid)
+    const bestScoresMap = new Map();
+    rawScores.forEach(data => {
+      const existing = bestScoresMap.get(data.uid);
+      if (!existing || data.score > existing.score) {
+        bestScoresMap.set(data.uid, data);
+      }
+    });
+
+    let allScores = Array.from(bestScoresMap.values());
+    allScores.sort((a, b) => b.score - a.score);
+    allScores = allScores.slice(0, 10);
     
     if (allScores.length === 0) {
       table.innerHTML = '<div style="text-align:center; padding:20px; color:#94a3b8;">No scores yet for this board! Be the first to play.</div>';
