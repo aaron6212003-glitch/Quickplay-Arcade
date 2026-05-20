@@ -324,6 +324,9 @@ export function init(container) {
       }, 1500);
     } else {
       // Game Over
+      if (window.saveScore && score > 0) {
+        window.saveScore('Higher or Lower', score);
+      }
       setTimeout(() => {
         elFinalScore.innerText = score;
         elGameOver.style.display = 'flex';

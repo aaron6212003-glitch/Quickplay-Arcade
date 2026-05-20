@@ -358,6 +358,9 @@ export function init(container) {
         localStorage.setItem('wr-best', best);
       }
       localStorage.setItem('wr-streak', streak);
+      if (window.saveScore && streak > 0) {
+        window.saveScore('Word Rush', streak);
+      }
     } else {
       document.getElementById('wr-title').innerText = "GAME OVER 💀";
       document.getElementById('wr-title').style.color = "#EF4444";
