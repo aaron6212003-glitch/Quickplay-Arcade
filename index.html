@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Outfit:wght@400;600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="styles.css?v=3" />
 </head>
 <body>
 
@@ -240,6 +240,57 @@
       <span id="auth-toggle-text">Don't have an account?</span> 
       <a href="#" id="auth-toggle-link" style="color: #38BDF8; font-weight: 700; text-decoration: none;">Sign Up</a>
     </p>
+  </div>
+</div>
+
+<!-- ===== PLAYER CARD MODAL ===== -->
+<div id="player-card-modal" class="player-card-modal">
+  <div class="player-card-modal-content">
+    <button class="player-card-close-btn" id="btn-player-card-close" aria-label="Close Profile">✕</button>
+    
+    <div class="gamer-card" id="modal-gamer-card">
+      <!-- Loading state -->
+      <div id="player-card-loading" style="display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 250px; width: 100%;">
+        <div class="loading-spinner" style="border: 4px solid rgba(56, 189, 248, 0.1); border-left-color: #38BDF8; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin-bottom: 20px;"></div>
+        <p style="color: #94a3b8; font-weight: 800; text-transform: uppercase; letter-spacing: 1.5px; font-size: 0.85rem;">Retrieving Player Profile...</p>
+      </div>
+
+      <!-- Loaded Gamer Card Content -->
+      <div id="player-card-loaded" style="display: none; width: 100%; flex-direction: column; align-items: center;">
+        <div class="avatar-ring" id="modal-avatar-ring">
+          <div class="gamer-avatar" id="modal-card-avatar">👾</div>
+        </div>
+        <h2 class="gamer-name" id="modal-card-username" style="margin-top: 10px; margin-bottom: 4px;">Player Name</h2>
+        
+        <div id="modal-card-title-badge" style="font-size: 0.72rem; font-weight: 900; color: #94a3b8; text-transform: uppercase; letter-spacing: 1.5px; padding: 4px 12px; border-radius: 6px; margin: 4px 0 12px; display: inline-block; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.06); box-shadow: inset 0 1px 5px rgba(0,0,0,0.2);">THE ROOKIE</div>
+        
+        <p class="gamer-tagline" id="modal-card-tagline" style="margin-bottom: 16px;">"Ready to play some arcade games!"</p>
+        <div class="fav-game-badge" id="modal-card-fav-game" style="margin-bottom: 20px;">🎯 Favorite: None</div>
+        
+        <div class="xp-section" style="width: 100%; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 20px; margin-bottom: 20px; text-align: left;">
+          <div class="xp-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+            <span class="xp-title" style="font-weight: 800; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; color: #cbd5e1;">Gamer Level</span>
+            <span class="xp-level" id="modal-profile-level" style="font-weight: 900; font-size: 0.85rem; background: linear-gradient(135deg, #EC4899, #F43F5E); color: white; padding: 2px 8px; border-radius: 6px;">LVL 1</span>
+          </div>
+          <div class="xp-track" style="height: 10px; background: rgba(255, 255, 255, 0.05); border-radius: 10px; overflow: hidden; margin-bottom: 6px; border: 1px solid rgba(255,255,255,0.03);">
+            <div class="xp-fill" id="modal-xp-progress-bar" style="height: 100%; width: 0%; background: linear-gradient(90deg, #38BDF8, #818CF8, #EC4899); border-radius: 10px; box-shadow: 0 0 10px rgba(56, 189, 248, 0.5); transition: width 1s cubic-bezier(0.16, 1, 0.3, 1);"></div>
+          </div>
+          <div class="xp-text" id="modal-xp-progress-text" style="font-size: 0.75rem; font-weight: 700; color: #64748b; text-align: right;">0 / 10 XP to next level</div>
+        </div>
+
+        <!-- Quick Stats Grid -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; width: 100%; margin-top: 5px;">
+          <div style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.04); border-radius: 14px; padding: 12px 10px; text-align: center;">
+            <div id="modal-stat-points" style="font-size: 1.5rem; font-weight: 900; color: #38BDF8; margin-bottom: 2px;">0</div>
+            <div style="font-size: 0.68rem; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px;">Total Points</div>
+          </div>
+          <div style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.04); border-radius: 14px; padding: 12px 10px; text-align: center;">
+            <div id="modal-stat-games" style="font-size: 1.5rem; font-weight: 900; color: #EC4899; margin-bottom: 2px;">0</div>
+            <div style="font-size: 0.68rem; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px;">Games Played</div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
 

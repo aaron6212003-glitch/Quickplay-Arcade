@@ -3,54 +3,123 @@ import { onAuthStateChanged } from './firebase.js';
 
 // --- COSMETICS DEFINITION SYSTEM ---
 const COSMETICS = [
-  // Avatars (Emojis)
+  // --- AVATARS (Emojis) ---
+  // Common
   { id: "avatar:👾", type: "avatar", name: "Cyber Alien", val: "👾", rarity: "common" },
-  { id: "avatar:🛡️", type: "avatar", name: "Arcade Shield", val: "🛡️", rarity: "common" },
   { id: "avatar:🎮", type: "avatar", name: "Retro Pad", val: "🎮", rarity: "common" },
+  { id: "avatar:🕹️", type: "avatar", name: "Joystick", val: "🕹️", rarity: "common" },
   { id: "avatar:🐱", type: "avatar", name: "Arcade Cat", val: "🐱", rarity: "common" },
+  { id: "avatar:🛡️", type: "avatar", name: "Arcade Shield", val: "🛡️", rarity: "common" },
+  { id: "avatar:📦", type: "avatar", name: "Loot Crate", val: "📦", rarity: "common" },
+  // Uncommon
   { id: "avatar:🚀", type: "avatar", name: "Space Rider", val: "🚀", rarity: "uncommon" },
   { id: "avatar:🛸", type: "avatar", name: "UFO Invader", val: "🛸", rarity: "uncommon" },
   { id: "avatar:🐯", type: "avatar", name: "Cyber Tiger", val: "🐯", rarity: "uncommon" },
   { id: "avatar:🤖", type: "avatar", name: "Cyber Bot", val: "🤖", rarity: "uncommon" },
+  { id: "avatar:🎯", type: "avatar", name: "Bullseye", val: "🎯", rarity: "uncommon" },
+  { id: "avatar:🦊", type: "avatar", name: "Stealth Fox", val: "🦊", rarity: "uncommon" },
+  { id: "avatar:🏹", type: "avatar", name: "Arcade Bow", val: "🏹", rarity: "uncommon" },
+  // Rare
   { id: "avatar:👻", type: "avatar", name: "Neon Ghost", val: "👻", rarity: "rare" },
   { id: "avatar:🦄", type: "avatar", name: "Neon Unicorn", val: "🦄", rarity: "rare" },
-  { id: "avatar:🦊", type: "avatar", name: "Cyber Fox", val: "🦊", rarity: "rare" },
   { id: "avatar:💀", type: "avatar", name: "Pixel Skull", val: "💀", rarity: "rare" },
+  { id: "avatar:🦁", type: "avatar", name: "Arcade Lion", val: "🦁", rarity: "rare" },
+  { id: "avatar:🦈", type: "avatar", name: "Cyber Shark", val: "🦈", rarity: "rare" },
+  { id: "avatar:💎", type: "avatar", name: "Arcane Prism", val: "💎", rarity: "rare" },
+  { id: "avatar:🔮", type: "avatar", name: "Crystal Ball", val: "🔮", rarity: "rare" },
+  { id: "avatar:🪐", type: "avatar", name: "Ringed Planet", val: "🪐", rarity: "rare" },
+  // Epic
   { id: "avatar:🐉", type: "avatar", name: "Holo Dragon", val: "🐉", rarity: "epic" },
   { id: "avatar:🧙‍♂️", type: "avatar", name: "Arcade Mage", val: "🧙‍♂️", rarity: "epic" },
   { id: "avatar:⚡", type: "avatar", name: "Lightning Sprite", val: "⚡", rarity: "epic" },
   { id: "avatar:👹", type: "avatar", name: "Oni Demon", val: "👹", rarity: "epic" },
+  { id: "avatar:☄️", type: "avatar", name: "Meteor Strike", val: "☄️", rarity: "epic" },
+  { id: "avatar:🧬", type: "avatar", name: "Cyber Helix", val: "🧬", rarity: "epic" },
+  { id: "avatar:⚔️", type: "avatar", name: "Holo Blade", val: "⚔️", rarity: "epic" },
+  { id: "avatar:🪶", type: "avatar", name: "Phoenix Feather", val: "🪶", rarity: "epic" },
+  // Legendary
   { id: "avatar:👑", type: "avatar", name: "Golden Emperor", val: "👑", rarity: "legendary" },
   { id: "avatar:🌌", type: "avatar", name: "Cosmic Nebula", val: "🌌", rarity: "legendary" },
   { id: "avatar:🧿", type: "avatar", name: "Stardust Eye", val: "🧿", rarity: "legendary" },
   { id: "avatar:🦖", type: "avatar", name: "Robo T-Rex", val: "🦖", rarity: "legendary" },
+  { id: "avatar:🔥", type: "avatar", name: "Flame Core", val: "🔥", rarity: "legendary" },
+  { id: "avatar:🏆", type: "avatar", name: "Grand Trophy", val: "🏆", rarity: "legendary" },
+  { id: "avatar:🔱", type: "avatar", name: "Golden Trident", val: "🔱", rarity: "legendary" },
+  { id: "avatar:🎭", type: "avatar", name: "Neon Persona", val: "🎭", rarity: "legendary" },
 
-  // Avatar Borders (CSS auras)
+  // --- BORDERS (Avatar Ring Auras) ---
+  // Common
   { id: "border:border-common", type: "border", name: "Slate Ring", val: "border-common", rarity: "common" },
+  // Uncommon
   { id: "border:border-uncommon", type: "border", name: "Green Aura", val: "border-uncommon", rarity: "uncommon" },
+  // Rare
   { id: "border:border-rare", type: "border", name: "Cyan Frost", val: "border-rare", rarity: "rare" },
+  { id: "border:border-electric", type: "border", name: "Static Volt", val: "border-electric", rarity: "rare" },
+  // Epic
   { id: "border:border-epic", type: "border", name: "Synth Pulse", val: "border-epic", rarity: "epic" },
+  { id: "border:border-shadow", type: "border", name: "Shadow Void", val: "border-shadow", rarity: "epic" },
+  { id: "border:border-glitch", type: "border", name: "Cyber Corruption", val: "border-glitch", rarity: "epic" },
+  // Legendary
   { id: "border:border-legendary", type: "border", name: "Cosmic Flame", val: "border-legendary", rarity: "legendary" },
+  { id: "border:border-ruby", type: "border", name: "Ruby Eclipse", val: "border-ruby", rarity: "legendary" },
+  { id: "border:border-rainbow", type: "border", name: "Rainbow Horizon", val: "border-rainbow", rarity: "legendary" },
+  { id: "border:border-diamond", type: "border", name: "Prism Crystal", val: "border-diamond", rarity: "legendary" },
+  { id: "border:border-phoenix", type: "border", name: "Solar Prominence", val: "border-phoenix", rarity: "legendary" },
 
-  // Themes (Card background visual styles)
+  // --- THEMES (Card Backgrounds) ---
+  // Common
   { id: "theme:theme-common", type: "theme", name: "Default Glass", val: "theme-common", rarity: "common" },
+  // Uncommon
   { id: "theme:theme-uncommon", type: "theme", name: "Cyber Grid", val: "theme-uncommon", rarity: "uncommon" },
+  // Rare
   { id: "theme:theme-rare", type: "theme", name: "Frozen Aurora", val: "theme-rare", rarity: "rare" },
+  { id: "theme:theme-sunset", type: "theme", name: "Pastel Horizon", val: "theme-sunset", rarity: "rare" },
+  // Epic
   { id: "theme:theme-epic", type: "theme", name: "Retro Synthwave", val: "theme-epic", rarity: "epic" },
+  { id: "theme:theme-matrix", type: "theme", name: "Digital Rain", val: "theme-matrix", rarity: "epic" },
+  { id: "theme:theme-static", type: "theme", name: "TV Glitch", val: "theme-static", rarity: "epic" },
+  // Legendary
   { id: "theme:theme-legendary", type: "theme", name: "Nebula Storm", val: "theme-legendary", rarity: "legendary" },
+  { id: "theme:theme-magma", type: "theme", name: "Magma Chamber", val: "theme-magma", rarity: "legendary" },
+  { id: "theme:theme-royal", type: "theme", name: "Imperial Silk", val: "theme-royal", rarity: "legendary" },
+  { id: "theme:theme-hyperdrive", type: "theme", name: "Hyperdrive", val: "theme-hyperdrive", rarity: "legendary" },
+  { id: "theme:theme-borealis", type: "theme", name: "Aurora Celestial", val: "theme-borealis", rarity: "legendary" },
+  { id: "theme:theme-abyss", type: "theme", name: "Bioluminescent Abyss", val: "theme-abyss", rarity: "legendary" },
+  { id: "theme:theme-gilded", type: "theme", name: "Gilded Gold", val: "theme-gilded", rarity: "legendary" },
 
-  // Titles (Slogan tags)
+  // --- TITLES (Slogan tags) ---
+  // Common
   { id: "title:THE ROOKIE", type: "title", name: "THE ROOKIE", val: "THE ROOKIE", rarity: "common" },
   { id: "title:BUTTON MASHER", type: "title", name: "BUTTON MASHER", val: "BUTTON MASHER", rarity: "common" },
+  { id: "title:CASUAL PLAYER", type: "title", name: "CASUAL PLAYER", val: "CASUAL PLAYER", rarity: "common" },
+  { id: "title:NOOB BUSTER", type: "title", name: "NOOB BUSTER", val: "NOOB BUSTER", rarity: "common" },
+  // Uncommon
   { id: "title:DAILY GRINDER", type: "title", name: "DAILY GRINDER", val: "DAILY GRINDER", rarity: "uncommon" },
   { id: "title:WORD WIZARD", type: "title", name: "WORD WIZARD", val: "WORD WIZARD", rarity: "uncommon" },
+  { id: "title:REACTION CHAMP", type: "title", name: "REACTION CHAMP", val: "REACTION CHAMP", rarity: "uncommon" },
+  { id: "title:COIN HUNTER", type: "title", name: "COIN HUNTER", val: "COIN HUNTER", rarity: "uncommon" },
+  // Rare
   { id: "title:TANKS COMMANDER", type: "title", name: "TANKS COMMANDER", val: "TANKS COMMANDER", rarity: "rare" },
   { id: "title:COLOR CONNOISSEUR", type: "title", name: "COLOR CONNOISSEUR", val: "COLOR CONNOISSEUR", rarity: "rare" },
+  { id: "title:SPEEDRUNNER", type: "title", name: "SPEEDRUNNER", val: "SPEEDRUNNER", rarity: "rare" },
+  { id: "title:PIXEL PERFECT", type: "title", name: "PIXEL PERFECT", val: "PIXEL PERFECT", rarity: "rare" },
+  { id: "title:ABYSSAL GUARDIAN", type: "title", name: "ABYSSAL GUARDIAN", val: "ABYSSAL GUARDIAN", rarity: "rare" },
+  // Epic
   { id: "title:LOGOS MAESTRO", type: "title", name: "LOGOS MAESTRO", val: "LOGOS MAESTRO", rarity: "epic" },
   { id: "title:ARCADE GLITCHER", type: "title", name: "ARCADE GLITCHER", val: "ARCADE GLITCHER", rarity: "epic" },
+  { id: "title:VOID WALKER", type: "title", name: "VOID WALKER", val: "VOID WALKER", rarity: "epic" },
+  { id: "title:CODEBREAKER", type: "title", name: "CODEBREAKER", val: "CODEBREAKER", rarity: "epic" },
+  { id: "title:LAVA SURFER", type: "title", name: "LAVA SURFER", val: "LAVA SURFER", rarity: "epic" },
+  { id: "title:HYPERDRIVE PILOT", type: "title", name: "HYPERDRIVE PILOT", val: "HYPERDRIVE PILOT", rarity: "epic" },
+  { id: "title:QUANTUM GLITCHER", type: "title", name: "QUANTUM GLITCHER", val: "QUANTUM GLITCHER", rarity: "epic" },
+  // Legendary
   { id: "title:PLAYHAUS CHAMPION", type: "title", name: "PLAYHAUS CHAMPION", val: "PLAYHAUS CHAMPION", rarity: "legendary" },
   { id: "title:COSMIC DEITY", type: "title", name: "COSMIC DEITY", val: "COSMIC DEITY", rarity: "legendary" },
-  { id: "title:UNBEATABLE", type: "title", name: "UNBEATABLE", val: "UNBEATABLE", rarity: "legendary" }
+  { id: "title:UNBEATABLE", type: "title", name: "UNBEATABLE", val: "UNBEATABLE", rarity: "legendary" },
+  { id: "title:HIGH SCORE LEGEND", type: "title", name: "HIGH SCORE LEGEND", val: "HIGH SCORE LEGEND", rarity: "legendary" },
+  { id: "title:GOLDEN BOY", type: "title", name: "GOLDEN BOY", val: "GOLDEN BOY", rarity: "legendary" },
+  { id: "title:MIDAS TOUCH", type: "title", name: "MIDAS TOUCH", val: "MIDAS TOUCH", rarity: "legendary" },
+  { id: "title:DIAMOND HANDS", type: "title", name: "DIAMOND HANDS", val: "DIAMOND HANDS", rarity: "legendary" }
 ];
 
 // Duplicate metal compensation scrap values
@@ -187,11 +256,11 @@ function showToast(message, type = 'success') {
 
 // --- COSMETIC GETTERS & STYLING ---
 function getTitleColor(titleText) {
-  if (titleText.includes("DEITY") || titleText.includes("CHAMP")) return "#F59E0B"; 
-  if (titleText.includes("MAESTRO") || titleText.includes("GLITCHER")) return "#A78BFA"; 
-  if (titleText.includes("COMMANDER") || titleText.includes("CONNOISSEUR")) return "#38BDF8"; 
-  if (titleText.includes("GRINDER") || titleText.includes("WIZARD")) return "#10B981"; 
-  return "#94a3b8"; 
+  const item = COSMETICS.find(c => c.type === 'title' && c.val === titleText);
+  if (item) {
+    return RARITY_COLORS[item.rarity] || "#94a3b8";
+  }
+  return "#94a3b8";
 }
 
 // --- UPDATE LIVE PREVIEW CARD CARD ---
@@ -380,7 +449,7 @@ function renderLockerGrid() {
   const pool = COSMETICS.filter(item => item.type === currentLockerCategory);
 
   pool.forEach(item => {
-    // Check ownership (Common items are automatically owned to avoid any migration issues)
+    // Check ownership
     const isOwned = owned.includes(item.id) || item.rarity === 'common';
 
     // Check equipped status
@@ -401,24 +470,45 @@ function renderLockerGrid() {
     if (isEquipped) el.classList.add('equipped');
     if (!isOwned) el.classList.add('locked');
 
-    // Choose visual icon representing category type
-    let renderIcon = "👾";
-    if (item.type === 'avatar') {
-      renderIcon = item.val;
-    } else if (item.type === 'border') {
-      renderIcon = "🛡️";
-    } else if (item.type === 'theme') {
-      renderIcon = "🖼️";
-    } else if (item.type === 'title') {
-      renderIcon = "🏷️";
-    }
+    const lockTag = !isOwned ? `<div style="font-size:0.6rem; color:#EF4444; font-weight:800; margin-top:4px;">🔒 ${SCRAP_COSTS[item.rarity]} Gems</div>` : '';
 
-    el.innerHTML = `
-      <div class="inventory-icon">${renderIcon}</div>
-      <div class="inventory-name" title="${item.name}">${item.name}</div>
-      <div class="inventory-rarity-lbl" style="color: ${RARITY_COLORS[item.rarity]};">${item.rarity}</div>
-      ${!isOwned ? `<div style="font-size:0.6rem; color:#EF4444; font-weight:800; margin-top:2px;">🔒 ${SCRAP_COSTS[item.rarity]} SCRAP</div>` : ''}
-    `;
+    // Build the visual preview based on item type
+    if (item.type === 'theme') {
+      el.classList.add('inventory-item--theme');
+      el.innerHTML = `
+        <div class="theme-preview-card gamer-card ${item.val}" aria-label="${item.name} preview">
+          <span class="theme-preview-emoji">👾</span>
+        </div>
+        <div class="inventory-name" title="${item.name}">${item.name}</div>
+        <div class="inventory-rarity-lbl" style="color: ${RARITY_COLORS[item.rarity]};">${item.rarity}</div>
+        ${lockTag}
+      `;
+    } else if (item.type === 'border') {
+      el.innerHTML = `
+        <div class="border-preview-wrap">
+          <div class="avatar-ring ${item.val} border-preview-ring">
+            <div class="gamer-avatar" style="font-size:1.8rem; width:52px; height:52px;">👾</div>
+          </div>
+        </div>
+        <div class="inventory-name" title="${item.name}">${item.name}</div>
+        <div class="inventory-rarity-lbl" style="color: ${RARITY_COLORS[item.rarity]};">${item.rarity}</div>
+        ${lockTag}
+      `;
+    } else if (item.type === 'avatar') {
+      el.innerHTML = `
+        <div class="inventory-icon">${item.val}</div>
+        <div class="inventory-name" title="${item.name}">${item.name}</div>
+        <div class="inventory-rarity-lbl" style="color: ${RARITY_COLORS[item.rarity]};">${item.rarity}</div>
+        ${lockTag}
+      `;
+    } else if (item.type === 'title') {
+      el.innerHTML = `
+        <div class="inventory-icon" style="color: ${RARITY_COLORS[item.rarity]}; font-size: 0.62rem; font-weight: 900; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 8px; padding: 6px 8px; border: 1px solid ${RARITY_COLORS[item.rarity]}44; border-radius: 6px; background: rgba(0,0,0,0.4); max-width: 100%; text-align:center; line-height:1.4;">${item.val}</div>
+        <div class="inventory-name" title="${item.name}">${item.name}</div>
+        <div class="inventory-rarity-lbl" style="color: ${RARITY_COLORS[item.rarity]};">${item.rarity}</div>
+        ${lockTag}
+      `;
+    }
 
     // Click trigger for equip or purchase
     el.addEventListener('click', () => {
@@ -490,11 +580,11 @@ async function purchaseItemWithScrap(item) {
 
   const currentScrap = userDocData.scrap || 0;
   if (currentScrap < cost) {
-    showToast(`Insufficient Scrap! Need ${cost} Scrap but you only have ${currentScrap}.`, "error");
+    showToast(`Insufficient Gems! Need ${cost} Gems but you only have ${currentScrap}.`, "error");
     return;
   }
 
-  const confirmMsg = `Buy "${item.name}" (${item.rarity.toUpperCase()}) directly for ${cost} Scrap Metal?`;
+  const confirmMsg = `Buy "${item.name}" (${item.rarity.toUpperCase()}) directly for ${cost} Gems?`;
   if (!confirm(confirmMsg)) return;
 
   try {
@@ -539,7 +629,7 @@ if (crankLever) {
 
     const currentCoins = userDocData.playCoins !== undefined ? userDocData.playCoins : 200;
     if (currentCoins < 100) {
-      showToast("Insufficient Play Coins! Spins cost 100 PC.", "error");
+      showToast("Insufficient Coins! Spins cost 100 Coins.", "error");
       return;
     }
 
@@ -641,14 +731,14 @@ if (crankLever) {
             <h3 style="font-size:1.15rem; font-weight:900; color:#fff; margin-bottom:4px;">${rolledItem.name}</h3>
             <p style="color:#64748b; font-size:0.8rem; margin-bottom: 12px;">Salvaged duplicate pulled!</p>
             <div style="font-size: 0.8rem; font-weight: 900; color: #10B981; background: rgba(16,185,129,0.1); border: 1px solid rgba(16,185,129,0.3); padding: 8px 16px; border-radius: 50px; display: inline-flex; align-items: center; gap: 6px;">
-              ⚙️ +${scrapCompensation} Scrap Metal
+              💎 +${scrapCompensation} Gems
             </div>
           `;
           revealViewport.style.background = 'rgba(15,23,42,0.6)';
           revealViewport.style.borderColor = 'rgba(255,255,255,0.08)';
           revealViewport.style.boxShadow = 'none';
 
-          showToast(`Duplicate! Converted "${rolledItem.name}" into +${scrapCompensation} Scrap Metal!`, "warning");
+          showToast(`Duplicate! Converted "${rolledItem.name}" into +${scrapCompensation} Gems!`, "warning");
         }
 
         // Re-render locker inventory list
@@ -704,7 +794,7 @@ if (btnAddCoins) {
       userDocData.playCoins = nextCoins;
       
       updateCurrencyDisplay(userDocData);
-      showToast("Sandbox: Credited +500 Play Coins! 🪙", "success");
+      showToast("Sandbox: Credited +500 Coins! 🪙", "success");
     } catch (e) {
       console.error(e);
       showToast("Sandbox: Failed to add coins.", "error");
@@ -724,10 +814,10 @@ if (btnAddScrap) {
       userDocData.scrap = nextScrap;
       
       updateCurrencyDisplay(userDocData);
-      showToast("Sandbox: Credited +100 Scrap Metal! ⚙️", "success");
+      showToast("Sandbox: Credited +100 Gems! 💎", "success");
     } catch (e) {
       console.error(e);
-      showToast("Sandbox: Failed to add scrap.", "error");
+      showToast("Sandbox: Failed to add Gems.", "error");
     }
   });
 }
@@ -757,7 +847,7 @@ if (btnDevReset) {
     const user = auth.currentUser;
     if (!user || !userDocData) return;
 
-    if (!confirm("Are you sure you want to reset all inventory progress, scrap metal, and custom equipped visuals to developer starter levels?")) {
+    if (!confirm("Are you sure you want to reset all inventory progress, Gems, and custom equipped visuals to developer starter levels?")) {
       return;
     }
 

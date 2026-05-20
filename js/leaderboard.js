@@ -1,4 +1,4 @@
-import { db, auth, collection, addDoc, getDocs, query, orderBy, limit, doc, updateDoc, increment, where } from './firebase.js';
+import { db, auth, collection, addDoc, getDocs, query, orderBy, limit, doc, getDoc, updateDoc, increment, where } from './firebase.js';
 import { getDailyGame, getYesterdayDateString } from './daily.js';
 
 let activeRankingsTab = 'daily'; // 'daily' or 'alltime'
@@ -108,9 +108,9 @@ window.saveScore = async function(gameName, score) {
       dateString: dateString
     });
     
-    // 2. Update the user's personal profile stats and award Play Coins
-    let coinsEarned = Math.max(5, Math.floor(score / 10)); // Guarantee at least 5 PC per game played
-    if (isDaily) coinsEarned += 15; // +15 PC for daily challenge run
+    // 2. Update the user's personal profile stats and award Coins
+    let coinsEarned = Math.max(5, Math.floor(score / 10)); // Guarantee at least 5 Coins per game played
+    if (isDaily) coinsEarned += 15; // +15 Coins for daily challenge run
 
     try {
       const userRef = doc(db, "users", user.uid);
@@ -119,7 +119,7 @@ window.saveScore = async function(gameName, score) {
         gamesPlayed: increment(1),
         playCoins: increment(coinsEarned)
       });
-      console.log(`User profile stats updated & awarded +${coinsEarned} Play Coins!`);
+      console.log(`User profile stats updated & awarded +${coinsEarned} Coins!`);
     } catch (e) {
       console.error("Could not update user profile stats:", e);
     }
@@ -195,9 +195,10 @@ window.loadLeaderboard = async function(gameFilter = 'all') {
     allScores.forEach((data) => {
       const rankDisplay = rank <= 3 ? medals[rank - 1] : `#${rank}`;
       const isCurrentUser = auth.currentUser && auth.currentUser.uid === data.uid;
+      const escapedUsername = (data.username || "Gamer").replace(/'/g, "\\'");
       
       html += `
-        <div class="lb-row ${rank <= 3 ? 'lb-row--top' : ''} ${isCurrentUser ? 'is-me' : ''}" ${isCurrentUser ? 'style="border-left: 4px solid #38BDF8;"' : ''}>
+        <div class="lb-row ${rank <= 3 ? 'lb-row--top' : ''} ${isCurrentUser ? 'is-me' : ''}" ${isCurrentUser ? 'style="border-left: 4px solid #38BDF8;"' : ''} onclick="window.showPlayerCard('${data.uid}', '${escapedUsername}', ${data.score})">
           <span class="lb-rank">${rankDisplay}</span>
           <span class="lb-avatar">👾</span>
           <span class="lb-user">
@@ -280,6 +281,124 @@ function initLeaderboard() {
   if (document.getElementById('leaderboard-table')) {
     window.loadLeaderboard();
     loadYesterdayChampion();
+  }
+  
+  // Register close handlers for player card modal
+  initPlayerCardCloseHandlers();
+}
+
+// --- DYNAMIC GAMER CARD OVERLAY MODAL HANDLERS ---
+window.showPlayerCard = async function(uid, fallbackUsername, fallbackScore) {
+  const modal = document.getElementById('player-card-modal');
+  if (!modal) return;
+
+  // Add the active class to trigger fade-in transition
+  modal.classList.add('active');
+
+  const loadingSection = document.getElementById('player-card-loading');
+  const loadedSection = document.getElementById('player-card-loaded');
+
+  const cardAvatar = document.getElementById('modal-card-avatar');
+  const cardUsername = document.getElementById('modal-card-username');
+  const cardTagline = document.getElementById('modal-card-tagline');
+  const cardFavGame = document.getElementById('modal-card-fav-game');
+  const profileLevel = document.getElementById('modal-profile-level');
+  const xpProgressBar = document.getElementById('modal-xp-progress-bar');
+  const xpProgressText = document.getElementById('modal-xp-progress-text');
+  const cardTitleBadge = document.getElementById('modal-card-title-badge');
+  const gamerCard = document.getElementById('modal-gamer-card');
+  const avatarRing = document.getElementById('modal-avatar-ring');
+  const statPoints = document.getElementById('modal-stat-points');
+  const statGames = document.getElementById('modal-stat-games');
+
+  // Reset to loading state with default clean themes
+  loadingSection.style.display = 'flex';
+  loadedSection.style.display = 'none';
+  gamerCard.className = 'gamer-card theme-common';
+  avatarRing.className = 'avatar-ring border-common';
+
+  let data = null;
+  try {
+    const userRef = doc(db, "users", uid);
+    const userSnap = await getDoc(userRef);
+    if (userSnap.exists()) {
+      data = userSnap.data();
+    }
+  } catch (error) {
+    console.error("Error retrieving player card profile document:", error);
+  }
+
+  // Populate data using actual Firestore document or guest fallback values
+  const username = (data && data.username) || fallbackUsername || "Guest Gamer";
+  const tagline = (data && data.tagline) || "A mysterious guest who loves playing mini games!";
+  const favGame = (data && data.favoriteGame) || "None";
+  const avatar = (data && data.avatar) || "👾";
+  const totalPoints = (data && typeof data.totalPoints === 'number') ? data.totalPoints : (fallbackScore || 0);
+  const gamesPlayed = (data && typeof data.gamesPlayed === 'number') ? data.gamesPlayed : 1;
+
+  const activeCosmetics = (data && data.activeCosmetics) || {};
+  const activeTitle = activeCosmetics.title || "THE ROOKIE";
+  const activeBorder = activeCosmetics.border || "border-common";
+  const activeTheme = activeCosmetics.theme || "theme-common";
+
+  // Set card contents
+  cardUsername.innerText = username;
+  cardTagline.innerText = `"${tagline}"`;
+  cardFavGame.innerText = `🎯 Favorite: ${favGame}`;
+  cardAvatar.innerText = avatar;
+  statPoints.innerText = totalPoints.toLocaleString();
+  statGames.innerText = gamesPlayed.toLocaleString();
+  cardTitleBadge.innerText = activeTitle;
+
+  // Compute gamer level progression math
+  const level = Math.floor(Math.sqrt(totalPoints / 10)) + 1;
+  const xpForCurrentLevel = Math.pow(level - 1, 2) * 10;
+  const xpForNextLevel = Math.pow(level, 2) * 10;
+  const xpNeeded = xpForNextLevel - xpForCurrentLevel;
+  const xpProgress = totalPoints - xpForCurrentLevel;
+  const xpPercent = Math.min(100, Math.max(0, (xpProgress / xpNeeded) * 100));
+
+  profileLevel.innerText = `LVL ${level}`;
+  xpProgressBar.style.width = `${xpPercent}%`;
+  xpProgressText.innerText = `${xpProgress} / ${xpNeeded} XP to next level`;
+
+  // Dynamically color coordinate Slogan Badge based on rarity levels
+  let badgeColor = "#94a3b8"; // common
+  const legendaries = ["PLAYHAUS CHAMPION", "COSMIC DEITY", "UNBEATABLE", "HIGH SCORE LEGEND", "GOLDEN BOY", "MIDAS TOUCH", "DIAMOND HANDS"];
+  const epics = ["LOGOS MAESTRO", "ARCADE GLITCHER", "VOID WALKER", "CODEBREAKER", "LAVA SURFER", "HYPERDRIVE PILOT", "QUANTUM GLITCHER"];
+  const rares = ["TANKS COMMANDER", "COLOR CONNOISSEUR", "SPEEDRUNNER", "PIXEL PERFECT", "ABYSSAL GUARDIAN"];
+  const uncommons = ["DAILY GRINDER", "WORD WIZARD", "REACTION CHAMP", "COIN HUNTER"];
+
+  if (legendaries.includes(activeTitle)) badgeColor = "#F59E0B";
+  else if (epics.includes(activeTitle)) badgeColor = "#A78BFA";
+  else if (rares.includes(activeTitle)) badgeColor = "#38BDF8";
+  else if (uncommons.includes(activeTitle)) badgeColor = "#10B981";
+
+  cardTitleBadge.style.color = badgeColor;
+  cardTitleBadge.style.borderColor = badgeColor + "33"; // 20% alpha border
+
+  // Apply equipped layout cosmetic styles
+  gamerCard.className = `gamer-card ${activeTheme}`;
+  avatarRing.className = `avatar-ring ${activeBorder}`;
+
+  // Swap spinner for loaded profile
+  loadingSection.style.display = 'none';
+  loadedSection.style.display = 'flex';
+};
+
+// Bind player card modal close handlers
+function initPlayerCardCloseHandlers() {
+  const cardModal = document.getElementById('player-card-modal');
+  const btnCardClose = document.getElementById('btn-player-card-close');
+  if (btnCardClose && cardModal) {
+    btnCardClose.addEventListener('click', () => {
+      cardModal.classList.remove('active');
+    });
+    cardModal.addEventListener('click', (e) => {
+      if (e.target === cardModal) {
+        cardModal.classList.remove('active');
+      }
+    });
   }
 }
 

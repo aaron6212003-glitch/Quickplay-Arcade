@@ -177,10 +177,16 @@ onAuthStateChanged(auth, async (user) => {
         titleBadge.innerText = activeTitle;
         // Dynamically style based on rarity of equipped title
         let badgeColor = "#94a3b8"; // common
-        if (activeTitle.includes("DEITY") || activeTitle.includes("CHAMP")) badgeColor = "#F59E0B"; // legendary
-        else if (activeTitle.includes("MAESTRO") || activeTitle.includes("GLITCHER")) badgeColor = "#A78BFA"; // epic
-        else if (activeTitle.includes("COMMANDER") || activeTitle.includes("CONNOISSEUR")) badgeColor = "#38BDF8"; // rare
-        else if (activeTitle.includes("GRINDER") || activeTitle.includes("WIZARD")) badgeColor = "#10B981"; // uncommon
+        const legendaries = ["PLAYHAUS CHAMPION", "COSMIC DEITY", "UNBEATABLE", "HIGH SCORE LEGEND", "GOLDEN BOY", "MIDAS TOUCH", "DIAMOND HANDS"];
+        const epics = ["LOGOS MAESTRO", "ARCADE GLITCHER", "VOID WALKER", "CODEBREAKER", "LAVA SURFER", "HYPERDRIVE PILOT", "QUANTUM GLITCHER"];
+        const rares = ["TANKS COMMANDER", "COLOR CONNOISSEUR", "SPEEDRUNNER", "PIXEL PERFECT", "ABYSSAL GUARDIAN"];
+        const uncommons = ["DAILY GRINDER", "WORD WIZARD", "REACTION CHAMP", "COIN HUNTER"];
+        
+        if (legendaries.includes(activeTitle)) badgeColor = "#F59E0B";
+        else if (epics.includes(activeTitle)) badgeColor = "#A78BFA";
+        else if (rares.includes(activeTitle)) badgeColor = "#38BDF8";
+        else if (uncommons.includes(activeTitle)) badgeColor = "#10B981";
+        
         titleBadge.style.color = badgeColor;
         titleBadge.style.borderColor = badgeColor + "33"; // subtle border
       }

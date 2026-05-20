@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Arcade Locker & Capsule Station - Playhaus</title>
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Outfit:wght@400;600;700;800;900&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="styles.css?v=3" />
   <style>
     body {
       background-color: #050811;
@@ -53,42 +53,84 @@
       flex-direction: column;
       align-items: center;
       position: relative;
+      overflow: hidden;
       transition: all 0.5s ease;
     }
 
-    /* Cosmic theme background effects */
-    .theme-common {
-      background: rgba(15, 23, 42, 0.45) !important;
+    /* ===== INVENTORY THEME PREVIEW CARDS ===== */
+    /* Theme items use full-width animated mini gamer-card previews */
+    .inventory-item--theme {
+      padding: 0;
+      overflow: hidden;
+      border: 1px solid rgba(255,255,255,0.08);
     }
-    .theme-uncommon {
-      background: linear-gradient(135deg, rgba(15, 23, 42, 0.65), rgba(6, 78, 59, 0.3)) !important;
-      background-image: radial-gradient(rgba(16, 185, 129, 0.1) 1px, transparent 1px) !important;
-      background-size: 16px 16px !important;
+    .inventory-item--theme .inventory-name,
+    .inventory-item--theme .inventory-rarity-lbl,
+    .inventory-item--theme div[style] {
+      padding: 0 8px;
+      margin-top: 4px;
     }
-    .theme-rare {
-      background: linear-gradient(135deg, rgba(30, 41, 59, 0.7), rgba(3, 105, 161, 0.4)) !important;
-      backdrop-filter: blur(20px);
-      box-shadow: inset 0 0 20px rgba(56, 189, 248, 0.1);
-    }
-    .theme-epic {
-      background: linear-gradient(135deg, rgba(15, 23, 42, 0.7), rgba(88, 28, 135, 0.4)) !important;
-      animation: epicBgShift 10s ease infinite alternate;
-    }
-    @keyframes epicBgShift {
-      0% { background-position: 0% 50%; }
-      100% { background-position: 100% 50%; }
-    }
-    .theme-legendary {
-      background: linear-gradient(135deg, rgba(15, 23, 42, 0.8), rgba(120, 53, 4, 0.5)) !important;
-      border-color: rgba(245, 158, 11, 0.4) !important;
-      animation: legendaryBgGlow 6s ease-in-out infinite alternate;
-    }
-    @keyframes legendaryBgGlow {
-      0% { box-shadow: 0 10px 40px rgba(0,0,0,0.5), inset 0 0 10px rgba(245, 158, 11, 0.1); }
-      100% { box-shadow: 0 10px 40px rgba(245, 158, 11, 0.15), inset 0 0 30px rgba(245, 158, 11, 0.25); }
+    .inventory-item--theme.equipped {
+      border: 2px solid #38BDF8 !important;
+      box-shadow: 0 0 15px rgba(56, 189, 248, 0.25) !important;
     }
 
-    /* Rarity border auras */
+    /* The actual animated background preview container inside the card slot */
+    .theme-preview-card {
+      width: 100%;
+      height: 90px;
+      border-radius: 12px 12px 0 0;
+      padding: 0 !important;
+      margin: 0 !important;
+      border: none !important;
+      box-shadow: none !important;
+      backdrop-filter: none !important;
+      -webkit-backdrop-filter: none !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      position: relative !important;
+      overflow: hidden !important;
+      flex-shrink: 0;
+    }
+    .theme-preview-emoji {
+      font-size: 2rem;
+      position: relative;
+      z-index: 3;
+      text-shadow: 0 2px 8px rgba(0,0,0,0.8);
+    }
+    .inventory-item--theme .inventory-name {
+      padding: 6px 8px 2px;
+      font-size: 0.7rem;
+      margin-bottom: 0;
+    }
+    .inventory-item--theme .inventory-rarity-lbl {
+      padding-bottom: 2px;
+    }
+    .inventory-item--theme > div:last-child {
+      padding-bottom: 6px;
+    }
+
+    /* ===== BORDER PREVIEW RINGS IN INVENTORY ===== */
+    .border-preview-wrap {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 8px;
+      padding-top: 4px;
+    }
+    .border-preview-ring {
+      width: 64px !important;
+      height: 64px !important;
+      margin-bottom: 0 !important;
+    }
+    .border-preview-ring .gamer-avatar {
+      width: 52px !important;
+      height: 52px !important;
+      font-size: 1.8rem !important;
+    }
+
+    /* Rarity border auras layout */
     .avatar-ring {
       position: relative;
       width: 140px;
@@ -98,35 +140,6 @@
       align-items: center;
       justify-content: center;
       border-radius: 50%;
-    }
-    
-    .border-common {
-      border: 4px solid rgba(255, 255, 255, 0.15) !important;
-    }
-    .border-uncommon {
-      border: 4px solid #10B981 !important;
-      box-shadow: 0 0 15px rgba(16, 185, 129, 0.4);
-    }
-    .border-rare {
-      border: 4px solid #38BDF8 !important;
-      box-shadow: 0 0 20px rgba(56, 189, 248, 0.5);
-    }
-    .border-epic {
-      border: 4px solid #A78BFA !important;
-      animation: epicBorderPulse 3s linear infinite alternate;
-    }
-    @keyframes epicBorderPulse {
-      0% { border-color: #A78BFA; box-shadow: 0 0 10px rgba(167, 139, 250, 0.3); }
-      100% { border-color: #EC4899; box-shadow: 0 0 20px rgba(236, 72, 153, 0.6); }
-    }
-    .border-legendary {
-      border: 4px solid #F59E0B !important;
-      animation: legendaryBorderPulse 4s linear infinite;
-    }
-    @keyframes legendaryBorderPulse {
-      0% { border-color: #F59E0B; box-shadow: 0 0 15px rgba(245, 158, 11, 0.5); }
-      50% { border-color: #EF4444; box-shadow: 0 0 25px rgba(239, 68, 68, 0.8); }
-      100% { border-color: #F59E0B; box-shadow: 0 0 15px rgba(245, 158, 11, 0.5); }
     }
 
     .gamer-avatar {
@@ -615,14 +628,14 @@
         <div class="currency-icon">🪙</div>
         <div class="currency-details">
           <div class="currency-val" id="text-play-coins">200</div>
-          <div class="currency-lbl">Play Coins</div>
+          <div class="currency-lbl">Coins</div>
         </div>
       </div>
       <div class="currency-box">
-        <div class="currency-icon">⚙️</div>
+        <div class="currency-icon">💎</div>
         <div class="currency-details">
           <div class="currency-val" id="text-scrap">0</div>
-          <div class="currency-lbl">Scrap Metal</div>
+          <div class="currency-lbl">Gems</div>
         </div>
       </div>
     </div>
@@ -632,7 +645,7 @@
       <div class="dev-title">⚙️ Sandbox Developer Testing Tools</div>
       <div class="dev-buttons">
         <button class="dev-btn" id="btn-dev-add-coins">🪙 Add +500 Coins</button>
-        <button class="dev-btn" id="btn-dev-add-scrap">⚙️ Add +100 Scrap</button>
+        <button class="dev-btn" id="btn-dev-add-scrap">💎 Add +100 Gems</button>
         <button class="dev-btn" id="btn-dev-unlock-all">🔓 Unlock All Items</button>
         <button class="dev-btn" id="btn-dev-reset">🔄 Reset Progress</button>
       </div>
@@ -650,7 +663,7 @@
       <!-- Tab: Vending machine draw room -->
       <div id="panel-vending">
         <p style="color:#94a3b8; font-size:0.95rem; margin-bottom:20px; line-height:1.5;">
-          Insert **100 Play Coins (🪙)** and crank the capsule wheel to pull a random Fortnite-style rarity cosmetic!
+          Insert **100 Coins (🪙)** and crank the capsule wheel to pull a random Fortnite-style rarity cosmetic!
         </p>
         <div class="vending-wrapper">
           <!-- The vending machine visual cabinet -->
@@ -662,7 +675,7 @@
               <div class="dome-sparks"></div>
             </div>
             <div style="color:#64748b; font-size:0.75rem; font-weight:800; text-transform:uppercase;">
-              Crank to Draw (100 PC)
+              Crank to Draw (100 Coins)
             </div>
             <div class="crank-handle" id="crank-lever">🌀</div>
             <div class="chute" id="chute-outlet">📪</div>
@@ -687,7 +700,7 @@
         </div>
         
         <p style="color:#94a3b8; font-size:0.85rem; margin-bottom:15px;" id="locker-sub-desc">
-          Click an unlocked item to equip it to your Gamer Card, or click a locked item to buy it using Scrap Metal!
+          Click an unlocked item to equip it to your Gamer Card, or click a locked item to buy it using Gems!
         </p>
 
         <!-- Inventory List -->
