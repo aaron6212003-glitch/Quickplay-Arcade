@@ -108,10 +108,17 @@ export function init(container) {
         text-shadow: 0 2px 4px rgba(0,0,0,0.2);
       }
       .hl-card-bottom .hl-subtitle {
-        color: #EC4899;
+        color: rgba(255, 255, 255, 0.4);
+        text-transform: lowercase;
+        font-style: italic;
+        font-size: 1.1rem;
+        font-weight: 400;
+        letter-spacing: 1px;
+        margin-bottom: 15px;
+        text-shadow: none;
       }
       
-      .hl-value-container { height: 80px; display: flex; align-items: center; justify-content: center; }
+      .hl-value-container { min-height: 80px; display: flex; align-items: center; justify-content: center; }
       .hl-value {
         font-size: 3.8rem; font-weight: 900; color: #FCD34D;
         text-shadow: 0 0 25px rgba(252, 211, 77, 0.6);
