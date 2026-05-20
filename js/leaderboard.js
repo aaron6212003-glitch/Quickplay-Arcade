@@ -108,23 +108,27 @@ window.saveScore = async function(gameName, score) {
       dateString: dateString
     });
     
-    // 2. Update the user's personal profile stats
+    // 2. Update the user's personal profile stats and award Play Coins
+    let coinsEarned = Math.max(5, Math.floor(score / 10)); // Guarantee at least 5 PC per game played
+    if (isDaily) coinsEarned += 15; // +15 PC for daily challenge run
+
     try {
       const userRef = doc(db, "users", user.uid);
       await updateDoc(userRef, {
         totalPoints: increment(score),
-        gamesPlayed: increment(1)
+        gamesPlayed: increment(1),
+        playCoins: increment(coinsEarned)
       });
-      console.log("User profile stats updated!");
+      console.log(`User profile stats updated & awarded +${coinsEarned} Play Coins!`);
     } catch (e) {
       console.error("Could not update user profile stats:", e);
     }
     
     // Show premium visual success feedback
     if (isDaily) {
-      showToast(`🚀 Score of ${score.toLocaleString()} saved to Today's Daily Challenge!`, "success");
+      showToast(`🚀 Score saved to Daily Challenge! Earned +${coinsEarned} 🪙!`, "success");
     } else {
-      showToast(`🏆 Score of ${score.toLocaleString()} saved to All-Time rankings!`, "success");
+      showToast(`🏆 Score of ${score.toLocaleString()} saved! Earned +${coinsEarned} 🪙!`, "success");
     }
     
     // Refresh leaderboard if we are on the homepage

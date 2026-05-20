@@ -161,10 +161,41 @@ onAuthStateChanged(auth, async (user) => {
       const favGame = data.favoriteGame || "None";
       const avatar = data.avatar || "👾";
       
+      const activeCosmetics = data.activeCosmetics || {};
+      const activeTitle = activeCosmetics.title || "THE ROOKIE";
+      const activeBorder = activeCosmetics.border || "border-common";
+      const activeTheme = activeCosmetics.theme || "theme-common";
+      
       if (cardUsername) cardUsername.innerText = username;
       if (cardTagline) cardTagline.innerText = `"${tagline}"`;
       if (cardFavGame) cardFavGame.innerText = `🎯 Favorite: ${favGame}`;
       if (cardAvatar) cardAvatar.innerText = avatar;
+      
+      // Update custom title badge
+      const titleBadge = document.getElementById('card-title-badge');
+      if (titleBadge) {
+        titleBadge.innerText = activeTitle;
+        // Dynamically style based on rarity of equipped title
+        let badgeColor = "#94a3b8"; // common
+        if (activeTitle.includes("DEITY") || activeTitle.includes("CHAMP")) badgeColor = "#F59E0B"; // legendary
+        else if (activeTitle.includes("MAESTRO") || activeTitle.includes("GLITCHER")) badgeColor = "#A78BFA"; // epic
+        else if (activeTitle.includes("COMMANDER") || activeTitle.includes("CONNOISSEUR")) badgeColor = "#38BDF8"; // rare
+        else if (activeTitle.includes("GRINDER") || activeTitle.includes("WIZARD")) badgeColor = "#10B981"; // uncommon
+        titleBadge.style.color = badgeColor;
+        titleBadge.style.borderColor = badgeColor + "33"; // subtle border
+      }
+      
+      // Update avatar border aura
+      const avatarRing = document.querySelector('.avatar-ring');
+      if (avatarRing) {
+        avatarRing.className = `avatar-ring ${activeBorder}`;
+      }
+      
+      // Update gamer card theme
+      const gamerCard = document.querySelector('.gamer-card');
+      if (gamerCard) {
+        gamerCard.className = `gamer-card ${activeTheme}`;
+      }
       
       // Setup edit profile button text depending on profile setup state
       const isDefaultProfile = !data.tagline && !data.avatar && (!data.favoriteGame || data.favoriteGame === "None");
