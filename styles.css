@@ -1190,34 +1190,37 @@ body {
 .player-card-modal {
   position: fixed !important;
   inset: 0 !important;
-  background: rgba(5, 8, 17, 0.82) !important;
-  backdrop-filter: blur(12px) !important;
-  -webkit-backdrop-filter: blur(12px) !important;
+  background: rgba(5, 8, 17, 0.88) !important;
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
   z-index: 1100 !important;
-  display: flex !important;
+  display: none;
   align-items: center !important;
   justify-content: center !important;
   opacity: 0;
-  pointer-events: none;
   transition: opacity 0.3s ease !important;
   padding: 20px !important;
 }
 
 .player-card-modal.active {
+  display: flex !important;
   opacity: 1 !important;
-  pointer-events: auto !important;
+  animation: modalFadeIn 0.3s ease forwards !important;
+}
+@keyframes modalFadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
 }
 
 .player-card-modal-content {
   width: 100% !important;
-  max-width: 400px !important;
+  max-width: 420px !important;
   position: relative !important;
-  transform: translateY(30px) scale(0.95) !important;
-  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+  animation: modalSlideUp 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) forwards !important;
 }
-
-.player-card-modal.active .player-card-modal-content {
-  transform: translateY(0) scale(1) !important;
+@keyframes modalSlideUp {
+  from { transform: translateY(40px) scale(0.94); opacity: 0; }
+  to   { transform: translateY(0)    scale(1);    opacity: 1; }
 }
 
 /* Modal close button standard positioning */
