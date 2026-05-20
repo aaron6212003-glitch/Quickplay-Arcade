@@ -3,100 +3,488 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>My Profile - Playhaus</title>
-  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Outfit:wght@400;600;700;800&display=swap" rel="stylesheet" />
+  <title>Gamer Profile - Playhaus</title>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Outfit:wght@400;600;700;800;900&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="styles.css" />
   <style>
-    .profile-header {
+    body {
+      background-color: #050811;
+      font-family: 'Outfit', sans-serif;
+      overflow-x: hidden;
+    }
+
+    /* Ambient Glowing Orbs background */
+    .profile-orb {
+      position: absolute; width: 450px; height: 450px; border-radius: 50%;
+      filter: blur(140px); opacity: 0.08; pointer-events: none; z-index: 0;
+    }
+    .profile-orb-1 { background: #38BDF8; top: 10%; left: -100px; }
+    .profile-orb-2 { background: #EC4899; bottom: 10%; right: -100px; }
+
+    .profile-container {
+      max-width: 1100px;
+      margin: 100px auto 60px;
+      padding: 0 24px;
+      display: grid;
+      grid-template-columns: 350px 1fr;
+      gap: 30px;
+      position: relative;
+      z-index: 1;
+    }
+
+    @media (max-width: 900px) {
+      .profile-container {
+        grid-template-columns: 1fr;
+        margin-top: 80px;
+      }
+    }
+
+    /* Left Column: Interactive Gamer Card */
+    .gamer-card {
+      background: rgba(15, 23, 42, 0.45);
+      backdrop-filter: blur(15px);
+      -webkit-backdrop-filter: blur(15px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 24px;
+      padding: 40px 24px;
       text-align: center;
-      padding: 60px 20px 40px;
-      margin-top: 60px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      position: relative;
     }
-    .profile-avatar {
-      font-size: 5rem;
-      margin-bottom: 20px;
-      display: inline-block;
-      background: #1e293b;
-      padding: 20px;
+
+    /* Level progression circle around Avatar */
+    .avatar-ring {
+      position: relative;
+      width: 140px;
+      height: 140px;
+      margin-bottom: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .avatar-ring::before {
+      content: '';
+      position: absolute;
+      inset: 0;
       border-radius: 50%;
-      border: 4px solid #38BDF8;
+      padding: 4px;
+      background: linear-gradient(135deg, #38BDF8, #818CF8, #EC4899);
+      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+      box-shadow: 0 0 20px rgba(56, 189, 248, 0.25);
     }
-    .profile-name {
-      font-size: 2.5rem;
+
+    .gamer-avatar {
+      font-size: 4.5rem;
+      background: rgba(30, 41, 59, 0.8);
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: inset 0 2px 8px rgba(255,255,255,0.05);
+    }
+
+    .gamer-name {
+      font-size: 2.2rem;
       font-weight: 900;
       color: #fff;
-      margin-bottom: 5px;
+      margin-bottom: 4px;
+      letter-spacing: -0.5px;
+      background: linear-gradient(to bottom, #ffffff, #cbd5e1);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
     }
-    .profile-join-date {
-      color: #94a3b8;
+
+    .gamer-tagline {
       font-size: 1rem;
-      margin-bottom: 30px;
+      font-style: italic;
+      color: rgba(255, 255, 255, 0.6);
+      margin-bottom: 16px;
+      padding: 0 10px;
+      line-height: 1.4;
+      max-width: 260px;
     }
-    .stats-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 20px;
-      max-width: 800px;
-      margin: 0 auto 40px;
-    }
-    .stat-card {
-      background: #1e293b;
-      border: 1px solid #334155;
-      border-radius: 16px;
-      padding: 30px 20px;
-      text-align: center;
-    }
-    .stat-value {
-      font-size: 2.5rem;
-      font-weight: 900;
+
+    .fav-game-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(56, 189, 248, 0.1);
+      border: 1px solid rgba(56, 189, 248, 0.3);
       color: #38BDF8;
-      margin-bottom: 10px;
-    }
-    .stat-label {
-      color: #cbd5e1;
-      font-weight: 700;
+      font-size: 0.8rem;
+      font-weight: 800;
       text-transform: uppercase;
       letter-spacing: 1px;
-      font-size: 0.9rem;
-    }
-    .badges-section {
-      max-width: 800px;
-      margin: 0 auto 60px;
-      text-align: center;
-    }
-    .badges-container {
-      display: flex;
-      justify-content: center;
-      gap: 15px;
-      flex-wrap: wrap;
-      margin-top: 20px;
-    }
-    .profile-badge {
-      background: rgba(56, 189, 248, 0.1);
-      border: 1px solid #38BDF8;
-      color: #38BDF8;
-      padding: 10px 20px;
+      padding: 6px 16px;
       border-radius: 50px;
+      margin-bottom: 30px;
+    }
+
+    /* Dynamic Gamer XP Bar */
+    .xp-section {
+      width: 100%;
+      border-top: 1px solid rgba(255,255,255,0.05);
+      padding-top: 24px;
+      margin-bottom: 30px;
+      text-align: left;
+    }
+    .xp-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+    .xp-title {
       font-weight: 800;
+      font-size: 0.95rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #cbd5e1;
+    }
+    .xp-level {
+      font-weight: 900;
+      font-size: 0.95rem;
+      background: linear-gradient(135deg, #EC4899, #F43F5E);
+      color: white;
+      padding: 2px 10px;
+      border-radius: 6px;
+    }
+    .xp-track {
+      height: 10px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 10px;
+      overflow: hidden;
+      margin-bottom: 6px;
+      border: 1px solid rgba(255,255,255,0.03);
+    }
+    .xp-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #38BDF8, #818CF8, #EC4899);
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(56, 189, 248, 0.5);
+      transition: width 1s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .xp-text {
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: #64748b;
+      text-align: right;
+    }
+
+    .edit-profile-btn {
+      width: 100%;
+      background: linear-gradient(135deg, #1f2937, #111827);
+      color: #cbd5e1;
+      border: 1px solid rgba(255,255,255,0.08);
+      padding: 12px 24px;
+      border-radius: 14px;
+      font-size: 1rem;
+      font-weight: 800;
+      cursor: pointer;
+      transition: all 0.25s;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .edit-profile-btn:hover {
+      background: rgba(255, 255, 255, 0.05);
+      border-color: rgba(255, 255, 255, 0.3);
+      color: #fff;
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    }
+
+    /* Right Column: Dashboard (Stats, Achievements, Matches) */
+    .dashboard-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 30px;
+    }
+
+    .dashboard-card {
+      background: rgba(15, 23, 42, 0.3);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 24px;
+      padding: 30px;
+      box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+    }
+
+    .dashboard-title {
+      font-size: 1.4rem;
+      font-weight: 900;
+      color: #fff;
+      margin-bottom: 20px;
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 10px;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+      padding-bottom: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
     }
-    .loading-overlay {
-      position: fixed;
-      inset: 0;
-      background: #0f172a;
-      z-index: 9999;
+
+    /* Stats Grid Customizations */
+    .stats-flex-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+    }
+    @media (max-width: 600px) {
+      .stats-flex-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+    .profile-stat-box {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.03);
+      border-radius: 18px;
+      padding: 24px 16px;
+      text-align: center;
+      transition: all 0.3s ease;
+    }
+    .profile-stat-box:hover {
+      background: rgba(255, 255, 255, 0.04);
+      border-color: rgba(56, 189, 248, 0.2);
+      transform: translateY(-2px);
+    }
+    .profile-stat-val {
+      font-size: 2.2rem;
+      font-weight: 900;
+      color: #38BDF8;
+      margin-bottom: 6px;
+      text-shadow: 0 4px 12px rgba(56, 189, 248, 0.15);
+    }
+    .profile-stat-label {
+      font-size: 0.8rem;
+      font-weight: 800;
+      color: #94a3b8;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    /* Locked/Unlocked Achievements Grid */
+    .achievements-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 15px;
+    }
+    .badge-card {
+      background: rgba(15, 23, 42, 0.5);
+      border: 1px solid rgba(255, 255, 255, 0.04);
+      border-radius: 18px;
+      padding: 20px 16px;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      opacity: 0.35;
+      filter: grayscale(80%);
+      transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .badge-card.unlocked {
+      opacity: 1;
+      filter: grayscale(0%);
+      background: rgba(56, 189, 248, 0.03);
+      border-color: rgba(56, 189, 248, 0.15);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.2), inset 0 0 12px rgba(56, 189, 248, 0.05);
+    }
+    .badge-card.unlocked:hover {
+      transform: translateY(-4px) scale(1.03);
+      box-shadow: 0 12px 25px rgba(56, 189, 248, 0.15);
+      border-color: rgba(56, 189, 248, 0.4);
+    }
+    .badge-icon {
+      font-size: 2.5rem;
+      margin-bottom: 12px;
+      transition: transform 0.3s ease;
+    }
+    .badge-card.unlocked:hover .badge-icon {
+      transform: scale(1.15) rotate(5deg);
+    }
+    .badge-name {
+      font-size: 0.95rem;
+      font-weight: 800;
+      color: #fff;
+      margin-bottom: 4px;
+    }
+    .badge-card.unlocked .badge-name {
+      color: #38BDF8;
+    }
+    .badge-desc {
+      font-size: 0.75rem;
+      color: #64748b;
+      line-height: 1.3;
+    }
+    .badge-card.unlocked .badge-desc {
+      color: #cbd5e1;
+    }
+
+    /* Matches Timeline */
+    .timeline-container {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .timeline-item {
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      align-items: center;
+      gap: 16px;
+      padding: 14px 20px;
+      background: rgba(255,255,255,0.01);
+      border: 1px solid rgba(255,255,255,0.03);
+      border-radius: 14px;
+      transition: all 0.2s ease;
+    }
+    .timeline-item:hover {
+      background: rgba(255,255,255,0.03);
+      border-color: rgba(255,255,255,0.08);
+    }
+    .timeline-game-icon {
+      width: 36px; height: 36px;
+      border-radius: 8px; background: rgba(56, 189, 248, 0.15);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.25rem; color: #38BDF8;
+    }
+    .timeline-details {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .timeline-game-title {
+      font-weight: 800; font-size: 0.95rem; color: #fff;
+    }
+    .timeline-time {
+      font-size: 0.75rem; color: #64748b; font-weight: 600;
+    }
+    .timeline-score {
+      font-size: 1.15rem; font-weight: 900; color: #FCD34D;
+      text-shadow: 0 0 10px rgba(252, 211, 77, 0.25);
+    }
+
+    /* Modal Design Upgrade */
+    .edit-modal-content {
+      background: #090d16;
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 24px;
+      width: 90%;
+      max-width: 480px;
+      padding: 35px;
+      text-align: left;
+      position: relative;
+      box-shadow: 0 25px 60px rgba(0,0,0,0.8), inset 0 0 20px rgba(255,255,255,0.02);
+      animation: modalFadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+    @keyframes modalFadeIn {
+      from { transform: scale(0.9); opacity: 0; filter: blur(5px); }
+      to { transform: scale(1); opacity: 1; filter: blur(0); }
+    }
+
+    .edit-modal-title {
+      font-size: 1.6rem;
+      font-weight: 900;
+      color: white;
+      margin-bottom: 25px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+      padding-bottom: 10px;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+    .form-label {
+      display: block;
+      font-size: 0.85rem;
+      font-weight: 800;
+      color: #94a3b8;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 8px;
+    }
+    .form-control {
+      width: 100%;
+      padding: 12px 16px;
+      border-radius: 10px;
+      border: 1px solid rgba(255,255,255,0.08);
+      background: rgba(15, 23, 42, 0.6);
+      color: white;
+      font-size: 1rem;
+      font-family: inherit;
+      box-sizing: border-box;
+      transition: all 0.25s ease;
+    }
+    .form-control:focus {
+      outline: none;
+      border-color: #38BDF8;
+      box-shadow: 0 0 10px rgba(56, 189, 248, 0.15);
+      background: rgba(15, 23, 42, 0.9);
+    }
+
+    /* Editable Avatar Grid */
+    .avatar-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin-bottom: 8px;
+    }
+    .avatar-item {
+      font-size: 2.2rem;
+      background: rgba(255,255,255,0.02);
+      border: 2px solid rgba(255,255,255,0.05);
+      border-radius: 12px;
+      aspect-ratio: 1;
       display: flex;
       align-items: center;
       justify-content: center;
-      color: #38BDF8;
-      font-size: 1.5rem;
-      font-weight: 800;
+      cursor: pointer;
+      transition: all 0.25s ease;
     }
+    .avatar-item:hover {
+      background: rgba(255,255,255,0.06);
+      border-color: rgba(255,255,255,0.2);
+      transform: scale(1.05);
+    }
+    .avatar-item.selected {
+      background: rgba(56, 189, 248, 0.1);
+      border-color: #38BDF8;
+      box-shadow: 0 0 15px rgba(56, 189, 248, 0.3);
+      transform: scale(1.08);
+    }
+
+    /* Frosted overlays */
+    .loading-overlay {
+      position: fixed; inset: 0; background: #050811; z-index: 9999;
+      display: flex; align-items: center; justify-content: center;
+      color: #38BDF8; font-size: 1.5rem; font-weight: 800;
+      text-transform: uppercase; letter-spacing: 2px;
+    }
+    .loading-spinner {
+      border: 4px solid rgba(56, 189, 248, 0.1);
+      border-left-color: #38BDF8;
+      border-radius: 50%;
+      width: 40px; height: 40px;
+      animation: spin 1s linear infinite;
+      margin-bottom: 20px;
+    }
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
   </style>
 </head>
 <body>
+
+<!-- Stellar glow particles -->
+<div class="profile-orb profile-orb-1"></div>
+<div class="profile-orb profile-orb-2"></div>
 
 <header class="nav" id="top-nav">
   <div class="nav__inner">
@@ -105,7 +493,7 @@
       <span>Play<strong>haus</strong></span>
     </a>
     <nav class="nav__links" id="desktop-nav">
-      <a href="index.html" class="nav__link">Home</a>
+      <a href="index.html" class="nav__link">Arcade Home</a>
     </nav>
     <div id="auth-container" style="display: flex; gap: 10px; align-items: center;">
       <button class="btn btn--outline" id="btn-login-trigger" style="padding: 8px 16px;">Log In</button>
@@ -113,38 +501,113 @@
   </div>
 </header>
 
-<div id="profile-loading" class="loading-overlay">Loading Profile...</div>
+<div id="profile-loading" class="loading-overlay">
+  <div style="text-align: center; display: flex; flex-direction: column; align-items: center;">
+    <div class="loading-spinner"></div>
+    <div>Loading Gamer Profile...</div>
+  </div>
+</div>
 
-<section class="profile-header" id="profile-content" style="display: none;">
-  <div class="profile-avatar">👾</div>
-  <h1 class="profile-name" id="profile-username">Loading...</h1>
-  <p class="profile-join-date" id="profile-joined">Joined: ...</p>
-  
-  <div class="stats-grid">
-    <div class="stat-card">
-      <div class="stat-value" id="stat-points">0</div>
-      <div class="stat-label">Total Points</div>
+<div class="profile-container" id="profile-content" style="display: none;">
+  <!-- Left Side: Interactive Gamer Card -->
+  <section class="gamer-card">
+    <div class="avatar-ring">
+      <div class="gamer-avatar" id="card-avatar">👾</div>
     </div>
-    <div class="stat-card">
-      <div class="stat-value" id="stat-games">0</div>
-      <div class="stat-label">Games Played</div>
+    <h1 class="gamer-name" id="card-username">Player Name</h1>
+    <p class="gamer-tagline" id="card-tagline">"Ready to play some arcade games!"</p>
+    <div class="fav-game-badge" id="card-fav-game">🎯 Favorite: None</div>
+    
+    <div class="xp-section">
+      <div class="xp-header">
+        <span class="xp-title">Gamer Status</span>
+        <span class="xp-level" id="profile-level">LVL 1</span>
+      </div>
+      <div class="xp-track">
+        <div class="xp-fill" id="xp-progress-bar"></div>
+      </div>
+      <div class="xp-text" id="xp-progress-text">0 / 10 XP to next level</div>
     </div>
-    <div class="stat-card">
-      <div class="stat-value" id="stat-rank">#?</div>
-      <div class="stat-label">Global Rank</div>
+    
+    <button class="edit-profile-btn" id="btn-edit-profile">Set Up Profile</button>
+  </section>
+
+  <!-- Right Side: Dashboard Panels -->
+  <section class="dashboard-panel">
+    <!-- Stats Board -->
+    <div class="dashboard-card">
+      <h2 class="dashboard-title">📈 Arcade Analytics</h2>
+      <div class="stats-flex-grid">
+        <div class="profile-stat-box">
+          <div class="profile-stat-val" id="stat-points">0</div>
+          <div class="profile-stat-label">Total Points</div>
+        </div>
+        <div class="profile-stat-box">
+          <div class="profile-stat-val" id="stat-games">0</div>
+          <div class="profile-stat-label">Games Played</div>
+        </div>
+        <div class="profile-stat-box">
+          <div class="profile-stat-val" id="stat-rank">#?</div>
+          <div class="profile-stat-label">Global Rank</div>
+        </div>
+      </div>
     </div>
-  </div>
-  
-  <div class="badges-section">
-    <h2 style="color: #fff; margin-bottom: 10px;">Achievements</h2>
-    <div class="badges-container" id="badges-container">
-      <!-- Loaded via JS -->
+
+    <!-- locked/unlocked badges -->
+    <div class="dashboard-card">
+      <h2 class="dashboard-title">🏆 Unlocked Achievements</h2>
+      <div class="achievements-grid" id="achievements-grid">
+        <!-- Badge 1: Rookie -->
+        <div class="badge-card" id="badge-rookie">
+          <div class="badge-icon">👶</div>
+          <div class="badge-name">Rookie</div>
+          <div class="badge-desc">Set up your gamer profile and bio!</div>
+        </div>
+        <!-- Badge 2: Pioneer -->
+        <div class="badge-card" id="badge-pioneer">
+          <div class="badge-icon">⭐</div>
+          <div class="badge-name">Pioneer</div>
+          <div class="badge-desc">Play a rotating daily challenge!</div>
+        </div>
+        <!-- Badge 3: Higher Power -->
+        <div class="badge-card" id="badge-higher-power">
+          <div class="badge-icon">🧠</div>
+          <div class="badge-name">Higher Power</div>
+          <div class="badge-desc">Score 10+ in Higher or Lower.</div>
+        </div>
+        <!-- Badge 4: Logos Expert -->
+        <div class="badge-card" id="badge-logos-expert">
+          <div class="badge-icon">🎨</div>
+          <div class="badge-name">Logos Expert</div>
+          <div class="badge-desc">Score 5+ in Famous Logos color deck.</div>
+        </div>
+        <!-- Badge 5: Tanks Vet -->
+        <div class="badge-card" id="badge-tanks-vet">
+          <div class="badge-icon">🛡️</div>
+          <div class="badge-name">Tanks Vet</div>
+          <div class="badge-desc">Score points in Toy Tanks battle.</div>
+        </div>
+        <!-- Badge 6: Gamer Elite -->
+        <div class="badge-card" id="badge-gamer-elite">
+          <div class="badge-icon">🔥</div>
+          <div class="badge-name">Gamer Elite</div>
+          <div class="badge-desc">Accumulate over 500 total XP points.</div>
+        </div>
+      </div>
     </div>
-  </div>
-</section>
+
+    <!-- Recent History Timeline -->
+    <div class="dashboard-card">
+      <h2 class="dashboard-title">🕒 Recent Score Submissions</h2>
+      <div class="timeline-container" id="timeline-container">
+        <div style="color: #64748b; font-size: 0.95rem; text-align: center; padding: 10px;">Loading timeline...</div>
+      </div>
+    </div>
+  </section>
+</div>
 
 <!-- ===== AUTH MODAL ===== -->
-<div id="auth-modal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 1000; align-items: center; justify-content: center;">
+<div id="auth-modal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 1000; align-items: center; justify-content: center;">
   <div style="background: #1e293b; padding: 30px; border-radius: 16px; width: 90%; max-width: 400px; text-align: center; border: 1px solid #334155; position: relative;">
     <button id="auth-close" style="position: absolute; top: 10px; right: 15px; background: transparent; border: none; color: #94a3b8; font-size: 1.5rem; cursor: pointer;">✕</button>
     <h2 id="auth-title" style="margin-bottom: 20px; font-weight: 900; color: #fff;">Log In</h2>
@@ -157,6 +620,61 @@
       <span id="auth-toggle-text">Don't have an account?</span> 
       <a href="#" id="auth-toggle-link" style="color: #38BDF8; font-weight: 700; text-decoration: none;">Sign Up</a>
     </p>
+  </div>
+</div>
+
+<!-- ===== PREMIUM EDIT PROFILE MODAL ===== -->
+<div id="edit-profile-modal" style="display: none; position: fixed; inset: 0; background: rgba(5, 8, 17, 0.85); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); z-index: 1000; align-items: center; justify-content: center;">
+  <div class="edit-modal-content">
+    <button id="btn-edit-modal-close" style="position: absolute; top: 15px; right: 20px; background: transparent; border: none; color: #64748b; font-size: 1.8rem; cursor: pointer; transition: color 0.2s;">✕</button>
+    <h2 class="edit-modal-title">👾 Customise Gamer Profile</h2>
+    
+    <!-- Avatar picker group -->
+    <div class="form-group">
+      <label class="form-label">Select Avatar Sprite</label>
+      <div class="avatar-grid" id="modal-avatar-grid">
+        <div class="avatar-item" data-val="👾">👾</div>
+        <div class="avatar-item" data-val="🚀">🚀</div>
+        <div class="avatar-item" data-val="🛡️">🛡️</div>
+        <div class="avatar-item" data-val="🐱">🐱</div>
+        <div class="avatar-item" data-val="🔥">🔥</div>
+        <div class="avatar-item" data-val="🛸">🛸</div>
+        <div class="avatar-item" data-val="👑">👑</div>
+        <div class="avatar-item" data-val="🎮">🎮</div>
+      </div>
+    </div>
+
+    <!-- Username control -->
+    <div class="form-group">
+      <label class="form-label" for="modal-input-username">Gamer Name</label>
+      <input type="text" class="form-control" id="modal-input-username" placeholder="Pick a gamer handle" maxlength="15" />
+    </div>
+
+    <!-- Tagline control -->
+    <div class="form-group">
+      <label class="form-label" for="modal-input-tagline">Custom Bio / Tagline</label>
+      <input type="text" class="form-control" id="modal-input-tagline" placeholder="Tell us your gamer slogan..." maxlength="60" />
+    </div>
+
+    <!-- Fav game control -->
+    <div class="form-group">
+      <label class="form-label" for="modal-select-fav">Favorite Game</label>
+      <select class="form-control" id="modal-select-fav">
+        <option value="None">🎯 None</option>
+        <option value="Higher or Lower">📊 Higher or Lower</option>
+        <option value="Color Guess">🎨 Color Guess</option>
+        <option value="Toy Tanks">🚜 Toy Tanks</option>
+        <option value="Word Rush">📝 Word Rush</option>
+        <option value="Word Gravity">🪐 Word Gravity</option>
+        <option value="Math Avalanche">❄️ Math Avalanche</option>
+        <option value="Neon Plinko">🟢 Neon Plinko</option>
+        <option value="Cyber Bot">🤖 Cyber Bot</option>
+      </select>
+    </div>
+
+    <div style="display: flex; gap: 15px; margin-top: 30px;">
+      <button class="btn btn--primary" id="btn-edit-modal-save" style="flex: 1; padding: 14px 20px; font-weight: 800; text-transform: uppercase;">Save Changes</button>
+    </div>
   </div>
 </div>
 
