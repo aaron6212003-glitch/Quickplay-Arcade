@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Game — QuickPlay Arcade</title>
-  <meta name="description" content="Play mini games on QuickPlay Arcade." />
+  <title>Playhaus — Small games. Big obsession.</title>
+  <meta name="description" content="Play mini games on Playhaus." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Outfit:wght@400;600;700;800&display=swap" rel="stylesheet" />
@@ -16,14 +16,14 @@
 <header class="nav" id="top-nav">
   <div class="nav__inner">
     <a href="index.html" class="nav__logo">
-      <span class="nav__logo-icon">🕹️</span>
-      <span>QuickPlay<strong>Arcade</strong></span>
+      <span class="nav__logo-icon">🏠</span>
+      <span>Play<strong>haus</strong></span>
     </a>
     <nav class="nav__links">
       <a href="index.html" class="nav__link">Home</a>
-      <a href="index.html#games" class="nav__link">Games</a>
+      <a href="index.html#rooms" class="nav__link">Rooms</a>
       <a href="index.html#daily" class="nav__link">Daily</a>
-      <a href="index.html#leaderboard" class="nav__link">Leaderboard</a>
+      <a href="index.html#leaderboard" class="nav__link">House Rankings</a>
     </nav>
     <button class="btn btn--random" id="random-btn">🎲 Random</button>
   </div>
@@ -32,13 +32,16 @@
 <!-- GAME CONTENT -->
 <main class="game-main" id="game-main">
   <div class="container">
-    <a href="index.html" class="back-link">← Back to Arcade</a>
+    <a href="index.html" class="back-link">← Back to Haus</a>
 
     <!-- Game header — filled by JS -->
     <div class="game-header" id="game-header">
       <div class="game-header__emoji" id="game-emoji">🎮</div>
       <div class="game-header__info">
-        <h1 class="game-header__title" id="game-title">Loading...</h1>
+        <div style="display:flex; align-items:center; gap: 10px;">
+          <h1 class="game-header__title" id="game-title">Loading...</h1>
+          <button id="info-btn" style="background: rgba(255,255,255,0.2); border: none; color: white; border-radius: 50%; width: 28px; height: 28px; cursor: pointer; font-weight: 800; display: none; align-items: center; justify-content: center; transition: transform 0.1s;">?</button>
+        </div>
         <p class="game-header__desc" id="game-desc"></p>
         <div class="game-header__meta" id="game-meta"></div>
       </div>
@@ -46,6 +49,20 @@
 
     <!-- Game Container (where playable games render) -->
     <div id="game-container" style="display: none; width: 100%; margin-bottom: 40px;"></div>
+
+    <!-- Rules Modal -->
+    <div id="rules-modal" style="position: fixed; inset: 0; background: rgba(10,10,20,0.9); z-index: 1000; display: none; align-items: center; justify-content: center; padding: 20px; backdrop-filter: blur(10px);">
+      <div style="background: linear-gradient(135deg, #1e1e2e, #11111b); padding: 35px 30px; border-radius: 24px; width: 100%; max-width: 380px; border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 30px 60px rgba(0,0,0,0.6);">
+        <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom: 25px;">
+          <div>
+            <h2 style="margin:0; font-size: 1.8rem; font-weight: 900; background: linear-gradient(90deg, #38BDF8, #818CF8); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">How to Play</h2>
+            <p style="margin: 5px 0 0; color: #888; font-size: 0.95rem;">Game Rules & Scoring</p>
+          </div>
+          <button id="close-rules" style="background:rgba(255,255,255,0.1); border:none; color:white; width:36px; height:36px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:1.2rem; cursor:pointer; transition: background 0.2s;">✕</button>
+        </div>
+        <div id="rules-content" style="font-size: 1.05rem; line-height: 1.5; color: #ddd; display: flex; flex-direction: column; gap: 15px;"></div>
+      </div>
+    </div>
 
     <!-- Coming soon card -->
     <div class="coming-soon-card" id="coming-soon">
@@ -95,5 +112,7 @@
 </nav>
 
 <script type="module" src="js/game.js"></script>
+<script type="module" src="js/auth.js"></script>
+<script type="module" src="js/leaderboard.js"></script>
 </body>
 </html>

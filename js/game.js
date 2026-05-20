@@ -5,9 +5,14 @@ const params = new URLSearchParams(window.location.search);
 const gameId = params.get('id');
 const game   = GAMES.find(g => g.id === gameId);
 
+const isDaily = params.get('daily') === 'true';
+if (isDaily) {
+  window.isDailyRun = true;
+}
+
 // ── Update page title & meta ─────────────────────────────────────────────────
 if (game) {
-  document.title = `${game.title} — QuickPlay Arcade`;
+  document.title = `${game.title} — Playhaus`;
   document.querySelector('meta[name="description"]').content = game.description;
 }
 
@@ -33,12 +38,71 @@ if (game) {
   const [c1, c2] = game.gradient;
   document.getElementById('game-header').style.borderColor = c1 + '55';
 
+  // Handle Info Button & Rules Modal
+  if (game.rules) {
+    const infoBtn = document.getElementById('info-btn');
+    infoBtn.style.display = 'flex';
+    infoBtn.addEventListener('click', () => {
+      document.getElementById('rules-content').innerHTML = game.rules;
+      document.getElementById('rules-modal').style.display = 'flex';
+    });
+    
+    document.getElementById('close-rules').addEventListener('click', () => {
+      document.getElementById('rules-modal').style.display = 'none';
+    });
+  }
+
   // Load specific game logic if it exists
-  if (gameId === 'battle-ball') {
-    document.getElementById('coming-soon').style.display = 'none';
-    document.getElementById('game-container').style.display = 'block';
-    import('./games/battle-ball.js').then(module => {
-      module.init(document.getElementById('game-container'));
+  const gameContainer = document.getElementById('game-container');
+  const comingSoon = document.getElementById('coming-soon');
+  
+  if (gameId === 'color-guess') {
+    comingSoon.style.display = 'none';
+    gameContainer.style.display = 'block';
+    import('./games/color-guess.js').then(module => {
+      module.init(gameContainer);
+    });
+  } else if (gameId === 'higher-lower') {
+    comingSoon.style.display = 'none';
+    gameContainer.style.display = 'block';
+    import('./games/higher-lower.js').then(module => {
+      module.init(gameContainer);
+    });
+  } else if (gameId === 'word-rush') {
+    comingSoon.style.display = 'none';
+    gameContainer.style.display = 'block';
+    import('./games/word-rush.js').then(module => {
+      module.init(gameContainer);
+    });
+  } else if (gameId === 'word-gravity') {
+    comingSoon.style.display = 'none';
+    gameContainer.style.display = 'block';
+    import('./games/word-gravity.js').then(module => {
+      module.init(gameContainer);
+    });
+  } else if (gameId === 'math-avalanche') {
+    comingSoon.style.display = 'none';
+    gameContainer.style.display = 'block';
+    import('./games/math-avalanche.js').then(module => {
+      module.init(gameContainer);
+    });
+  } else if (gameId === 'tanks') {
+    comingSoon.style.display = 'none';
+    gameContainer.style.display = 'block';
+    import('./games/tanks.js').then(module => {
+      module.initTanks(gameContainer);
+    });
+  } else if (gameId === 'cyber-bot') {
+    comingSoon.style.display = 'none';
+    gameContainer.style.display = 'block';
+    import('./games/cyber-bot.js').then(module => {
+      module.init(gameContainer);
+    });
+  } else if (gameId === 'neon-plinko') {
+    comingSoon.style.display = 'none';
+    gameContainer.style.display = 'block';
+    import('./games/neon-plinko.js').then(module => {
+      module.init(gameContainer);
     });
   }
 
@@ -72,7 +136,7 @@ moreGrid.innerHTML = others.map(g => {
         </div>
       </div>
       <div class="game-card__footer">
-        <a href="game.html?id=${g.id}" class="btn btn--primary btn--sm">▶ Play</a>
+        <a href="game.html?id=${g.id}" class="btn btn--primary btn--sm">▶ Play Game</a>
       </div>
     </article>
   `;

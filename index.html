@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>QuickPlay Arcade — Fast, Funny Games You Can Play in Seconds</title>
+  <title>Playhaus — Small games. Big obsession.</title>
   <meta name="description" content="Play fast, funny mini-games in seconds. Daily challenges, viral games, leaderboards. Built for TikTok, Instagram, and YouTube Shorts." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -16,17 +16,19 @@
 <header class="nav" id="top-nav">
   <div class="nav__inner">
     <a href="index.html" class="nav__logo">
-      <span class="nav__logo-icon">🕹️</span>
-      <span>QuickPlay<strong>Arcade</strong></span>
+      <span class="nav__logo-icon">🏠</span>
+      <span>Play<strong>haus</strong></span>
     </a>
     <nav class="nav__links" id="desktop-nav">
       <a href="index.html" class="nav__link active">Home</a>
-      <a href="#games" class="nav__link">Games</a>
+      <a href="#rooms" class="nav__link">Rooms</a>
       <a href="#daily" class="nav__link">Daily</a>
-      <a href="#leaderboard" class="nav__link">Leaderboard</a>
+      <a href="#leaderboard" class="nav__link">House Rankings</a>
       <a href="#about" class="nav__link">About</a>
     </nav>
-    <button class="btn btn--random" id="random-btn">🎲 Random</button>
+    <div id="auth-container" style="display: flex; gap: 10px; align-items: center;">
+      <button class="btn btn--outline" id="btn-login-trigger" style="padding: 8px 16px;">Log In</button>
+    </div>
     <button class="nav__hamburger" id="hamburger" aria-label="Menu">
       <span></span><span></span><span></span>
     </button>
@@ -34,9 +36,9 @@
   <!-- Mobile slide-down menu -->
   <div class="nav__mobile-menu" id="mobile-menu">
     <a href="index.html" class="nav__mobile-link">🏠 Home</a>
-    <a href="#games" class="nav__mobile-link">🎮 Games</a>
+    <a href="#rooms" class="nav__mobile-link">🚪 Rooms</a>
     <a href="#daily" class="nav__mobile-link">🔥 Daily</a>
-    <a href="#leaderboard" class="nav__mobile-link">🏆 Leaderboard</a>
+    <a href="#leaderboard" class="nav__mobile-link">🏆 House Rankings</a>
     <a href="#about" class="nav__mobile-link">ℹ️ About</a>
   </div>
 </header>
@@ -50,19 +52,19 @@
   </div>
   <div class="hero__content">
     <div class="hero__badge">🔥 New games added weekly</div>
-    <h1 class="hero__title">QuickPlay<br /><span class="gradient-text">Arcade</span></h1>
-    <p class="hero__subtitle">Fast, funny games you can play in seconds.</p>
+    <h1 class="hero__title">Welcome to<br /><span class="gradient-text">Playhaus</span></h1>
+    <p class="hero__subtitle">Explore rooms full of quick, addictive games made for your daily break.</p>
     <div class="hero__cta-group">
-      <a href="#games" class="btn btn--primary btn--lg pulse-ring">▶ Play Now</a>
-      <a href="#games" class="btn btn--outline btn--lg">Browse Games</a>
+      <a href="#rooms" class="btn btn--primary btn--lg pulse-ring">▶ Enter the Haus</a>
+      <a href="#rooms" class="btn btn--outline btn--lg">Browse Rooms</a>
     </div>
     <p class="hero__social-hook">📱 Play. Screenshot your score. Tag us on TikTok.</p>
   </div>
   <div class="hero__floating-cards">
-    <div class="float-card float-card--1">🎨<br/><small>Color Games</small></div>
-    <div class="float-card float-card--2">⚔️<br/><small>Battles</small></div>
-    <div class="float-card float-card--3">🏆<br/><small>Sports</small></div>
-    <div class="float-card float-card--4">🧠<br/><small>Trivia</small></div>
+    <div class="float-card float-card--1">🧩<br/><small>Puzzle Room</small></div>
+    <div class="float-card float-card--2">🕹️<br/><small>Arcade Room</small></div>
+    <div class="float-card float-card--3">🔍<br/><small>Guessing Room</small></div>
+    <div class="float-card float-card--4">🔥<br/><small>Daily Room</small></div>
   </div>
 </section>
 
@@ -75,22 +77,13 @@
   </div>
 </section>
 
-<!-- ===== SEARCH ===== -->
-<section class="search-bar-section">
-  <div class="container">
-    <div class="search-wrap">
-      <span class="search-icon">🔍</span>
-      <input type="text" id="search-input" class="search-input" placeholder="Search games..." autocomplete="off" />
-      <button class="search-clear" id="search-clear" aria-label="Clear">✕</button>
-    </div>
-  </div>
-</section>
+<!-- SEARCH REMOVED -->
 
-<!-- ===== FEATURED GAMES ===== -->
-<section class="games-section" id="games">
+<!-- ===== FEATURED ROOMS ===== -->
+<section class="games-section" id="rooms">
   <div class="container">
     <div class="section-header">
-      <h2 class="section-title">🎮 Featured Games</h2>
+      <h2 class="section-title">🚪 Playhaus Rooms</h2>
       <span class="section-count" id="game-count"></span>
     </div>
     <div class="games-grid" id="games-grid">
@@ -108,17 +101,24 @@
     <div class="daily-card">
       <div class="daily-card__badge">🔥 DAILY</div>
       <div class="daily-card__left">
-        <p class="daily-card__eyebrow">Today's Viral Challenge</p>
-        <h2 class="daily-card__title">Can you beat today's game?</h2>
+        <p class="daily-card__eyebrow">Daily Room</p>
+        <h2 class="daily-card__title">Today's Game: <span id="daily-game-name">Loading...</span></h2>
+        
+        <!-- Yesterday's Champion Banner -->
+        <div id="yesterday-champion-banner" style="display:none; background:rgba(250,204,21,0.1); border:1px solid #eab308; color:#fef08a; padding:10px 15px; border-radius:8px; font-weight:700; margin-bottom:15px; text-align:left; align-items:center; gap:8px;">
+          <span>🏆</span>
+          <span id="yesterday-champion-text">Yesterday's Champion: ...</span>
+        </div>
+
         <p class="daily-card__desc">A brand-new challenge drops every day at midnight. Compete, share your score, and climb the leaderboard.</p>
         <div class="daily-card__meta">
           <span class="meta-pill">⏱️ New challenge every day</span>
           <span class="meta-pill" id="daily-countdown">⏰ Resets in: <strong id="countdown-timer">--:--:--</strong></span>
         </div>
-        <a href="game.html?id=viral-challenge" class="btn btn--primary btn--lg">🔥 Play Today's Challenge</a>
+        <a href="#" id="daily-play-btn" class="btn btn--primary btn--lg">🔥 Play Today's Challenge</a>
       </div>
       <div class="daily-card__right">
-        <div class="daily-emoji-display">🔥</div>
+        <div class="daily-emoji-display" id="daily-game-emoji">🔥</div>
       </div>
     </div>
   </div>
@@ -127,9 +127,28 @@
 <!-- ===== LEADERBOARD ===== -->
 <section class="leaderboard-section" id="leaderboard">
   <div class="container">
-    <div class="section-header">
-      <h2 class="section-title">🏆 Leaderboard</h2>
-      <span class="section-subtitle">Top players this week</span>
+    <div class="section-header" style="display:flex; flex-direction:column; gap:15px; align-items:flex-start; margin-bottom: 20px;">
+      <div style="display:flex; justify-content:space-between; width:100%; align-items:center;">
+        <div>
+          <h2 class="section-title" style="margin-bottom:0;">🏆 House Rankings</h2>
+          <span class="section-subtitle">Top of the Haus</span>
+        </div>
+        <select id="leaderboard-filter" style="display:none; background:#1e293b; color:#fff; border:1px solid #334155; padding:8px 16px; border-radius:8px; font-weight:700; outline:none; cursor:pointer;">
+          <option value="all">All Rooms</option>
+          <option value="Toy Tanks">Toy Tanks</option>
+          <option value="Color Guess">Color Guess</option>
+          <option value="Higher or Lower">Higher or Lower</option>
+          <option value="Word Rush">Word Rush</option>
+          <option value="Word Gravity">Word Gravity</option>
+          <option value="Math Avalanche">Math Avalanche</option>
+        </select>
+      </div>
+      
+      <!-- Premium Rankings Tabs -->
+      <div style="display:flex; gap:10px; background:#111827; padding:4px; border-radius:10px; border:1px solid #1f2937; width:fit-content;">
+        <button id="tab-daily-rankings" style="background:#1f2937; color:#38BDF8; border:none; padding:8px 16px; border-radius:8px; font-weight:800; cursor:pointer; font-size:0.9rem; transition:all 0.2s;">🔥 Today's Challenge</button>
+        <button id="tab-alltime-rankings" style="background:transparent; color:#94a3b8; border:none; padding:8px 16px; border-radius:8px; font-weight:800; cursor:pointer; font-size:0.9rem; transition:all 0.2s;">👑 All-Time Best</button>
+      </div>
     </div>
     <div class="leaderboard-card">
       <div class="leaderboard-table" id="leaderboard-table">
@@ -145,7 +164,7 @@
     <div class="share-card">
       <div class="share-card__content">
         <h2 class="share-card__title">Go Viral 🚀</h2>
-        <p class="share-card__desc">Play. Screenshot your score.<br/>Tag us on TikTok <strong>@QuickPlayArcade</strong></p>
+        <p class="share-card__desc">Play. Screenshot your score.<br/>Tag us on TikTok <strong>@Playhaus</strong></p>
         <div class="share-card__socials">
           <a href="#" class="social-btn social-btn--tiktok" aria-label="TikTok">
             <svg viewBox="0 0 24 24" fill="currentColor" width="22" height="22"><path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.32 6.32 0 00-.79-.05 6.34 6.34 0 00-6.34 6.34 6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.33-6.34V8.69a8.18 8.18 0 004.78 1.52V6.76a4.85 4.85 0 01-1.01-.07z"/></svg>
@@ -168,15 +187,15 @@
 <!-- ===== FOOTER ===== -->
 <footer class="footer">
   <div class="container">
-    <div class="footer__logo">🕹️ QuickPlay<strong>Arcade</strong></div>
-    <p class="footer__tagline">Built for quick games, daily challenges, and viral fun.</p>
+    <div class="footer__logo">🏠 Play<strong>haus</strong></div>
+    <p class="footer__tagline">Small games. Big obsession.</p>
     <div class="footer__links">
       <a href="index.html">Home</a>
-      <a href="#games">Games</a>
+      <a href="#rooms">Rooms</a>
       <a href="#daily">Daily</a>
-      <a href="#leaderboard">Leaderboard</a>
+      <a href="#leaderboard">House Rankings</a>
     </div>
-    <p class="footer__copy">© 2026 QuickPlay Arcade. All rights reserved.</p>
+    <p class="footer__copy">© 2026 Playhaus. All rights reserved.</p>
   </div>
 </footer>
 
@@ -186,9 +205,9 @@
     <span class="bottom-nav__icon">🏠</span>
     <span class="bottom-nav__label">Home</span>
   </a>
-  <a href="#games" class="bottom-nav__item" id="bn-games">
-    <span class="bottom-nav__icon">🎮</span>
-    <span class="bottom-nav__label">Games</span>
+  <a href="#rooms" class="bottom-nav__item" id="bn-games">
+    <span class="bottom-nav__icon">🚪</span>
+    <span class="bottom-nav__label">Rooms</span>
   </a>
   <a href="#daily" class="bottom-nav__item" id="bn-daily">
     <span class="bottom-nav__icon">🔥</span>
@@ -196,10 +215,35 @@
   </a>
   <a href="#leaderboard" class="bottom-nav__item" id="bn-lb">
     <span class="bottom-nav__icon">🏆</span>
-    <span class="bottom-nav__label">Scores</span>
+    <span class="bottom-nav__label">Rankings</span>
   </a>
 </nav>
 
 <script type="module" src="js/main.js"></script>
+
+<!-- ===== AUTH MODAL ===== -->
+<div id="auth-modal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 1000; align-items: center; justify-content: center;">
+  <div style="background: #1e293b; padding: 30px; border-radius: 16px; width: 90%; max-width: 400px; text-align: center; border: 1px solid #334155; position: relative;">
+    <button id="auth-close" style="position: absolute; top: 10px; right: 15px; background: transparent; border: none; color: #94a3b8; font-size: 1.5rem; cursor: pointer;">✕</button>
+    
+    <h2 id="auth-title" style="margin-bottom: 20px; font-weight: 900; color: #fff;">Log In</h2>
+    
+    <div id="auth-error" style="color: #EF4444; background: rgba(239, 68, 68, 0.1); padding: 10px; border-radius: 8px; margin-bottom: 15px; font-size: 0.9rem; display: none;"></div>
+    
+    <input type="text" id="auth-username" placeholder="Username (for new signups)" style="display: none; width: 100%; padding: 12px; margin-bottom: 15px; border-radius: 8px; border: 1px solid #334155; background: #0f172a; color: white;" />
+    <input type="email" id="auth-email" placeholder="Email Address" style="width: 100%; padding: 12px; margin-bottom: 15px; border-radius: 8px; border: 1px solid #334155; background: #0f172a; color: white;" />
+    <input type="password" id="auth-password" placeholder="Password" style="width: 100%; padding: 12px; margin-bottom: 20px; border-radius: 8px; border: 1px solid #334155; background: #0f172a; color: white;" />
+    
+    <button id="auth-submit" class="btn btn--primary" style="width: 100%; margin-bottom: 15px;">Log In</button>
+    
+    <p style="color: #94a3b8; font-size: 0.9rem;">
+      <span id="auth-toggle-text">Don't have an account?</span> 
+      <a href="#" id="auth-toggle-link" style="color: #38BDF8; font-weight: 700; text-decoration: none;">Sign Up</a>
+    </p>
+  </div>
+</div>
+
+<script type="module" src="js/auth.js"></script>
+<script type="module" src="js/leaderboard.js"></script>
 </body>
 </html>

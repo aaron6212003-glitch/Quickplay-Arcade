@@ -1,12 +1,10 @@
-import { GAMES, CATEGORIES, LEADERBOARD } from '../data/games.js';
+import { GAMES, CATEGORIES } from '../data/games.js';
+import { getDailyGame } from './daily.js';
 
 // ── DOM refs ────────────────────────────────────────────────────────────────
 const categoryScroll = document.getElementById('category-scroll');
 const gamesGrid      = document.getElementById('games-grid');
 const gameCount      = document.getElementById('game-count');
-const searchInput    = document.getElementById('search-input');
-const searchClear    = document.getElementById('search-clear');
-const noResults      = document.getElementById('no-results');
 const lbTable        = document.getElementById('leaderboard-table');
 const randomBtn      = document.getElementById('random-btn');
 const hamburger      = document.getElementById('hamburger');
@@ -15,7 +13,6 @@ const countdownEl    = document.getElementById('countdown-timer');
 
 // ── State ────────────────────────────────────────────────────────────────────
 let activeCategory = 'all';
-let searchQuery    = '';
 
 // ── Render categories ────────────────────────────────────────────────────────
 function renderCategories() {
@@ -38,11 +35,7 @@ function renderCategories() {
 // ── Filter games ─────────────────────────────────────────────────────────────
 function filteredGames() {
   return GAMES.filter(g => {
-    const matchCat   = activeCategory === 'all' || g.category === activeCategory;
-    const matchSearch = g.title.toLowerCase().includes(searchQuery) ||
-                        g.description.toLowerCase().includes(searchQuery) ||
-                        g.category.toLowerCase().includes(searchQuery);
-    return matchCat && matchSearch;
+    return activeCategory === 'all' || g.category === activeCategory;
   });
 }
 
@@ -74,7 +67,7 @@ function gameCardHTML(game) {
         </div>
       </div>
       <div class="game-card__footer">
-        <a href="game.html?id=${game.id}" class="btn btn--primary btn--sm">▶ Play</a>
+        <a href="game.html?id=${game.id}" class="btn btn--primary btn--sm">▶ Play Game</a>
       </div>
     </article>
   `;
@@ -83,48 +76,17 @@ function gameCardHTML(game) {
 // ── Render games grid ────────────────────────────────────────────────────────
 function renderGames() {
   const list = filteredGames();
-  gameCount.textContent = `${list.length} game${list.length !== 1 ? 's' : ''}`;
-  if (list.length === 0) {
-    gamesGrid.innerHTML = '';
-    noResults.classList.remove('hidden');
-  } else {
-    noResults.classList.add('hidden');
-    gamesGrid.innerHTML = list.map(gameCardHTML).join('');
-  }
+  if (gameCount) gameCount.textContent = `${list.length} game${list.length !== 1 ? 's' : ''}`;
+  if (gamesGrid) gamesGrid.innerHTML = list.map(gameCardHTML).join('');
 }
-
-// ── Render leaderboard ───────────────────────────────────────────────────────
-function renderLeaderboard() {
-  lbTable.innerHTML = LEADERBOARD.map(row => `
-    <div class="lb-row ${row.rank <= 3 ? 'lb-row--top' : ''}">
-      <span class="lb-rank">${row.rank <= 3 ? ['🥇','🥈','🥉'][row.rank-1] : '#' + row.rank}</span>
-      <span class="lb-avatar">${row.avatar}</span>
-      <span class="lb-user">${row.username}</span>
-      <span class="lb-game">${row.game}</span>
-      <span class="lb-score">${row.score.toLocaleString()}</span>
-    </div>
-  `).join('');
-}
-
-// ── Search ───────────────────────────────────────────────────────────────────
-searchInput.addEventListener('input', () => {
-  searchQuery = searchInput.value.trim().toLowerCase();
-  searchClear.style.opacity = searchQuery ? '1' : '0';
-  renderGames();
-});
-searchClear.addEventListener('click', () => {
-  searchInput.value = '';
-  searchQuery = '';
-  searchClear.style.opacity = '0';
-  renderGames();
-});
-searchClear.style.opacity = '0';
 
 // ── Random game ──────────────────────────────────────────────────────────────
-randomBtn.addEventListener('click', () => {
-  const g = GAMES[Math.floor(Math.random() * GAMES.length)];
-  window.location.href = `game.html?id=${g.id}`;
-});
+if (randomBtn) {
+  randomBtn.addEventListener('click', () => {
+    const g = GAMES[Math.floor(Math.random() * GAMES.length)];
+    window.location.href = `game.html?id=${g.id}`;
+  });
+}
 
 // ── Hamburger ────────────────────────────────────────────────────────────────
 hamburger.addEventListener('click', () => {
@@ -151,7 +113,30 @@ function updateCountdown() {
 updateCountdown();
 setInterval(updateCountdown, 1000);
 
+// ── Leaderboard Filter ───────────────────────────────────────────────────────
+const lbFilter = document.getElementById('leaderboard-filter');
+if (lbFilter) {
+  lbFilter.addEventListener('change', (e) => {
+    if (window.loadLeaderboard) {
+      window.loadLeaderboard(e.target.value);
+    }
+  });
+}
+
 // ── Init ─────────────────────────────────────────────────────────────────────
 renderCategories();
 renderGames();
-renderLeaderboard();
+
+// ── Populate Daily Card ──────────────────────────────────────────────────────
+const dailyNameEl = document.getElementById('daily-game-name');
+const dailyPlayBtn = document.getElementById('daily-play-btn');
+const dailyEmojiEl = document.getElementById('daily-game-emoji');
+
+if (dailyNameEl && dailyPlayBtn && dailyEmojiEl) {
+  const { game } = getDailyGame();
+  if (game) {
+    dailyNameEl.textContent = game.title;
+    dailyPlayBtn.href = `game.html?id=${game.id}&daily=true`;
+    dailyEmojiEl.textContent = game.emoji;
+  }
+}
