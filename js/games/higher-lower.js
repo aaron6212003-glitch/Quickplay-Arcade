@@ -194,6 +194,26 @@ export function init(container) {
       }
       .hl-play-again:active { transform: translateY(1px) scale(0.98); }
 
+      .hl-home-btn {
+        background: rgba(255, 255, 255, 0.05);
+        color: #fff;
+        border: 2px solid rgba(255, 255, 255, 0.15);
+        padding: 18px 48px;
+        border-radius: 50px; font-size: 1.3rem; font-weight: 800; cursor: pointer;
+        transition: all 0.25s;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        backdrop-filter: blur(5px);
+        -webkit-backdrop-filter: blur(5px);
+      }
+      .hl-home-btn:hover {
+        background: rgba(255, 255, 255, 0.12);
+        border-color: rgba(255, 255, 255, 0.4);
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(255, 255, 255, 0.1);
+      }
+      .hl-home-btn:active { transform: translateY(1px); }
+
       /* Premium Animations */
       @keyframes hlPopIn {
         0% { transform: scale(0.7); opacity: 0; filter: blur(5px); }
@@ -256,7 +276,10 @@ export function init(container) {
         <div class="hl-game-over-title">GAME OVER</div>
         <div style="color: #64748b; font-size: 1.2rem; font-weight: 700; text-transform: uppercase; letter-spacing: 2px;">FINAL SCORE</div>
         <div class="hl-final-score" id="final-score-display">0</div>
-        <button class="hl-play-again" onclick="resetGame()">PLAY AGAIN</button>
+        <div style="display: flex; gap: 15px; flex-wrap: wrap; justify-content: center; width: 100%; max-width: 440px;">
+          <button class="hl-play-again" onclick="resetGame()">PLAY AGAIN</button>
+          <button class="hl-home-btn" onclick="window.location.href='index.html'">HOME</button>
+        </div>
       </div>
     </div>
   `;
