@@ -415,6 +415,11 @@ export function init(container) {
     }
   };
 
+  // Sort each database category's items by value ascending so we can calculate rank distances
+  for (const cat in DATABASES) {
+    DATABASES[cat].items.sort((a, b) => a.val - b.val);
+  }
+
   let currentCategoryName = "";
   let currentCategory = null;
   let currentCard = null;
@@ -453,17 +458,43 @@ export function init(container) {
   }
 
   function getRandomCard(excludeName = "") {
-    let available = currentCategory.items.filter(item => 
-      item.name !== excludeName && !seenNames.has(item.name)
-    );
+    // If it's the very first card, pick completely at random to start the game
+    if (excludeName === "") {
+      const card = currentCategory.items[Math.floor(Math.random() * currentCategory.items.length)];
+      seenNames.add(card.name);
+      return card;
+    }
     
-    // Fallback if all cards have been seen
+    // Find index of currentCard (excludeName) in the sorted items list
+    const currIdx = currentCategory.items.findIndex(item => item.name === excludeName);
+    
+    // Filter unseen candidates that are close in rank for a more competitive/challenging matchup
+    let maxDistance = 12; // Start with ±12 index positions for a tight, high-difficulty match
+    let available = [];
+    
+    while (maxDistance <= currentCategory.items.length) {
+      available = currentCategory.items.filter((item, idx) => {
+        if (item.name === excludeName || seenNames.has(item.name)) return false;
+        return Math.abs(idx - currIdx) <= maxDistance;
+      });
+      
+      if (available.length > 0) break;
+      maxDistance += 4; // Expand search radius if no close cards are unseen
+    }
+    
+    // Fallback if all cards in the entire category have been seen
     if (available.length === 0) {
       seenNames.clear();
-      if (excludeName) {
-        seenNames.add(excludeName);
+      seenNames.add(excludeName);
+      maxDistance = 12;
+      while (maxDistance <= currentCategory.items.length) {
+        available = currentCategory.items.filter((item, idx) => {
+          if (item.name === excludeName) return false;
+          return Math.abs(idx - currIdx) <= maxDistance;
+        });
+        if (available.length > 0) break;
+        maxDistance += 4;
       }
-      available = currentCategory.items.filter(item => item.name !== excludeName);
     }
     
     const card = available[Math.floor(Math.random() * available.length)];
