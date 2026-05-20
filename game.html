@@ -25,7 +25,12 @@
       <a href="index.html#daily" class="nav__link">Daily</a>
       <a href="index.html#leaderboard" class="nav__link">House Rankings</a>
     </nav>
-    <button class="btn btn--random" id="random-btn">🎲 Random</button>
+    <div style="display: flex; gap: 10px; align-items: center;">
+      <button class="btn btn--random" id="random-btn">🎲 Random</button>
+      <div id="auth-container" style="display: flex; gap: 10px; align-items: center;">
+        <button class="btn btn--outline" id="btn-login-trigger" style="padding: 8px 16px;">Log In</button>
+      </div>
+    </div>
   </div>
 </header>
 
@@ -110,6 +115,28 @@
     <span class="bottom-nav__label">Scores</span>
   </a>
 </nav>
+
+<!-- ===== AUTH MODAL ===== -->
+<div id="auth-modal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 1000; align-items: center; justify-content: center;">
+  <div style="background: #1e293b; padding: 30px; border-radius: 16px; width: 90%; max-width: 400px; text-align: center; border: 1px solid #334155; position: relative;">
+    <button id="auth-close" style="position: absolute; top: 10px; right: 15px; background: transparent; border: none; color: #94a3b8; font-size: 1.5rem; cursor: pointer;">✕</button>
+    
+    <h2 id="auth-title" style="margin-bottom: 20px; font-weight: 900; color: #fff;">Log In</h2>
+    
+    <div id="auth-error" style="color: #EF4444; background: rgba(239, 68, 68, 0.1); padding: 10px; border-radius: 8px; margin-bottom: 15px; font-size: 0.9rem; display: none;"></div>
+    
+    <input type="text" id="auth-username" placeholder="Username (for new signups)" style="display: none; width: 100%; padding: 12px; margin-bottom: 15px; border-radius: 8px; border: 1px solid #334155; background: #0f172a; color: white;" />
+    <input type="email" id="auth-email" placeholder="Email Address" style="width: 100%; padding: 12px; margin-bottom: 15px; border-radius: 8px; border: 1px solid #334155; background: #0f172a; color: white;" />
+    <input type="password" id="auth-password" placeholder="Password" style="width: 100%; padding: 12px; margin-bottom: 20px; border-radius: 8px; border: 1px solid #334155; background: #0f172a; color: white;" />
+    
+    <button id="auth-submit" class="btn btn--primary" style="width: 100%; margin-bottom: 15px;">Log In</button>
+    
+    <p style="color: #94a3b8; font-size: 0.9rem;">
+      <span id="auth-toggle-text">Don't have an account?</span> 
+      <a href="#" id="auth-toggle-link" style="color: #38BDF8; font-weight: 700; text-decoration: none;">Sign Up</a>
+    </p>
+  </div>
+</div>
 
 <script type="module" src="js/game.js"></script>
 <script type="module" src="js/auth.js"></script>

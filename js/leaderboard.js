@@ -3,11 +3,89 @@ import { getDailyGame, getYesterdayDateString } from './daily.js';
 
 let activeRankingsTab = 'daily'; // 'daily' or 'alltime'
 
+// --- PREMIUM TOAST NOTIFICATION ---
+function showToast(message, type = 'success') {
+  let toastContainer = document.getElementById('toast-container');
+  if (!toastContainer) {
+    toastContainer = document.createElement('div');
+    toastContainer.id = 'toast-container';
+    toastContainer.style.cssText = `
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      z-index: 9999;
+      pointer-events: none;
+    `;
+    document.body.appendChild(toastContainer);
+  }
+
+  const toast = document.createElement('div');
+  toast.style.cssText = `
+    min-width: 280px;
+    max-width: 400px;
+    padding: 16px 20px;
+    border-radius: 12px;
+    background: rgba(15, 23, 42, 0.95);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #fff;
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 600;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.4), 0 8px 10px -6px rgba(0, 0, 0, 0.4);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    transform: translateY(20px);
+    opacity: 0;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    pointer-events: auto;
+  `;
+
+  let icon = 'ℹ️';
+  if (type === 'success') {
+    icon = '✅';
+    toast.style.borderLeft = '4px solid #10B981';
+  } else if (type === 'warning') {
+    icon = '⚠️';
+    toast.style.borderLeft = '4px solid #F59E0B';
+  } else if (type === 'error') {
+    icon = '❌';
+    toast.style.borderLeft = '4px solid #EF4444';
+  }
+
+  toast.innerHTML = `
+    <span style="font-size: 1.25rem;">${icon}</span>
+    <span style="flex: 1;">${message}</span>
+  `;
+
+  toastContainer.appendChild(toast);
+
+  // Trigger animation
+  setTimeout(() => {
+    toast.style.transform = 'translateY(0)';
+    toast.style.opacity = '1';
+  }, 10);
+
+  // Fade out and remove
+  setTimeout(() => {
+    toast.style.transform = 'translateY(-20px)';
+    toast.style.opacity = '0';
+    setTimeout(() => {
+      toast.remove();
+    }, 300);
+  }, 5000);
+}
+
 // --- SAVE SCORE ---
 window.saveScore = async function(gameName, score) {
   const user = auth.currentUser;
   if (!user) {
     console.log("User not logged in, score not saved to global leaderboard.");
+    showToast("⚠️ Score not saved! Log in using the top-right button to join the rankings.", "warning");
     return;
   }
 
@@ -42,12 +120,20 @@ window.saveScore = async function(gameName, score) {
       console.error("Could not update user profile stats:", e);
     }
     
+    // Show premium visual success feedback
+    if (isDaily) {
+      showToast(`🚀 Score of ${score.toLocaleString()} saved to Today's Daily Challenge!`, "success");
+    } else {
+      showToast(`🏆 Score of ${score.toLocaleString()} saved to All-Time rankings!`, "success");
+    }
+    
     // Refresh leaderboard if we are on the homepage
     if (document.getElementById('leaderboard-table')) {
       window.loadLeaderboard();
     }
   } catch (e) {
     console.error("Error adding score: ", e);
+    showToast("❌ Failed to save score to the leaderboard.", "error");
   }
 };
 
