@@ -9,6 +9,17 @@ export function init(container) {
         border: 1px solid rgba(255,255,255,0.05);
       }
       
+      /* Sleek Glowing Timer Progress Bar */
+      .hl-timer-container {
+        position: absolute; top: 0; left: 0; right: 0; height: 6px;
+        background: rgba(255, 255, 255, 0.03); z-index: 15;
+      }
+      .hl-timer-bar {
+        width: 100%; height: 100%; background: #10B981;
+        box-shadow: 0 0 12px #10B981;
+        transition: width 0.05s linear, background-color 0.2s ease;
+      }
+      
       /* Ambient Blurred Orbs background */
       .hl-orb {
         position: absolute; width: 350px; height: 350px; border-radius: 50%;
@@ -22,7 +33,7 @@ export function init(container) {
       }
       
       .hl-score-banner {
-        position: absolute; top: 18px; left: 0; right: 0; z-index: 10;
+        position: absolute; top: 22px; left: 0; right: 0; z-index: 10;
         display: flex; justify-content: center; gap: 15px; pointer-events: none;
       }
       .hl-score-pill {
@@ -36,7 +47,7 @@ export function init(container) {
       .hl-card {
         flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
         width: 100%; position: relative; transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.5s ease;
-        padding: 30px 20px; text-align: center; color: white; z-index: 2;
+        padding: 35px 20px; text-align: center; color: white; z-index: 2;
         background: rgba(15, 23, 42, 0.45);
         backdrop-filter: blur(15px);
         -webkit-backdrop-filter: blur(15px);
@@ -198,6 +209,11 @@ export function init(container) {
     </style>
 
     <div class="hl-wrapper">
+      <!-- 5s Glowing Visual Timer -->
+      <div class="hl-timer-container">
+        <div class="hl-timer-bar" id="hl-timer-bar"></div>
+      </div>
+      
       <!-- Background stellar elements -->
       <div class="hl-orb hl-orb-1"></div>
       <div class="hl-orb hl-orb-2"></div>
@@ -238,7 +254,7 @@ export function init(container) {
     </div>
   `;
 
-  // DATASET: Curated and 100% correct data verified for 2026
+  // DATASET: Expanded, massive question bank curated for maximum variation & anti-cheating
   const DATABASES = {
     "Monthly Google Searches": {
       prefix: "",
@@ -246,8 +262,8 @@ export function init(container) {
         { name: "Google", val: 85000000 },
         { name: "YouTube", val: 75000000 },
         { name: "Facebook", val: 65000000 },
-        { name: "TikTok", val: 55000000 },
         { name: "Instagram", val: 60000000 },
+        { name: "TikTok", val: 55000000 },
         { name: "Weather", val: 50000000 },
         { name: "Amazon", val: 45000000 },
         { name: "Translate", val: 40000000 },
@@ -262,7 +278,22 @@ export function init(container) {
         { name: "Cristiano Ronaldo", val: 18000000 },
         { name: "NFL", val: 18000000 },
         { name: "Lionel Messi", val: 16000000 },
-        { name: "GTA 5", val: 14000000 }
+        { name: "GTA 5", val: 14000000 },
+        { name: "Spider-Man", val: 13000000 },
+        { name: "McDonald's", val: 12000000 },
+        { name: "Nike", val: 11000000 },
+        { name: "PlayStation 5", val: 10000000 },
+        { name: "Harry Potter", val: 9500000 },
+        { name: "Nintendo", val: 9000000 },
+        { name: "Xbox", val: 8500000 },
+        { name: "Starbucks", val: 8000000 },
+        { name: "Batman", val: 7000000 },
+        { name: "Formula 1", val: 6000000 },
+        { name: "SpongeBob", val: 5000000 },
+        { name: "Ferrari", val: 4000000 },
+        { name: "Elden Ring", val: 3000000 },
+        { name: "Shrek", val: 2500000 },
+        { name: "Taco Bell", val: 2000000 }
       ]
     },
     "Net Worth": {
@@ -270,24 +301,36 @@ export function init(container) {
       items: [
         { name: "Elon Musk", val: 782000000000 },
         { name: "Larry Page", val: 313000000000 },
+        { name: "Sergey Brin", val: 295000000000 },
         { name: "Jeff Bezos", val: 272000000000 },
-        { name: "Jay-Z", val: 2500000000 },
         { name: "Mark Zuckerberg", val: 210000000000 },
         { name: "Larry Ellison", val: 205000000000 },
-        { name: "Warren Buffett", val: 140000000000 },
+        { name: "Steve Ballmer", val: 148000000000 },
         { name: "Bernard Arnault", val: 143000000000 },
+        { name: "Warren Buffett", val: 140000000000 },
+        { name: "Jensen Huang", val: 122000000000 },
+        { name: "Michael Dell", val: 120000000000 },
         { name: "Bill Gates", val: 105000000000 },
+        { name: "Mukesh Ambani", val: 116000000000 },
+        { name: "Gautam Adani", val: 102000000000 },
+        { name: "Phil Knight", val: 40000000000 },
+        { name: "Donald Trump", val: 6500000000 },
         { name: "Michael Jordan", val: 4300000000 },
         { name: "Oprah Winfrey", val: 3000000000 },
         { name: "MrBeast", val: 2600000000 },
+        { name: "Jay-Z", val: 2500000000 },
         { name: "Kim Kardashian", val: 1900000000 },
         { name: "Taylor Swift", val: 1600000000 },
         { name: "Rihanna", val: 1400000000 },
+        { name: "Selena Gomez", val: 1300000000 },
         { name: "Cristiano Ronaldo", val: 1200000000 },
         { name: "Tiger Woods", val: 1100000000 },
         { name: "LeBron James", val: 1000000000 },
         { name: "Lionel Messi", val: 850000000 },
-        { name: "Dwayne Johnson", val: 800000000 }
+        { name: "Dwayne Johnson", val: 800000000 },
+        { name: "Beyoncé", val: 800000000 },
+        { name: "Kylie Jenner", val: 700000000 },
+        { name: "Drake", val: 250000000 }
       ]
     },
     "Box Office Gross": {
@@ -307,12 +350,24 @@ export function init(container) {
         { name: "Top Gun: Maverick", val: 1495000000 },
         { name: "Frozen II", val: 1450000000 },
         { name: "Barbie", val: 1445000000 },
+        { name: "Avengers: Age of Ultron", val: 1405000000 },
         { name: "The Super Mario Bros. Movie", val: 1361000000 },
         { name: "Black Panther", val: 1347000000 },
         { name: "Harry Potter & Deathly Hallows Part 2", val: 1342000000 },
         { name: "Star Wars: The Last Jedi", val: 1332000000 },
         { name: "Jurassic World: Fallen Kingdom", val: 1310000000 },
-        { name: "Frozen", val: 1280000000 }
+        { name: "Frozen", val: 1280000000 },
+        { name: "Beauty and the Beast (2017)", val: 1263000000 },
+        { name: "Incredibles 2", val: 1242000000 },
+        { name: "The Fate of the Furious", val: 1236000000 },
+        { name: "Iron Man 3", val: 1214000000 },
+        { name: "Minions", val: 1159000000 },
+        { name: "Captain America: Civil War", val: 1153000000 },
+        { name: "Aquaman", val: 1148000000 },
+        { name: "Skyfall", val: 1108000000 },
+        { name: "Transformers: Dark of the Moon", val: 1123000000 },
+        { name: "Toy Story 4", val: 1073000000 },
+        { name: "Joker", val: 1074000000 }
       ]
     },
     "Instagram Followers": {
@@ -322,18 +377,33 @@ export function init(container) {
         { name: "Cristiano Ronaldo", val: 664000000 },
         { name: "Lionel Messi", val: 506000000 },
         { name: "Selena Gomez", val: 406000000 },
-        { name: "Kylie Jenner", val: 383000000 },
         { name: "Dwayne 'The Rock' Johnson", val: 396000000 },
+        { name: "Kylie Jenner", val: 383000000 },
         { name: "Ariana Grande", val: 363000000 },
         { name: "Kim Kardashian", val: 345000000 },
         { name: "Beyoncé", val: 312000000 },
         { name: "Khloé Kardashian", val: 305000000 },
+        { name: "Nike", val: 302000000 },
         { name: "Kendall Jenner", val: 291000000 },
         { name: "Justin Bieber", val: 290000000 },
         { name: "Taylor Swift", val: 283000000 },
+        { name: "National Geographic", val: 280000000 },
         { name: "Virat Kohli", val: 270000000 },
         { name: "Neymar Jr", val: 220000000 },
-        { name: "Zendaya", val: 182000000 }
+        { name: "Zendaya", val: 182000000 },
+        { name: "Cardi B", val: 165000000 },
+        { name: "LeBron James", val: 160000000 },
+        { name: "Demi Lovato", val: 155000000 },
+        { name: "Rihanna", val: 151000000 },
+        { name: "Drake", val: 145000000 },
+        { name: "Billie Eilish", val: 110000000 },
+        { name: "Shakira", val: 90000000 },
+        { name: "Khaby Lame", val: 81000000 },
+        { name: "Real Madrid CF", val: 162000000 },
+        { name: "FC Barcelona", val: 130000000 },
+        { name: "NASA", val: 97000000 },
+        { name: "Miley Cyrus", val: 215000000 },
+        { name: "Eminem", val: 44000000 }
       ]
     }
   };
@@ -345,9 +415,11 @@ export function init(container) {
   let score = 0;
   let highScore = localStorage.getItem('hl-high-score') || 0;
   
-  // Anti-repeat selection tracking
+  // Anti-repeat & timer states
   let seenNames = new Set();
   let isTransitioning = false;
+  let timerInterval = null;
+  const timeLimitMs = 5000; // Hard 5-second timer
   
   // DOM Elements
   const elScore = container.querySelector('#hl-score');
@@ -392,12 +464,90 @@ export function init(container) {
     return card;
   }
 
+  // --- TIMER LOGIC ---
+  function startTimer() {
+    stopTimer();
+    const timerBar = container.querySelector('#hl-timer-bar');
+    if (!timerBar) return;
+    
+    timerBar.style.width = '100%';
+    timerBar.style.backgroundColor = '#10B981';
+    timerBar.style.boxShadow = '0 0 12px #10B981';
+    
+    const startTime = Date.now();
+    
+    timerInterval = setInterval(() => {
+      if (isTransitioning) return;
+      
+      const elapsed = Date.now() - startTime;
+      const remaining = Math.max(0, timeLimitMs - elapsed);
+      const pct = (remaining / timeLimitMs) * 100;
+      
+      timerBar.style.width = pct + '%';
+      
+      if (pct > 50) {
+        timerBar.style.backgroundColor = '#10B981';
+        timerBar.style.boxShadow = '0 0 12px #10B981';
+      } else if (pct > 22) {
+        timerBar.style.backgroundColor = '#F59E0B';
+        timerBar.style.boxShadow = '0 0 12px #F59E0B';
+      } else {
+        timerBar.style.backgroundColor = '#EF4444';
+        timerBar.style.boxShadow = '0 0 12px #EF4444';
+      }
+      
+      if (remaining <= 0) {
+        stopTimer();
+        handleTimeout();
+      }
+    }, 20);
+  }
+
+  function stopTimer() {
+    if (timerInterval) {
+      clearInterval(timerInterval);
+      timerInterval = null;
+    }
+  }
+
+  function handleTimeout() {
+    if (isTransitioning) return;
+    isTransitioning = true;
+    
+    // Show TIME'S UP overlay element in the bottom card
+    const valDiv = document.createElement('div');
+    valDiv.className = 'hl-value anim-pop';
+    valDiv.innerText = "TIME'S UP! ⏰";
+    valDiv.style.color = '#EF4444';
+    valDiv.style.textShadow = '0 0 25px rgba(239, 68, 68, 0.6)';
+    valDiv.style.fontSize = '2.5rem';
+    
+    elBottomContainer.innerHTML = '';
+    elBottomContainer.appendChild(valDiv);
+    
+    // Shake screen
+    hlWrapper.classList.add('hl-shake');
+    setTimeout(() => hlWrapper.classList.remove('hl-shake'), 450);
+
+    // Save score
+    if (window.saveScore && score > 0) {
+      window.saveScore('Higher or Lower', score);
+    }
+    
+    setTimeout(() => {
+      elFinalScore.innerText = score;
+      elGameOver.style.display = 'flex';
+      isTransitioning = false;
+    }, 1500);
+  }
+
   function initGame() {
     score = 0;
     elScore.innerText = score;
     elGameOver.style.display = 'none';
     seenNames.clear();
     isTransitioning = false;
+    stopTimer();
     
     // Pick random category for this round
     const categories = Object.keys(DATABASES);
@@ -408,6 +558,7 @@ export function init(container) {
     nextCard = getRandomCard(currentCard.name);
     
     renderCards();
+    startTimer();
   }
 
   function renderCards() {
@@ -422,7 +573,6 @@ export function init(container) {
     elBottomContainer.innerHTML = '';
     elBottomContainer.appendChild(elBtnGroup);
     
-    // Remove anim classes to prepare fresh entry
     cardBottom.classList.remove('anim-slide-up');
     void cardBottom.offsetWidth; // trigger reflow
     cardBottom.classList.add('anim-slide-up');
@@ -431,6 +581,7 @@ export function init(container) {
   window.guess = function(choice) {
     if (isTransitioning) return;
     isTransitioning = true;
+    stopTimer(); // Freeze timer immediately
 
     // Reveal value
     const isHigher = nextCard.val >= currentCard.val;
@@ -445,10 +596,10 @@ export function init(container) {
     valDiv.className = 'hl-value anim-pop';
     valDiv.innerText = formatNumber(nextCard.val);
     if (!isCorrect) {
-      valDiv.style.color = '#EF4444'; // Red if wrong
+      valDiv.style.color = '#EF4444';
       valDiv.style.textShadow = '0 0 25px rgba(239, 68, 68, 0.6)';
     } else {
-      valDiv.style.color = '#10B981'; // Green if correct
+      valDiv.style.color = '#10B981';
       valDiv.style.textShadow = '0 0 25px rgba(16, 185, 129, 0.6)';
     }
     
@@ -464,7 +615,7 @@ export function init(container) {
         localStorage.setItem('hl-high-score', highScore);
       }
       
-      // Gorgeous premium transition flow
+      // Slide transitions
       setTimeout(() => {
         cardTop.classList.add('slide-out');
         cardBottom.classList.add('slide-up-merge');
@@ -475,7 +626,6 @@ export function init(container) {
           currentCard = nextCard;
           nextCard = getRandomCard(currentCard.name);
           
-          // Reset positions and remove transition classes
           cardTop.classList.remove('slide-out');
           cardBottom.classList.remove('slide-up-merge');
           
@@ -484,7 +634,8 @@ export function init(container) {
           
           renderCards();
           isTransitioning = false;
-        }, 600); // Wait for translation to complete
+          startTimer(); // Start fresh countdown for next card
+        }, 600);
       }, 1500);
       
     } else {
@@ -499,7 +650,6 @@ export function init(container) {
       setTimeout(() => {
         elFinalScore.innerText = score;
         elGameOver.style.display = 'flex';
-        // Reset transitioning lock so play again click is registered safely
         isTransitioning = false;
       }, 1500);
     }
@@ -507,6 +657,17 @@ export function init(container) {
 
   window.resetGame = initGame;
 
-  // Start the premium experience
+  // Cleanup timers and global handlers if user leaves the page
+  const observer = new MutationObserver((mutations) => {
+    if (!document.contains(container)) {
+      stopTimer();
+      delete window.guess;
+      delete window.resetGame;
+      observer.disconnect();
+    }
+  });
+  observer.observe(document.body, { childList: true, subtree: true });
+
+  // Start the high-stakes premium experience
   initGame();
 }
