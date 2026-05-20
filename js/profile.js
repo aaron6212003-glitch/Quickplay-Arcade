@@ -224,9 +224,7 @@ onAuthStateChanged(auth, async (user) => {
             "Toy Tanks": "🚜",
             "Word Rush": "📝",
             "Word Gravity": "🪐",
-            "Math Avalanche": "❄️",
-            "Neon Plinko": "🟢",
-            "Cyber Bot": "🤖"
+            "Math Avalanche": "❄️"
           };
           
           timelineContainer.innerHTML = recentScores.map(scoreItem => {
