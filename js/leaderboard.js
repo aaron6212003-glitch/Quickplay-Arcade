@@ -108,27 +108,43 @@ window.saveScore = async function(gameName, score) {
       dateString: dateString
     });
     
-    // 2. Update the user's personal profile stats and award Coins
-    let coinsEarned = Math.max(5, Math.floor(score / 10)); // Guarantee at least 5 Coins per game played
-    if (isDaily) coinsEarned += 15; // +15 Coins for daily challenge run
+    // 2. Map raw score to normalized XP (Max 100) and Coins (Max 50) using balanced game multipliers
+    const gameConfigs = {
+      'Higher or Lower': { xpMult: 5.0, coinMult: 2.5, maxXp: 100, maxCoins: 50 },
+      'Word Rush':       { xpMult: 4.0, coinMult: 2.0, maxXp: 100, maxCoins: 50 },
+      'Color Guess':     { xpMult: 0.15, coinMult: 0.075, maxXp: 100, maxCoins: 50 },
+      'Math Avalanche':  { xpMult: 0.08, coinMult: 0.04,  maxXp: 100, maxCoins: 50 },
+      'Word Gravity':    { xpMult: 0.08, coinMult: 0.04,  maxXp: 100, maxCoins: 50 },
+      'Toy Tanks':       { xpMult: 0.02, coinMult: 0.01,  maxXp: 100, maxCoins: 50 }
+    };
+
+    const config = gameConfigs[gameName] || { xpMult: 0.1, coinMult: 0.05, maxXp: 100, maxCoins: 50 };
+
+    let xpEarned = Math.max(5, Math.min(config.maxXp, Math.round(score * config.xpMult)));
+    let coinsEarned = Math.max(5, Math.min(config.maxCoins, Math.round(score * config.coinMult)));
+
+    if (isDaily) {
+      xpEarned += 25; // +25 XP Bonus for daily challenge run
+      coinsEarned += 15; // +15 Coins Bonus for daily challenge run
+    }
 
     try {
       const userRef = doc(db, "users", user.uid);
       await updateDoc(userRef, {
-        totalPoints: increment(score),
+        totalPoints: increment(xpEarned), // totalPoints in DB represents total cumulative XP
         gamesPlayed: increment(1),
         playCoins: increment(coinsEarned)
       });
-      console.log(`User profile stats updated & awarded +${coinsEarned} Coins!`);
+      console.log(`User profile stats updated: Earned +${xpEarned} XP & +${coinsEarned} Coins!`);
     } catch (e) {
       console.error("Could not update user profile stats:", e);
     }
     
-    // Show premium visual success feedback
+    // Show premium visual success feedback displaying both XP and Coins
     if (isDaily) {
-      showToast(`🚀 Score saved to Daily Challenge! Earned +${coinsEarned} 🪙!`, "success");
+      showToast(`🚀 Daily Score saved! Earned +${xpEarned} XP ⭐ & +${coinsEarned} Coins 🪙!`, "success");
     } else {
-      showToast(`🏆 Score of ${score.toLocaleString()} saved! Earned +${coinsEarned} 🪙!`, "success");
+      showToast(`🏆 Score of ${score.toLocaleString()} saved! Earned +${xpEarned} XP ⭐ & +${coinsEarned} Coins 🪙!`, "success");
     }
     
     // Refresh leaderboard if we are on the homepage
