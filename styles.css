@@ -1081,297 +1081,414 @@ body {
 }
 .gamer-card.theme-vortex > * { position: relative; z-index: 2; }
 /* ==========================================================================
-   TEN NEW EXTENDED ANIMATED THEMES
+   TEN NEW HYPER-PREMIUM ANIMATED THEMES
    ========================================================================== */
 
 /* 1. Common: Dark Slate (theme-slate) */
 .gamer-card.theme-slate {
-  background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%) !important;
+  background: linear-gradient(135deg, #1e293b 0%, #0b0f19 100%) !important;
   border-color: rgba(255, 255, 255, 0.12) !important;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.7) !important;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.7), inset 0 0 15px rgba(255, 255, 255, 0.03) !important;
   position: relative;
   overflow: hidden;
+}
+.gamer-card.theme-slate::before {
+  content: '';
+  position: absolute;
+  inset: -10%;
+  background: radial-gradient(circle at 30% 30%, rgba(148, 163, 184, 0.08) 0%, transparent 60%);
+  z-index: 0;
+  pointer-events: none;
+  animation: slateGlow 8s ease-in-out infinite alternate !important;
 }
 .gamer-card.theme-slate::after {
   content: '';
   position: absolute;
-  inset: -20%;
-  background: radial-gradient(circle at center, rgba(148, 163, 184, 0.06) 0%, transparent 70%);
+  inset: 0;
+  background: linear-gradient(115deg, transparent 35%, rgba(255, 255, 255, 0.04) 48%, rgba(255, 255, 255, 0.08) 50%, rgba(255, 255, 255, 0.04) 52%, transparent 65%);
+  background-size: 200% 100%;
   z-index: 0;
   pointer-events: none;
-  animation: slateMist 12s ease-in-out infinite alternate !important;
+  animation: slateSweep 7s ease-in-out infinite !important;
 }
-@keyframes slateMist {
-  0% { transform: translate(-5%, -5%) scale(1); }
-  100% { transform: translate(5%, 5%) scale(1.1); }
+@keyframes slateGlow {
+  0% { transform: scale(1) translate(0, 0); opacity: 0.7; }
+  100% { transform: scale(1.1) translate(3%, 3%); opacity: 1; }
+}
+@keyframes slateSweep {
+  0% { background-position: -150% 0; }
+  100% { background-position: 150% 0; }
 }
 .gamer-card.theme-slate > * { position: relative; z-index: 2; }
 
 
 /* 2. Common: Ocean Breeze (theme-ocean) */
 .gamer-card.theme-ocean {
-  background: linear-gradient(180deg, #0f3d59 0%, #051824 100%) !important;
-  border-color: rgba(56, 189, 248, 0.2) !important;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.7) !important;
+  background: linear-gradient(180deg, #0a2537 0%, #030a10 100%) !important;
+  border-color: rgba(56, 189, 248, 0.25) !important;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.75), inset 0 0 15px rgba(56, 189, 248, 0.08) !important;
   position: relative;
   overflow: hidden;
+}
+.gamer-card.theme-ocean::before {
+  content: '';
+  position: absolute;
+  inset: -20%;
+  background: radial-gradient(circle at 70% 80%, rgba(14, 165, 233, 0.15) 0%, transparent 60%);
+  z-index: 0;
+  pointer-events: none;
+  animation: oceanSwell 12s ease-in-out infinite alternate !important;
 }
 .gamer-card.theme-ocean::after {
   content: '';
   position: absolute;
   inset: 0;
-  background: linear-gradient(135deg, transparent 40%, rgba(56, 189, 248, 0.08) 50%, transparent 60%);
-  background-size: 200% 200%;
+  background: 
+    linear-gradient(135deg, transparent 40%, rgba(56, 189, 248, 0.06) 50%, transparent 60%),
+    radial-gradient(circle at 20% 40%, rgba(56, 189, 248, 0.1) 1px, transparent 2px),
+    radial-gradient(circle at 80% 60%, rgba(56, 189, 248, 0.1) 1.5px, transparent 2.5px);
+  background-size: 200% 200%, 120px 120px, 120px 120px;
   z-index: 0;
   pointer-events: none;
-  animation: oceanWaves 10s linear infinite !important;
+  animation: oceanWaves 9s linear infinite !important;
+}
+@keyframes oceanSwell {
+  0% { transform: scale(1) translate(0, 0); }
+  100% { transform: scale(1.15) translate(-4%, -2%); }
 }
 @keyframes oceanWaves {
-  0% { background-position: 200% 0; }
-  100% { background-position: -200% 0; }
+  0% { background-position: 200% 0, 0 0, 0 0; }
+  100% { background-position: -200% 0, -20px -120px, 20px -120px; }
 }
 .gamer-card.theme-ocean > * { position: relative; z-index: 2; }
 
 
 /* 3. Uncommon: Amethyst Spark (theme-amethyst) */
 .gamer-card.theme-amethyst {
-  background: linear-gradient(135deg, #2e1065 0%, #0f052d 100%) !important;
+  background: linear-gradient(135deg, #240b4f 0%, #0a031a 100%) !important;
   border-color: #A78BFA !important;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.75), inset 0 0 15px rgba(167, 139, 250, 0.1) !important;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.8), inset 0 0 20px rgba(167, 139, 250, 0.12) !important;
   position: relative;
   overflow: hidden;
+}
+.gamer-card.theme-amethyst::before {
+  content: '';
+  position: absolute;
+  inset: -10%;
+  background: radial-gradient(circle at center, rgba(167, 139, 250, 0.14) 0%, transparent 60%);
+  z-index: 0;
+  pointer-events: none;
+  animation: amethystCore 4s ease-in-out infinite alternate !important;
 }
 .gamer-card.theme-amethyst::after {
   content: '';
   position: absolute;
   inset: 0;
   background-image: 
-    radial-gradient(circle at 10% 30%, rgba(167, 139, 250, 0.15) 1.5px, transparent 2px),
-    radial-gradient(circle at 80% 20%, rgba(167, 139, 250, 0.12) 2px, transparent 3px),
-    radial-gradient(circle at 40% 70%, rgba(167, 139, 250, 0.15) 1px, transparent 2px),
-    radial-gradient(circle at 90% 80%, rgba(167, 139, 250, 0.1) 2.5px, transparent 3.5px);
-  background-size: 150px 150px;
+    radial-gradient(circle at 15% 25%, rgba(196, 181, 253, 0.4) 1px, transparent 2px),
+    radial-gradient(circle at 85% 15%, rgba(196, 181, 253, 0.35) 1.5px, transparent 2.5px),
+    radial-gradient(circle at 45% 75%, rgba(196, 181, 253, 0.4) 1.2px, transparent 2.2px),
+    radial-gradient(circle at 75% 85%, rgba(196, 181, 253, 0.3) 2px, transparent 3px);
+  background-size: 140px 140px;
   z-index: 0;
   pointer-events: none;
-  animation: amethystSparkle 6s linear infinite !important;
+  animation: amethystTwinkle 5s linear infinite !important;
 }
-@keyframes amethystSparkle {
-  0% { background-position: 0 0; }
-  100% { background-position: 0 -150px; }
+@keyframes amethystCore {
+  0% { transform: scale(0.92); opacity: 0.6; }
+  100% { transform: scale(1.08); opacity: 1; }
+}
+@keyframes amethystTwinkle {
+  0% { background-position: 0 0; opacity: 0.4; }
+  50% { opacity: 0.95; }
+  100% { background-position: 0 -140px; opacity: 0.4; }
 }
 .gamer-card.theme-amethyst:hover {
-  box-shadow: 0 25px 45px rgba(167, 139, 250, 0.25), inset 0 0 25px rgba(167, 139, 250, 0.2) !important;
+  box-shadow: 0 25px 45px rgba(167, 139, 250, 0.3), inset 0 0 25px rgba(167, 139, 250, 0.25) !important;
 }
 .gamer-card.theme-amethyst > * { position: relative; z-index: 2; }
 
 
 /* 4. Uncommon: Emerald Forest (theme-forest) */
 .gamer-card.theme-forest {
-  background: linear-gradient(135deg, #062f22 0%, #02120b 100%) !important;
+  background: linear-gradient(135deg, #03251a 0%, #010a07 100%) !important;
   border-color: #10B981 !important;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.75), inset 0 0 15px rgba(16, 185, 129, 0.1) !important;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.8), inset 0 0 20px rgba(16, 185, 129, 0.12) !important;
   position: relative;
   overflow: hidden;
+}
+.gamer-card.theme-forest::before {
+  content: '';
+  position: absolute;
+  inset: -10%;
+  background: radial-gradient(circle at 30% 20%, rgba(16, 185, 129, 0.12) 0%, transparent 60%);
+  z-index: 0;
+  pointer-events: none;
+  animation: forestBeams 6s ease-in-out infinite alternate !important;
 }
 .gamer-card.theme-forest::after {
   content: '';
   position: absolute;
   inset: 0;
   background-image: 
-    radial-gradient(circle at 20% 80%, rgba(52, 211, 153, 0.22) 2px, transparent 3px),
-    radial-gradient(circle at 60% 90%, rgba(52, 211, 153, 0.18) 3px, transparent 4px),
-    radial-gradient(circle at 80% 70%, rgba(52, 211, 153, 0.25) 1.5px, transparent 2.5px),
-    radial-gradient(circle at 40% 60%, rgba(52, 211, 153, 0.15) 4px, transparent 5px);
-  background-size: 200px 200px;
+    radial-gradient(circle at 10% 90%, rgba(52, 211, 153, 0.6) 2.5px, transparent 3.5px),
+    radial-gradient(circle at 60% 80%, rgba(52, 211, 153, 0.5) 3.5px, transparent 4.5px),
+    radial-gradient(circle at 80% 95%, rgba(52, 211, 153, 0.55) 2px, transparent 3px),
+    radial-gradient(circle at 35% 65%, rgba(52, 211, 153, 0.45) 4px, transparent 5px);
+  background-size: 180px 180px;
   z-index: 0;
   pointer-events: none;
-  animation: forestFireflies 9s linear infinite !important;
+  animation: forestFireflies 7s linear infinite, fireflyFlicker 1.8s ease-in-out infinite alternate !important;
+}
+@keyframes forestBeams {
+  0% { opacity: 0.4; transform: rotate(-5deg) scale(0.95); }
+  100% { opacity: 0.95; transform: rotate(5deg) scale(1.05); }
 }
 @keyframes forestFireflies {
-  0% { background-position: 0 200px; }
-  100% { background-position: -20px 0; }
+  0% { background-position: 0 180px; }
+  100% { background-position: -25px 0; }
+}
+@keyframes fireflyFlicker {
+  0% { filter: brightness(0.6) opacity(0.5); }
+  100% { filter: brightness(1.4) opacity(1); }
 }
 .gamer-card.theme-forest:hover {
-  box-shadow: 0 25px 45px rgba(52, 211, 153, 0.25), inset 0 0 25px rgba(16, 185, 129, 0.2) !important;
+  box-shadow: 0 25px 45px rgba(52, 211, 153, 0.3), inset 0 0 25px rgba(16, 185, 129, 0.25) !important;
 }
 .gamer-card.theme-forest > * { position: relative; z-index: 2; }
 
 
 /* 5. Rare: Solar Flare (theme-solar) */
 .gamer-card.theme-solar {
-  background: radial-gradient(circle at bottom right, #451a03 0%, #0c0401 100%) !important;
+  background: radial-gradient(circle at bottom right, #381201 0%, #080200 100%) !important;
   border-color: #F59E0B !important;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.8), inset 0 0 20px rgba(245, 158, 11, 0.15) !important;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.85), inset 0 0 20px rgba(245, 158, 11, 0.15) !important;
   position: relative;
   overflow: hidden;
+}
+.gamer-card.theme-solar::before {
+  content: '';
+  position: absolute;
+  inset: -15%;
+  background: radial-gradient(circle at bottom right, rgba(245, 158, 11, 0.25) 0%, rgba(249, 115, 22, 0.1) 45%, transparent 70%);
+  z-index: 0;
+  pointer-events: none;
+  animation: solarCore 4s ease-in-out infinite alternate !important;
 }
 .gamer-card.theme-solar::after {
   content: '';
   position: absolute;
   inset: -30%;
-  background: radial-gradient(ellipse at center, rgba(245, 158, 11, 0.18) 0%, rgba(249, 115, 22, 0.1) 40%, transparent 70%);
+  background: radial-gradient(ellipse at center, rgba(249, 115, 22, 0.18) 0%, rgba(245, 158, 11, 0.08) 50%, transparent 75%);
   z-index: 0;
   pointer-events: none;
-  animation: solarWind 8s ease-in-out infinite alternate !important;
+  animation: solarWind 6s ease-in-out infinite alternate-reverse !important;
+}
+@keyframes solarCore {
+  0% { transform: scale(0.9) rotate(0deg); opacity: 0.7; }
+  100% { transform: scale(1.1) rotate(10deg); opacity: 1; }
 }
 @keyframes solarWind {
   0% { transform: rotate(0deg) translate(0, 0) scale(1); }
-  100% { transform: rotate(15deg) translate(-5%, -5%) scale(1.15); }
+  100% { transform: rotate(20deg) translate(-4%, -4%) scale(1.18); }
 }
 .gamer-card.theme-solar:hover {
-  box-shadow: 0 25px 45px rgba(245, 158, 11, 0.35), inset 0 0 30px rgba(249, 115, 22, 0.25) !important;
+  box-shadow: 0 25px 45px rgba(245, 158, 11, 0.4), inset 0 0 30px rgba(249, 115, 22, 0.3) !important;
 }
 .gamer-card.theme-solar > * { position: relative; z-index: 2; }
 
 
 /* 6. Rare: Toxic Waste (theme-toxic) */
 .gamer-card.theme-toxic {
-  background: linear-gradient(180deg, #0d280d 0%, #020802 100%) !important;
+  background: linear-gradient(180deg, #09200a 0%, #010501 100%) !important;
   border-color: #84CC16 !important;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.8), inset 0 0 20px rgba(132, 204, 22, 0.15) !important;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.85), inset 0 0 20px rgba(132, 204, 22, 0.18) !important;
   position: relative;
   overflow: hidden;
+}
+.gamer-card.theme-toxic::before {
+  content: '';
+  position: absolute;
+  inset: -10%;
+  background: radial-gradient(circle at 50% 90%, rgba(132, 204, 22, 0.15) 0%, transparent 60%);
+  z-index: 0;
+  pointer-events: none;
+  animation: toxicFog 5s ease-in-out infinite alternate !important;
 }
 .gamer-card.theme-toxic::after {
   content: '';
   position: absolute;
   inset: 0;
   background-image: 
-    radial-gradient(circle at 10% 80%, rgba(132, 204, 22, 0.25) 4px, transparent 5px),
-    radial-gradient(circle at 45% 90%, rgba(132, 204, 22, 0.2) 6px, transparent 7px),
-    radial-gradient(circle at 80% 75%, rgba(132, 204, 22, 0.3) 3px, transparent 4px),
-    radial-gradient(circle at 92% 85%, rgba(132, 204, 22, 0.2) 5px, transparent 6px);
-  background-size: 250px 250px;
+    radial-gradient(circle at 15% 95%, rgba(132, 204, 22, 0.6) 4.5px, transparent 5.5px),
+    radial-gradient(circle at 45% 90%, rgba(132, 204, 22, 0.5) 6px, transparent 7.5px),
+    radial-gradient(circle at 75% 95%, rgba(132, 204, 22, 0.65) 3.5px, transparent 4.5px),
+    radial-gradient(circle at 90% 80%, rgba(132, 204, 22, 0.55) 5px, transparent 6px);
+  background-size: 200px 220px;
   z-index: 0;
   pointer-events: none;
-  animation: toxicBubbles 8s linear infinite !important;
+  animation: toxicBubbles 4s linear infinite !important;
+}
+@keyframes toxicFog {
+  0% { opacity: 0.5; transform: scale(1) translate(-2%, 0); }
+  100% { opacity: 1; transform: scale(1.12) translate(2%, -2%); }
 }
 @keyframes toxicBubbles {
-  0% { background-position: 0 250px; }
-  100% { background-position: 10px 0; }
+  0% { background-position: 0 220px; opacity: 0; }
+  15% { opacity: 0.85; }
+  85% { opacity: 0.85; }
+  100% { background-position: 15px 0; opacity: 0; }
 }
 .gamer-card.theme-toxic:hover {
-  box-shadow: 0 25px 45px rgba(132, 204, 22, 0.35), inset 0 0 30px rgba(132, 204, 22, 0.25) !important;
+  box-shadow: 0 25px 45px rgba(132, 204, 22, 0.4), inset 0 0 30px rgba(132, 204, 22, 0.3) !important;
 }
 .gamer-card.theme-toxic > * { position: relative; z-index: 2; }
 
 
 /* 7. Epic: Deep Space (theme-deepspace) */
 .gamer-card.theme-deepspace {
-  background: radial-gradient(circle at 30% 20%, #09091e 0%, #030307 100%) !important;
+  background: radial-gradient(circle at 30% 20%, #060616 0%, #010103 100%) !important;
   border-color: #3B82F6 !important;
-  box-shadow: 0 20px 45px rgba(0, 0, 0, 0.85), inset 0 0 25px rgba(59, 130, 246, 0.2) !important;
+  box-shadow: 0 20px 45px rgba(0, 0, 0, 0.9), inset 0 0 25px rgba(59, 130, 246, 0.22) !important;
   position: relative;
   overflow: hidden;
 }
-.gamer-card.theme-deepspace::after {
+.gamer-card.theme-deepspace::before {
   content: '';
   position: absolute;
-  inset: -40%;
+  inset: -30%;
   background: 
-    radial-gradient(circle at 20% 30%, rgba(59, 130, 246, 0.18) 0%, transparent 60%),
-    radial-gradient(circle at 75% 75%, rgba(168, 85, 247, 0.12) 0%, transparent 60%);
+    radial-gradient(circle at 25% 30%, rgba(59, 130, 246, 0.25) 0%, transparent 60%),
+    radial-gradient(circle at 75% 70%, rgba(168, 85, 247, 0.16) 0%, transparent 60%);
   z-index: 0;
   pointer-events: none;
   filter: blur(35px);
-  animation: deepspaceCloud 12s ease-in-out infinite alternate !important;
+  animation: nebulaSwirl 16s linear infinite !important;
 }
-@keyframes deepspaceCloud {
-  0% { transform: translate(0, 0) scale(1); }
-  100% { transform: translate(-10%, 10%) scale(1.1); }
-}
-.gamer-card.theme-deepspace::before {
+.gamer-card.theme-deepspace::after {
   content: '';
   position: absolute;
   inset: 0;
   background-image: 
     radial-gradient(1.5px 1.5px at 15% 15%, #fff 100%, transparent),
-    radial-gradient(2px 2px at 70% 30%, rgba(255,255,255,0.7) 100%, transparent),
-    radial-gradient(1px 1px at 35% 75%, rgba(255,255,255,0.8) 100%, transparent),
+    radial-gradient(2px 2px at 75% 30%, rgba(255,255,255,0.85) 100%, transparent),
+    radial-gradient(1.2px 1.2px at 40% 75%, rgba(255,255,255,0.9) 100%, transparent),
     radial-gradient(2.5px 2.5px at 85% 65%, #fff 100%, transparent);
-  background-size: 200px 200px;
-  opacity: 0.5;
+  background-size: 160px 160px;
   z-index: 0;
   pointer-events: none;
-  animation: deepspaceStars 20s linear infinite !important;
+  animation: spaceTwinkle 4s ease-in-out infinite alternate !important;
 }
-@keyframes deepspaceStars {
-  0% { background-position: 0 0; }
-  100% { background-position: -50px -200px; }
+@keyframes nebulaSwirl {
+  0% { transform: rotate(0deg) scale(1); }
+  50% { transform: rotate(180deg) scale(1.12); }
+  100% { transform: rotate(360deg) scale(1); }
+}
+@keyframes spaceTwinkle {
+  0% { opacity: 0.45; transform: scale(0.98); }
+  100% { opacity: 0.95; transform: scale(1.02); }
 }
 .gamer-card.theme-deepspace:hover {
-  box-shadow: 0 25px 50px rgba(59, 130, 246, 0.4), inset 0 0 35px rgba(168, 85, 247, 0.3) !important;
+  box-shadow: 0 25px 50px rgba(59, 130, 246, 0.45), inset 0 0 35px rgba(168, 85, 247, 0.35) !important;
 }
 .gamer-card.theme-deepspace > * { position: relative; z-index: 2; }
 
 
 /* 8. Epic: Glacial Frost (theme-frost) */
 .gamer-card.theme-frost {
-  background: linear-gradient(180deg, #0e1e2d 0%, #060c12 100%) !important;
+  background: linear-gradient(180deg, #071522 0%, #02070c 100%) !important;
   border-color: #38BDF8 !important;
-  box-shadow: 0 20px 45px rgba(0, 0, 0, 0.85), inset 0 0 25px rgba(56, 189, 248, 0.2) !important;
+  box-shadow: 0 20px 45px rgba(0, 0, 0, 0.9), inset 0 0 25px rgba(56, 189, 248, 0.22) !important;
   position: relative;
   overflow: hidden;
+}
+.gamer-card.theme-frost::before {
+  content: '';
+  position: absolute;
+  inset: -10%;
+  background: radial-gradient(circle at center, rgba(56, 189, 248, 0.16) 0%, transparent 60%);
+  z-index: 0;
+  pointer-events: none;
+  animation: glacialGlow 5s ease-in-out infinite alternate !important;
 }
 .gamer-card.theme-frost::after {
   content: '';
   position: absolute;
   inset: 0;
   background-image: 
-    radial-gradient(circle at 10% 10%, rgba(255, 255, 255, 0.15) 1.5px, transparent 2.5px),
-    radial-gradient(circle at 50% 30%, rgba(255, 255, 255, 0.22) 2px, transparent 3px),
-    radial-gradient(circle at 80% 15%, rgba(255, 255, 255, 0.18) 1px, transparent 2px),
-    radial-gradient(circle at 30% 60%, rgba(255, 255, 255, 0.15) 2.5px, transparent 3.5px),
-    radial-gradient(circle at 75% 70%, rgba(255, 255, 255, 0.2) 2px, transparent 3px);
-  background-size: 200px 200px;
+    radial-gradient(circle at 10% 10%, rgba(255, 255, 255, 0.4) 1.5px, transparent 2.5px),
+    radial-gradient(circle at 50% 30%, rgba(255, 255, 255, 0.5) 2.5px, transparent 3.5px),
+    radial-gradient(circle at 85% 20%, rgba(255, 255, 255, 0.35) 1.2px, transparent 2.2px),
+    radial-gradient(circle at 30% 65%, rgba(255, 255, 255, 0.45) 3px, transparent 4px),
+    radial-gradient(circle at 75% 75%, rgba(255, 255, 255, 0.5) 2px, transparent 3px);
+  background-size: 150px 150px;
   z-index: 0;
   pointer-events: none;
-  animation: frostDrift 7s linear infinite !important;
+  animation: frostSnow 5s linear infinite !important;
 }
-@keyframes frostDrift {
+@keyframes glacialGlow {
+  0% { opacity: 0.5; transform: scale(0.95); }
+  100% { opacity: 0.95; transform: scale(1.05); }
+}
+@keyframes frostSnow {
   0% { background-position: 0 0; }
-  100% { background-position: -30px 200px; }
+  100% { background-position: -25px 150px; }
 }
 .gamer-card.theme-frost:hover {
-  box-shadow: 0 25px 50px rgba(56, 189, 248, 0.4), inset 0 0 35px rgba(56, 189, 248, 0.3) !important;
+  box-shadow: 0 25px 50px rgba(56, 189, 248, 0.45), inset 0 0 35px rgba(56, 189, 248, 0.35) !important;
 }
 .gamer-card.theme-frost > * { position: relative; z-index: 2; }
 
 
 /* 9. Legendary: Prismatic Hologram (theme-prism) */
 .gamer-card.theme-prism {
-  background: linear-gradient(135deg, #0d061a 0%, #03010a 100%) !important;
+  background: linear-gradient(135deg, #0a0414 0%, #020105 100%) !important;
   border-color: #f43f5e !important;
-  box-shadow: 0 20px 45px rgba(0, 0, 0, 0.92), inset 0 0 30px rgba(244, 63, 94, 0.2) !important;
+  box-shadow: 0 20px 45px rgba(0, 0, 0, 0.95), inset 0 0 30px rgba(244, 63, 94, 0.25) !important;
   position: relative;
   overflow: hidden;
-  transition: border-color 0.4s ease !important;
 }
-.gamer-card.theme-prism::after {
+.gamer-card.theme-prism::before {
   content: '';
   position: absolute;
   inset: -100px;
   background: linear-gradient(
     45deg,
-    rgba(244, 63, 94, 0.18) 0%,
-    rgba(236, 72, 153, 0.12) 20%,
-    rgba(168, 85, 247, 0.18) 40%,
-    rgba(59, 130, 246, 0.15) 60%,
-    rgba(6, 182, 212, 0.18) 80%,
-    rgba(244, 63, 94, 0.18) 100%
+    rgba(244, 63, 94, 0.22) 0%,
+    rgba(236, 72, 153, 0.16) 20%,
+    rgba(168, 85, 247, 0.22) 40%,
+    rgba(59, 130, 246, 0.18) 60%,
+    rgba(6, 182, 212, 0.22) 80%,
+    rgba(244, 63, 94, 0.22) 100%
   );
   background-size: 300% 300%;
   z-index: 0;
   pointer-events: none;
-  animation: prismSweep 8s linear infinite !important;
+  animation: prismSpectrum 8s linear infinite !important;
 }
-@keyframes prismSweep {
-  0% { background-position: 0% 50%; }
+.gamer-card.theme-prism::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: 
+    linear-gradient(115deg, transparent 40%, rgba(255, 255, 255, 0.08) 48%, rgba(255, 255, 255, 0.18) 50%, rgba(255, 255, 255, 0.08) 52%, transparent 60%),
+    linear-gradient(to bottom, transparent 95%, rgba(6, 182, 212, 0.15) 96%, transparent 97%);
+  background-size: 200% 100%, 100% 25px;
+  z-index: 0;
+  pointer-events: none;
+  animation: prismGlissade 4s ease-in-out infinite !important;
+}
+@keyframes prismSpectrum {
+  0% { background-position: 0% 50%; filter: hue-rotate(0deg); }
   50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
+  100% { background-position: 0% 50%; filter: hue-rotate(360deg); }
+}
+@keyframes prismGlissade {
+  0% { background-position: -150% 0, 0 0; }
+  100% { background-position: 150% 0, 0 200px; }
 }
 .gamer-card.theme-prism:hover {
-  box-shadow: 0 25px 50px rgba(244, 63, 94, 0.4), inset 0 0 40px rgba(168, 85, 247, 0.35) !important;
+  box-shadow: 0 25px 50px rgba(244, 63, 94, 0.5), inset 0 0 40px rgba(168, 85, 247, 0.4) !important;
   border-color: #38bdf8 !important;
 }
 .gamer-card.theme-prism > * { position: relative; z-index: 2; }
@@ -1379,48 +1496,50 @@ body {
 
 /* 10. Legendary: Infernal Embers (theme-inferno) */
 .gamer-card.theme-inferno {
-  background: radial-gradient(ellipse at bottom, #2b0404 0%, #030000 100%) !important;
+  background: radial-gradient(ellipse at bottom, #210202 0%, #020000 100%) !important;
   border-color: #f97316 !important;
-  box-shadow: 0 20px 45px rgba(0, 0, 0, 0.95), inset 0 0 35px rgba(249, 115, 22, 0.25) !important;
+  box-shadow: 0 20px 45px rgba(0, 0, 0, 0.95), inset 0 0 35px rgba(249, 115, 22, 0.28) !important;
   position: relative;
   overflow: hidden;
+}
+.gamer-card.theme-inferno::before {
+  content: '';
+  position: absolute;
+  inset: -10%;
+  background: 
+    radial-gradient(circle at 20% 90%, rgba(239, 68, 68, 0.32) 0%, transparent 60%),
+    radial-gradient(circle at 80% 90%, rgba(249, 115, 22, 0.26) 0%, transparent 60%);
+  z-index: 0;
+  pointer-events: none;
+  filter: blur(20px);
+  animation: magmaPulse 4s ease-in-out infinite alternate !important;
 }
 .gamer-card.theme-inferno::after {
   content: '';
   position: absolute;
   inset: 0;
-  background: 
-    radial-gradient(circle at 10% 90%, rgba(239, 68, 68, 0.28) 0%, transparent 60%),
-    radial-gradient(circle at 90% 90%, rgba(249, 115, 22, 0.22) 0%, transparent 60%);
-  z-index: 0;
-  pointer-events: none;
-  filter: blur(25px);
-  animation: infernoPulse 6s ease-in-out infinite alternate !important;
-}
-@keyframes infernoPulse {
-  0% { transform: scale(1); opacity: 0.7; }
-  100% { transform: scale(1.15); opacity: 1; }
-}
-.gamer-card.theme-inferno::before {
-  content: '';
-  position: absolute;
-  inset: 0;
   background-image: 
-    radial-gradient(circle at 15% 75%, rgba(239, 68, 68, 0.8) 2px, transparent 3px),
-    radial-gradient(circle at 45% 85%, rgba(249, 115, 22, 0.95) 2.5px, transparent 3.5px),
-    radial-gradient(circle at 75% 70%, rgba(245, 158, 11, 0.8) 1.5px, transparent 2.5px),
-    radial-gradient(circle at 90% 60%, rgba(239, 68, 68, 0.9) 3px, transparent 4px);
-  background-size: 200px 250px;
+    radial-gradient(circle at 10% 95%, rgba(239, 68, 68, 0.8) 2.5px, transparent 3.5px),
+    radial-gradient(circle at 45% 90%, rgba(249, 115, 22, 0.9) 3px, transparent 4px),
+    radial-gradient(circle at 75% 92%, rgba(245, 158, 11, 0.85) 2px, transparent 3px),
+    radial-gradient(circle at 90% 75%, rgba(239, 68, 68, 0.85) 3.5px, transparent 4.5px);
+  background-size: 200px 240px;
   z-index: 0;
   pointer-events: none;
   animation: infernoEmbers 5s linear infinite !important;
 }
+@keyframes magmaPulse {
+  0% { transform: scale(1); opacity: 0.65; }
+  100% { transform: scale(1.12); opacity: 0.95; }
+}
 @keyframes infernoEmbers {
-  0% { background-position: 0 250px; }
-  100% { background-position: -20px 0; }
+  0% { background-position: 0 240px; opacity: 0; }
+  15% { opacity: 1; }
+  85% { opacity: 1; }
+  100% { background-position: -20px 0; opacity: 0; }
 }
 .gamer-card.theme-inferno:hover {
-  box-shadow: 0 25px 50px rgba(249, 115, 22, 0.45), inset 0 0 45px rgba(239, 68, 68, 0.4) !important;
+  box-shadow: 0 25px 50px rgba(249, 115, 22, 0.5), inset 0 0 45px rgba(239, 68, 68, 0.45) !important;
   border-color: #ef4444 !important;
 }
 .gamer-card.theme-inferno > * { position: relative; z-index: 2; }
