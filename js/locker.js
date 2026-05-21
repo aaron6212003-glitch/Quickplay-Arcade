@@ -86,6 +86,9 @@ const COSMETICS = [
   { id: "theme:theme-borealis", type: "theme", name: "Aurora Celestial", val: "theme-borealis", rarity: "legendary" },
   { id: "theme:theme-abyss", type: "theme", name: "Bioluminescent Abyss", val: "theme-abyss", rarity: "legendary" },
   { id: "theme:theme-gilded", type: "theme", name: "Gilded Gold", val: "theme-gilded", rarity: "legendary" },
+  { id: "theme:theme-blackhole", type: "theme", name: "Cosmic Singularity", val: "theme-blackhole", rarity: "legendary" },
+  { id: "theme:theme-cyberpunk", type: "theme", name: "Neon Cyberpunk", val: "theme-cyberpunk", rarity: "legendary" },
+  { id: "theme:theme-vortex", type: "theme", name: "Chrono Vortex", val: "theme-vortex", rarity: "legendary" },
 
   // --- TITLES (Slogan tags) ---
   // Common
