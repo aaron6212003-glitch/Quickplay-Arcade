@@ -11,6 +11,9 @@ const COSMETICS = [
   { id: "avatar:🐱", type: "avatar", name: "Arcade Cat", val: "🐱", rarity: "common" },
   { id: "avatar:🛡️", type: "avatar", name: "Arcade Shield", val: "🛡️", rarity: "common" },
   { id: "avatar:📦", type: "avatar", name: "Loot Crate", val: "📦", rarity: "common" },
+  { id: "avatar:🍕", type: "avatar", name: "Pixel Pizza", val: "🍕", rarity: "common" },
+  { id: "avatar:🪙", type: "avatar", name: "Retro Coin", val: "🪙", rarity: "common" },
+  { id: "avatar:🍄", type: "avatar", name: "1-Up Mushroom", val: "🍄", rarity: "common" },
   // Uncommon
   { id: "avatar:🚀", type: "avatar", name: "Space Rider", val: "🚀", rarity: "uncommon" },
   { id: "avatar:🛸", type: "avatar", name: "UFO Invader", val: "🛸", rarity: "uncommon" },
@@ -19,6 +22,9 @@ const COSMETICS = [
   { id: "avatar:🎯", type: "avatar", name: "Bullseye", val: "🎯", rarity: "uncommon" },
   { id: "avatar:🦊", type: "avatar", name: "Stealth Fox", val: "🦊", rarity: "uncommon" },
   { id: "avatar:🏹", type: "avatar", name: "Arcade Bow", val: "🏹", rarity: "uncommon" },
+  { id: "avatar:🛩️", type: "avatar", name: "Sky Fighter", val: "🛩️", rarity: "uncommon" },
+  { id: "avatar:🕶️", type: "avatar", name: "Cool Retro", val: "🕶️", rarity: "uncommon" },
+  { id: "avatar:🔋", type: "avatar", name: "Power Cell", val: "🔋", rarity: "uncommon" },
   // Rare
   { id: "avatar:👻", type: "avatar", name: "Neon Ghost", val: "👻", rarity: "rare" },
   { id: "avatar:🦄", type: "avatar", name: "Neon Unicorn", val: "🦄", rarity: "rare" },
@@ -28,6 +34,9 @@ const COSMETICS = [
   { id: "avatar:💎", type: "avatar", name: "Arcane Prism", val: "💎", rarity: "rare" },
   { id: "avatar:🔮", type: "avatar", name: "Crystal Ball", val: "🔮", rarity: "rare" },
   { id: "avatar:🪐", type: "avatar", name: "Ringed Planet", val: "🪐", rarity: "rare" },
+  { id: "avatar:🧛", type: "avatar", name: "Pixel Count", val: "🧛", rarity: "rare" },
+  { id: "avatar:👽", type: "avatar", name: "Glow Xenomorph", val: "👽", rarity: "rare" },
+  { id: "avatar:🌀", type: "avatar", name: "Cosmic Vortex", val: "🌀", rarity: "rare" },
   // Epic
   { id: "avatar:🐉", type: "avatar", name: "Holo Dragon", val: "🐉", rarity: "epic" },
   { id: "avatar:🧙‍♂️", type: "avatar", name: "Arcade Mage", val: "🧙‍♂️", rarity: "epic" },
@@ -37,6 +46,8 @@ const COSMETICS = [
   { id: "avatar:🧬", type: "avatar", name: "Cyber Helix", val: "🧬", rarity: "epic" },
   { id: "avatar:⚔️", type: "avatar", name: "Holo Blade", val: "⚔️", rarity: "epic" },
   { id: "avatar:🪶", type: "avatar", name: "Phoenix Feather", val: "🪶", rarity: "epic" },
+  { id: "avatar:📡", type: "avatar", name: "Deep Dish Signal", val: "📡", rarity: "epic" },
+  { id: "avatar:🦾", type: "avatar", name: "Cybernetic Arm", val: "🦾", rarity: "epic" },
   // Legendary
   { id: "avatar:👑", type: "avatar", name: "Golden Emperor", val: "👑", rarity: "legendary" },
   { id: "avatar:🌌", type: "avatar", name: "Cosmic Nebula", val: "🌌", rarity: "legendary" },
@@ -46,6 +57,9 @@ const COSMETICS = [
   { id: "avatar:🏆", type: "avatar", name: "Grand Trophy", val: "🏆", rarity: "legendary" },
   { id: "avatar:🔱", type: "avatar", name: "Golden Trident", val: "🔱", rarity: "legendary" },
   { id: "avatar:🎭", type: "avatar", name: "Neon Persona", val: "🎭", rarity: "legendary" },
+  { id: "avatar:🌟", type: "avatar", name: "Cosmic Star", val: "🌟", rarity: "legendary" },
+  { id: "avatar:💫", type: "avatar", name: "Supernova", val: "💫", rarity: "legendary" },
+  { id: "avatar:🎴", type: "avatar", name: "Arcane Card", val: "🎴", rarity: "legendary" },
 
   // --- BORDERS (Avatar Ring Auras) ---
   // Common
@@ -65,19 +79,28 @@ const COSMETICS = [
   { id: "border:border-rainbow", type: "border", name: "Rainbow Horizon", val: "border-rainbow", rarity: "legendary" },
   { id: "border:border-diamond", type: "border", name: "Prism Crystal", val: "border-diamond", rarity: "legendary" },
   { id: "border:border-phoenix", type: "border", name: "Solar Prominence", val: "border-phoenix", rarity: "legendary" },
+  { id: "border:border-nebula", type: "border", name: "Celestial Nebula", val: "border-nebula", rarity: "legendary" },
 
   // --- THEMES (Card Backgrounds) ---
   // Common
   { id: "theme:theme-common", type: "theme", name: "Default Glass", val: "theme-common", rarity: "common" },
+  { id: "theme:theme-slate", type: "theme", name: "Dark Slate", val: "theme-slate", rarity: "common" },
+  { id: "theme:theme-ocean", type: "theme", name: "Ocean Breeze", val: "theme-ocean", rarity: "common" },
   // Uncommon
   { id: "theme:theme-uncommon", type: "theme", name: "Cyber Grid", val: "theme-uncommon", rarity: "uncommon" },
+  { id: "theme:theme-amethyst", type: "theme", name: "Amethyst Spark", val: "theme-amethyst", rarity: "uncommon" },
+  { id: "theme:theme-forest", type: "theme", name: "Emerald Forest", val: "theme-forest", rarity: "uncommon" },
   // Rare
   { id: "theme:theme-rare", type: "theme", name: "Frozen Aurora", val: "theme-rare", rarity: "rare" },
   { id: "theme:theme-sunset", type: "theme", name: "Pastel Horizon", val: "theme-sunset", rarity: "rare" },
+  { id: "theme:theme-solar", type: "theme", name: "Solar Flare", val: "theme-solar", rarity: "rare" },
+  { id: "theme:theme-toxic", type: "theme", name: "Toxic Waste", val: "theme-toxic", rarity: "rare" },
   // Epic
   { id: "theme:theme-epic", type: "theme", name: "Retro Synthwave", val: "theme-epic", rarity: "epic" },
   { id: "theme:theme-matrix", type: "theme", name: "Digital Rain", val: "theme-matrix", rarity: "epic" },
   { id: "theme:theme-static", type: "theme", name: "TV Glitch", val: "theme-static", rarity: "epic" },
+  { id: "theme:theme-deepspace", type: "theme", name: "Deep Space", val: "theme-deepspace", rarity: "epic" },
+  { id: "theme:theme-frost", type: "theme", name: "Glacial Frost", val: "theme-frost", rarity: "epic" },
   // Legendary
   { id: "theme:theme-legendary", type: "theme", name: "Nebula Storm", val: "theme-legendary", rarity: "legendary" },
   { id: "theme:theme-magma", type: "theme", name: "Magma Chamber", val: "theme-magma", rarity: "legendary" },
@@ -89,6 +112,8 @@ const COSMETICS = [
   { id: "theme:theme-blackhole", type: "theme", name: "Cosmic Singularity", val: "theme-blackhole", rarity: "legendary" },
   { id: "theme:theme-cyberpunk", type: "theme", name: "Neon Cyberpunk", val: "theme-cyberpunk", rarity: "legendary" },
   { id: "theme:theme-vortex", type: "theme", name: "Chrono Vortex", val: "theme-vortex", rarity: "legendary" },
+  { id: "theme:theme-prism", type: "theme", name: "Prismatic Hologram", val: "theme-prism", rarity: "legendary" },
+  { id: "theme:theme-inferno", type: "theme", name: "Infernal Embers", val: "theme-inferno", rarity: "legendary" },
 
   // --- TITLES (Slogan tags) ---
   // Common
@@ -96,17 +121,23 @@ const COSMETICS = [
   { id: "title:BUTTON MASHER", type: "title", name: "BUTTON MASHER", val: "BUTTON MASHER", rarity: "common" },
   { id: "title:CASUAL PLAYER", type: "title", name: "CASUAL PLAYER", val: "CASUAL PLAYER", rarity: "common" },
   { id: "title:NOOB BUSTER", type: "title", name: "NOOB BUSTER", val: "NOOB BUSTER", rarity: "common" },
+  { id: "title:KEYBOARD WARRIOR", type: "title", name: "KEYBOARD WARRIOR", val: "KEYBOARD WARRIOR", rarity: "common" },
+  { id: "title:CHIPPOPOTAMUS", type: "title", name: "CHIPPOPOTAMUS", val: "CHIPPOPOTAMUS", rarity: "common" },
   // Uncommon
   { id: "title:DAILY GRINDER", type: "title", name: "DAILY GRINDER", val: "DAILY GRINDER", rarity: "uncommon" },
   { id: "title:WORD WIZARD", type: "title", name: "WORD WIZARD", val: "WORD WIZARD", rarity: "uncommon" },
   { id: "title:REACTION CHAMP", type: "title", name: "REACTION CHAMP", val: "REACTION CHAMP", rarity: "uncommon" },
   { id: "title:COIN HUNTER", type: "title", name: "COIN HUNTER", val: "COIN HUNTER", rarity: "uncommon" },
+  { id: "title:XP HUNTER", type: "title", name: "XP HUNTER", val: "XP HUNTER", rarity: "uncommon" },
+  { id: "title:COMBO BREEDER", type: "title", name: "COMBO BREEDER", val: "COMBO BREEDER", rarity: "uncommon" },
   // Rare
   { id: "title:TANKS COMMANDER", type: "title", name: "TANKS COMMANDER", val: "TANKS COMMANDER", rarity: "rare" },
   { id: "title:COLOR CONNOISSEUR", type: "title", name: "COLOR CONNOISSEUR", val: "COLOR CONNOISSEUR", rarity: "rare" },
   { id: "title:SPEEDRUNNER", type: "title", name: "SPEEDRUNNER", val: "SPEEDRUNNER", rarity: "rare" },
   { id: "title:PIXEL PERFECT", type: "title", name: "PIXEL PERFECT", val: "PIXEL PERFECT", rarity: "rare" },
   { id: "title:ABYSSAL GUARDIAN", type: "title", name: "ABYSSAL GUARDIAN", val: "ABYSSAL GUARDIAN", rarity: "rare" },
+  { id: "title:RETRO RAIDER", type: "title", name: "RETRO RAIDER", val: "RETRO RAIDER", rarity: "rare" },
+  { id: "title:GRID RUNNER", type: "title", name: "GRID RUNNER", val: "GRID RUNNER", rarity: "rare" },
   // Epic
   { id: "title:LOGOS MAESTRO", type: "title", name: "LOGOS MAESTRO", val: "LOGOS MAESTRO", rarity: "epic" },
   { id: "title:ARCADE GLITCHER", type: "title", name: "ARCADE GLITCHER", val: "ARCADE GLITCHER", rarity: "epic" },
@@ -115,6 +146,8 @@ const COSMETICS = [
   { id: "title:LAVA SURFER", type: "title", name: "LAVA SURFER", val: "LAVA SURFER", rarity: "epic" },
   { id: "title:HYPERDRIVE PILOT", type: "title", name: "HYPERDRIVE PILOT", val: "HYPERDRIVE PILOT", rarity: "epic" },
   { id: "title:QUANTUM GLITCHER", type: "title", name: "QUANTUM GLITCHER", val: "QUANTUM GLITCHER", rarity: "epic" },
+  { id: "title:SYNTHWAVE RIDER", type: "title", name: "SYNTHWAVE RIDER", val: "SYNTHWAVE RIDER", rarity: "epic" },
+  { id: "title:GLITCH MONARCH", type: "title", name: "GLITCH MONARCH", val: "GLITCH MONARCH", rarity: "epic" },
   // Legendary
   { id: "title:PLAYHAUS CHAMPION", type: "title", name: "PLAYHAUS CHAMPION", val: "PLAYHAUS CHAMPION", rarity: "legendary" },
   { id: "title:COSMIC DEITY", type: "title", name: "COSMIC DEITY", val: "COSMIC DEITY", rarity: "legendary" },
@@ -122,7 +155,9 @@ const COSMETICS = [
   { id: "title:HIGH SCORE LEGEND", type: "title", name: "HIGH SCORE LEGEND", val: "HIGH SCORE LEGEND", rarity: "legendary" },
   { id: "title:GOLDEN BOY", type: "title", name: "GOLDEN BOY", val: "GOLDEN BOY", rarity: "legendary" },
   { id: "title:MIDAS TOUCH", type: "title", name: "MIDAS TOUCH", val: "MIDAS TOUCH", rarity: "legendary" },
-  { id: "title:DIAMOND HANDS", type: "title", name: "DIAMOND HANDS", val: "DIAMOND HANDS", rarity: "legendary" }
+  { id: "title:DIAMOND HANDS", type: "title", name: "DIAMOND HANDS", val: "DIAMOND HANDS", rarity: "legendary" },
+  { id: "title:THE CHOSEN ONE", type: "title", name: "THE CHOSEN ONE", val: "THE CHOSEN ONE", rarity: "legendary" },
+  { id: "title:INFINITY GAMER", type: "title", name: "INFINITY GAMER", val: "INFINITY GAMER", rarity: "legendary" }
 ];
 
 // Duplicate metal compensation scrap values
