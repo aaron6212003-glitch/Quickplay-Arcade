@@ -182,11 +182,21 @@ export function init(container) {
       else numCount++;
     });
 
-    // Enforce 45% operator ratio: if operators are below 45%, force an operator to drop!
+    // Corridor Guardrails: Keep operators strictly between 25% and 38% of the board!
     const totalTiles = numCount + opCount;
-    let spawnOp = Math.random() < 0.45; // 45% baseline operator spawn rate
-    if (totalTiles > 0 && (opCount / totalTiles) < 0.45) {
-      spawnOp = true;
+    let spawnOp;
+    
+    if (totalTiles > 0) {
+      const opRatio = opCount / totalTiles;
+      if (opRatio < 0.25) {
+        spawnOp = true;  // Too few operators - force an operator!
+      } else if (opRatio > 0.38) {
+        spawnOp = false; // Too many operators - force a number!
+      } else {
+        spawnOp = Math.random() < 0.30; // Perfect corridor: 30% operator chance
+      }
+    } else {
+      spawnOp = Math.random() < 0.30; // Default empty board split
     }
 
     if (spawnOp) {
