@@ -140,3 +140,100 @@ if (dailyNameEl && dailyPlayBtn && dailyEmojiEl) {
     dailyEmojiEl.textContent = game.emoji;
   }
 }
+
+// ── 📖 Arcade Onboarding Tutorial Slideshow ─────────────────────────────────
+const btnHowToPlay = document.getElementById('btn-how-to-play');
+const tutorialModal = document.getElementById('tutorial-modal');
+const btnTutorialClose = document.getElementById('tutorial-close-btn');
+const btnTutorialPrev = document.getElementById('tutorial-prev');
+const btnTutorialNext = document.getElementById('tutorial-next');
+const slides = document.querySelectorAll('.tutorial-slide');
+const dots = document.querySelectorAll('.tutorial-dot');
+
+let currentSlideIdx = 0;
+
+function showSlide(index) {
+  currentSlideIdx = index;
+  
+  // Update slide visibility
+  slides.forEach((slide, i) => {
+    if (i === index) {
+      slide.classList.add('active');
+    } else {
+      slide.classList.remove('active');
+    }
+  });
+
+  // Update dots active status
+  dots.forEach((dot, i) => {
+    if (i === index) {
+      dot.classList.add('active');
+    } else {
+      dot.classList.remove('active');
+    }
+  });
+
+  // Update navigation buttons text & disabled states
+  if (btnTutorialPrev) {
+    btnTutorialPrev.disabled = index === 0;
+  }
+  
+  if (btnTutorialNext) {
+    if (index === slides.length - 1) {
+      btnTutorialNext.textContent = 'Got It! 👍';
+      btnTutorialNext.style.background = 'linear-gradient(135deg, #10B981, #059669)';
+      btnTutorialNext.style.boxShadow = '0 4px 15px rgba(16, 185, 129, 0.3)';
+    } else {
+      btnTutorialNext.textContent = 'Next ▶';
+      btnTutorialNext.style.background = '';
+      btnTutorialNext.style.boxShadow = '';
+    }
+  }
+}
+
+if (btnHowToPlay && tutorialModal) {
+  btnHowToPlay.addEventListener('click', () => {
+    tutorialModal.style.display = 'flex';
+    showSlide(0);
+  });
+}
+
+if (btnTutorialClose) {
+  btnTutorialClose.addEventListener('click', () => {
+    tutorialModal.style.display = 'none';
+  });
+}
+
+// Close on clicking outside the card
+if (tutorialModal) {
+  tutorialModal.addEventListener('click', (e) => {
+    if (e.target === tutorialModal) {
+      tutorialModal.style.display = 'none';
+    }
+  });
+}
+
+if (btnTutorialPrev) {
+  btnTutorialPrev.addEventListener('click', () => {
+    if (currentSlideIdx > 0) {
+      showSlide(currentSlideIdx - 1);
+    }
+  });
+}
+
+if (btnTutorialNext) {
+  btnTutorialNext.addEventListener('click', () => {
+    if (currentSlideIdx < slides.length - 1) {
+      showSlide(currentSlideIdx + 1);
+    } else {
+      tutorialModal.style.display = 'none';
+    }
+  });
+}
+
+// Allow clicking on dots directly
+dots.forEach((dot, i) => {
+  dot.addEventListener('click', () => {
+    showSlide(i);
+  });
+});

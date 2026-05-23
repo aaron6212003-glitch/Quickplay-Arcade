@@ -61,6 +61,7 @@
     <p class="hero__subtitle">Explore rooms full of quick, addictive games made for your daily break.</p>
     <div class="hero__cta-group">
       <a href="#rooms" class="btn btn--primary btn--lg pulse-ring">▶ Enter the Haus</a>
+      <button id="btn-how-to-play" class="btn btn--outline btn--lg" style="border-color: rgba(167, 139, 250, 0.4); color: #C084FC;">📖 How to Play</button>
       <a href="#rooms" class="btn btn--outline btn--lg">Browse Rooms</a>
     </div>
     <p class="hero__social-hook">📱 Play. Screenshot your score. Tag us on TikTok.</p>
@@ -313,6 +314,81 @@
             <div style="font-size: 0.68rem; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px;">Games Played</div>
           </div>
         </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== ONBOARDING HOW-TO-PLAY TUTORIAL MODAL ===== -->
+<div id="tutorial-modal" class="tutorial-overlay" style="display: none;">
+  <div class="tutorial-card">
+    <button id="tutorial-close-btn" class="tutorial-close">✕</button>
+    
+    <!-- Slide 1: Welcome -->
+    <div class="tutorial-slide active" data-index="0">
+      <div class="tutorial-icon">👾</div>
+      <h3 class="tutorial-title">Welcome to Playhaus</h3>
+      <p class="tutorial-text">
+        Welcome to your ultimate daily gaming escape! Playhaus is a premium arcade playground packed with quick, addictive, and double-layered original games.
+      </p>
+      <div class="tutorial-badge-info">Step 1 of 5</div>
+    </div>
+    
+    <!-- Slide 2: Play & Level Up -->
+    <div class="tutorial-slide" data-index="1">
+      <div class="tutorial-icon">🏆</div>
+      <h3 class="tutorial-title">Play & Level Up</h3>
+      <p class="tutorial-text">
+        Play any arcade game to rack up high scores and earn massive **XP**! Leveling up locks in your status, leveling bonuses, and prestigious player badges.
+      </p>
+      <div class="tutorial-badge-info">Step 2 of 5</div>
+    </div>
+    
+    <!-- Slide 3: Coins & Gems -->
+    <div class="tutorial-slide" data-index="2">
+      <div class="tutorial-icon">💎</div>
+      <h3 class="tutorial-title">Coins, Gems & Verification</h3>
+      <p class="tutorial-text">
+        Earn **Coins** dynamically by beating game scores! Claim rare **Gems** by verifying your email in the Locker room (+100 Gems bonus) or using the Gems Store.
+      </p>
+      <div class="tutorial-badge-info">Step 3 of 5</div>
+    </div>
+    
+    <!-- Slide 4: Vending Machine Gacha -->
+    <div class="tutorial-slide" data-index="3">
+      <div class="tutorial-icon">🕹️</div>
+      <h3 class="tutorial-title">Capsule Vending Machine</h3>
+      <p class="tutorial-text">
+        Spend your Coins & Gems in the **Locker Room** to spin the legendary **Capsule V Vending Machine**! Spin to unlock rare borders, avatar rings, and slogan tags.
+      </p>
+      <div class="tutorial-badge-info">Step 4 of 5</div>
+    </div>
+    
+    <!-- Slide 5: Customize Gamer Card -->
+    <div class="tutorial-slide" data-index="4">
+      <div class="tutorial-icon">🃏</div>
+      <h3 class="tutorial-title">Your Custom Gamer Card</h3>
+      <p class="tutorial-text">
+        Equip your unlocked cosmetics, choose your favorite game, and **upload your own custom profile picture**! Your custom card displays live on global leaderboards.
+      </p>
+      <div class="tutorial-badge-info">Step 5 of 5</div>
+    </div>
+    
+    <!-- Footer Controls -->
+    <div class="tutorial-footer">
+      <!-- Dots -->
+      <div class="tutorial-dots">
+        <div class="tutorial-dot active" data-index="0"></div>
+        <div class="tutorial-dot" data-index="1"></div>
+        <div class="tutorial-dot" data-index="2"></div>
+        <div class="tutorial-dot" data-index="3"></div>
+        <div class="tutorial-dot" data-index="4"></div>
+      </div>
+      
+      <!-- Buttons -->
+      <div class="tutorial-nav">
+        <button id="tutorial-prev" class="tutorial-btn tutorial-btn--back" disabled>◀ Back</button>
+        <button id="tutorial-next" class="tutorial-btn tutorial-btn--next">Next ▶</button>
       </div>
     </div>
   </div>

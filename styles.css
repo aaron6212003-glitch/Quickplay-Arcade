@@ -2223,4 +2223,207 @@ body {
   padding-right: 45px !important;
 }
 
+/* ==========================================================================
+   📖 ArcOnboarding Tutorial Slideshow
+   ========================================================================== */
+
+.tutorial-overlay {
+  position: fixed !important;
+  inset: 0 !important;
+  background: rgba(5, 8, 17, 0.9) !important;
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+  z-index: 1300 !important;
+  display: none;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 20px !important;
+  opacity: 0;
+  animation: authFadeIn 0.3s ease forwards !important;
+}
+
+.tutorial-card {
+  background: rgba(15, 23, 42, 0.85) !important;
+  backdrop-filter: blur(25px) !important;
+  -webkit-backdrop-filter: blur(25px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  padding: 40px 30px !important;
+  border-radius: 28px !important;
+  width: 100% !important;
+  max-width: 480px !important;
+  text-align: center !important;
+  position: relative !important;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6), inset 0 1px 1px rgba(255, 255, 255, 0.1) !important;
+  animation: authModalSlideUp 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  min-height: 480px !important;
+}
+
+.tutorial-close {
+  position: absolute !important;
+  top: 15px !important;
+  right: 15px !important;
+  background: rgba(255, 255, 255, 0.04) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  color: #64748b !important;
+  font-size: 1.1rem !important;
+  cursor: pointer !important;
+  width: 32px !important;
+  height: 32px !important;
+  border-radius: 50% !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  transition: all 0.25s ease !important;
+  z-index: 20 !important;
+}
+.tutorial-close:hover {
+  background: rgba(255, 255, 255, 0.1) !important;
+  color: #ffffff !important;
+  transform: rotate(90deg) !important;
+}
+
+/* Slide elements styling */
+.tutorial-slide {
+  display: none;
+  flex-direction: column !important;
+  align-items: center !important;
+  flex: 1 !important;
+  width: 100% !important;
+  animation: tutorialSlideFade 0.3s ease forwards !important;
+}
+.tutorial-slide.active {
+  display: flex !important;
+}
+
+@keyframes tutorialSlideFade {
+  from { opacity: 0; transform: scale(0.96); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+.tutorial-icon {
+  font-size: 4.5rem !important;
+  margin-bottom: 20px !important;
+  filter: drop-shadow(0 0 20px rgba(167, 139, 250, 0.3)) !important;
+  animation: floatIcon 3s ease-in-out infinite !important;
+}
+@keyframes floatIcon {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-10px); }
+}
+
+.tutorial-title {
+  font-family: 'Outfit', sans-serif !important;
+  font-size: 1.8rem !important;
+  font-weight: 900 !important;
+  margin-bottom: 12px !important;
+  background: linear-gradient(135deg, #ffffff, #c084fc) !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  letter-spacing: -0.5px !important;
+  text-align: center !important;
+}
+
+.tutorial-text {
+  color: #94a3b8 !important;
+  font-size: 0.98rem !important;
+  line-height: 1.6 !important;
+  margin-bottom: 20px !important;
+  font-weight: 500 !important;
+  text-align: center !important;
+}
+
+.tutorial-badge-info {
+  background: rgba(167, 139, 250, 0.1) !important;
+  border: 1px solid rgba(167, 139, 250, 0.15) !important;
+  color: #c084fc !important;
+  padding: 8px 16px !important;
+  border-radius: 12px !important;
+  font-size: 0.82rem !important;
+  font-weight: 800 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 1px !important;
+  margin-top: auto !important;
+  margin-bottom: 10px !important;
+}
+
+/* Footer controls */
+.tutorial-footer {
+  width: 100% !important;
+  margin-top: auto !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  gap: 15px !important;
+}
+
+.tutorial-dots {
+  display: flex !important;
+  gap: 8px !important;
+}
+.tutorial-dot {
+  width: 8px !important;
+  height: 8px !important;
+  border-radius: 50% !important;
+  background: rgba(255, 255, 255, 0.15) !important;
+  cursor: pointer !important;
+  transition: all 0.25s ease !important;
+}
+.tutorial-dot.active {
+  background: #a78bfa !important;
+  width: 24px !important;
+  border-radius: 4px !important;
+  box-shadow: 0 0 10px rgba(167, 139, 250, 0.5) !important;
+}
+
+.tutorial-nav {
+  display: flex !important;
+  justify-content: space-between !important;
+  width: 100% !important;
+  gap: 15px !important;
+}
+
+.tutorial-btn {
+  flex: 1 !important;
+  padding: 12px 20px !important;
+  border-radius: 12px !important;
+  font-family: 'Outfit', sans-serif !important;
+  font-size: 0.95rem !important;
+  font-weight: 800 !important;
+  cursor: pointer !important;
+  border: none !important;
+  transition: all 0.25s ease !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 6px !important;
+}
+.tutorial-btn--back {
+  background: rgba(255, 255, 255, 0.04) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  color: #94a3b8 !important;
+}
+.tutorial-btn--back:hover {
+  background: rgba(255, 255, 255, 0.08) !important;
+  color: #ffffff !important;
+}
+.tutorial-btn--back:disabled {
+  opacity: 0.3 !important;
+  cursor: not-allowed !important;
+}
+.tutorial-btn--next {
+  background: linear-gradient(135deg, #a78bfa, #818cf8) !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 15px rgba(167, 139, 250, 0.3) !important;
+}
+.tutorial-btn--next:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 8px 24px rgba(167, 139, 250, 0.45) !important;
+}
+.tutorial-btn--next:active {
+  transform: translateY(0) scale(0.98) !important;
+}
+
 
