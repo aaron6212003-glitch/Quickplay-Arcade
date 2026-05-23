@@ -66,9 +66,50 @@ if (game) {
     
     // Format rules HTML to leverage pre-screen layout classes
     let rulesHtml = game.rules || '';
-    rulesHtml = rulesHtml
-      .replace(/style='display:\s*flex;\s*gap:\s*12px;'/g, 'class="pre-screen-list-item"')
-      .replace(/style="display:\s*flex;\s*gap:\s*12px;"/g, 'class="pre-screen-list-item"');
+    if (gameId === 'tanks') {
+      rulesHtml = `
+        <div style="background: rgba(255,255,255,0.03); padding: 14px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.06); margin-bottom: 12px; width: 100%; box-sizing: border-box; text-align: left;">
+          <div style="font-weight: 900; color: #38BDF8; font-size: 0.95rem; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.5px; display: flex; align-items: center; gap: 6px;">💻 Desktop Controls</div>
+          <div class="pre-screen-list-item" style="margin-bottom: 8px;">
+            <span>🕹️</span>
+            <div>Drive: <strong>WASD</strong> or <strong>Arrow Keys</strong></div>
+          </div>
+          <div class="pre-screen-list-item" style="margin-bottom: 8px;">
+            <span>🖱️</span>
+            <div>Aim & Shoot: <strong>Move Mouse</strong> and <strong>Left Click</strong></div>
+          </div>
+          <div class="pre-screen-list-item">
+            <span>💣</span>
+            <div>Landmine: Press <strong>Spacebar</strong></div>
+          </div>
+        </div>
+        
+        <div style="background: rgba(255,255,255,0.03); padding: 14px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.06); width: 100%; box-sizing: border-box; text-align: left;">
+          <div style="font-weight: 900; color: #a78bfa; font-size: 0.95rem; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.5px; display: flex; align-items: center; gap: 6px;">📱 Mobile Controls</div>
+          <div class="pre-screen-list-item" style="margin-bottom: 8px;">
+            <span>🕹️</span>
+            <div>Drive: Use the <strong>Virtual Joystick</strong> in the bottom panel</div>
+          </div>
+          <div class="pre-screen-list-item" style="margin-bottom: 8px;">
+            <span>👆</span>
+            <div>Aim & Shoot: <strong>Tap anywhere</strong> on the play board!</div>
+          </div>
+          <div class="pre-screen-list-item">
+            <span>💣</span>
+            <div>Landmine: Tap the <strong>MINE Button</strong> in the bottom panel</div>
+          </div>
+        </div>
+        
+        <div class="pre-screen-list-item" style="margin-top: 15px; text-align: left; width: 100%;">
+          <span>🔄</span>
+          <div>Bullets bounce off walls <strong>ONCE</strong>! Use bounce shots around corners to catch enemies off guard.</div>
+        </div>
+      `;
+    } else {
+      rulesHtml = rulesHtml
+        .replace(/style='display:\s*flex;\s*gap:\s*12px;'/g, 'class="pre-screen-list-item"')
+        .replace(/style="display:\s*flex;\s*gap:\s*12px;"/g, 'class="pre-screen-list-item"');
+    }
       
     preScreen.innerHTML = `
       <div class="pre-screen-icon">${game.emoji}</div>

@@ -1,23 +1,29 @@
 export function initTanks(container) {
-  // Setup Canvas
+  // Setup Canvas (Taller and narrower arcade ratio)
   const canvas = document.createElement('canvas');
-  canvas.width = 800;
-  canvas.height = 600;
+  canvas.width = 550;
+  canvas.height = 700;
   canvas.style.width = '100%';
-  canvas.style.maxWidth = '800px';
+  canvas.style.maxWidth = '550px';
   canvas.style.height = 'auto';
   canvas.style.display = 'block';
   canvas.style.margin = '0 auto';
   canvas.style.background = '#e7e5e4'; // Corkboard/paper background
-  canvas.style.border = '12px solid #78350f'; // Thick wooden frame
-  canvas.style.borderRadius = '8px';
+  canvas.style.border = '8px solid #78350f'; // Solid wooden arcade frame
+  canvas.style.borderRadius = '8px 8px 8px 8px'; // Base rounded border
   canvas.style.boxShadow = 'inset 0 0 20px rgba(0,0,0,0.3), 0 10px 20px rgba(0,0,0,0.5)';
   canvas.style.cursor = 'none'; // Hide default cursor, draw custom crosshair
   
-  // Wrapper for UI
+  // Wrapper for UI (Flex container for vertical DOM flow stacking)
   const wrapper = document.createElement('div');
   wrapper.style.position = 'relative';
   wrapper.style.textAlign = 'center';
+  wrapper.style.display = 'flex';
+  wrapper.style.flexDirection = 'column';
+  wrapper.style.alignItems = 'center';
+  wrapper.style.width = '100%';
+  wrapper.style.maxWidth = '550px';
+  wrapper.style.margin = '0 auto';
   
   // Score display
   const scoreDisplay = document.createElement('div');
@@ -39,14 +45,15 @@ export function initTanks(container) {
   livesDisplay.style.fontWeight = '900';
   livesDisplay.style.color = '#dc2626';
   livesDisplay.style.fontFamily = 'monospace';
-  livesDisplay.innerText = '♥♥♥';
+  livesDisplay.innerText = '♥♥•';
 
-  // Level display
+  // Level display (Centered at the top to clear room for bottom panel)
   const levelDisplay = document.createElement('div');
   levelDisplay.style.position = 'absolute';
-  levelDisplay.style.bottom = '10px';
-  levelDisplay.style.left = '20px';
-  levelDisplay.style.fontSize = '20px';
+  levelDisplay.style.top = '10px';
+  levelDisplay.style.left = '50%';
+  levelDisplay.style.transform = 'translateX(-50%)';
+  levelDisplay.style.fontSize = '22px';
   levelDisplay.style.fontWeight = '900';
   levelDisplay.style.color = '#78350f';
   levelDisplay.style.fontFamily = 'monospace';
@@ -57,19 +64,24 @@ export function initTanks(container) {
   wrapper.appendChild(livesDisplay);
   wrapper.appendChild(levelDisplay);
 
-  // Mobile Controls Overlay
+  // Mobile Controls Overlay (Dedicated panel below the canvas, blending into the wooden frame!)
   const mobileControls = document.createElement('div');
-  mobileControls.style.display = 'none'; // hidden until touch
-  mobileControls.style.position = 'absolute';
-  mobileControls.style.inset = '0';
-  mobileControls.style.pointerEvents = 'none';
+  mobileControls.style.display = 'none'; // hidden until touch trigger
+  mobileControls.style.width = '100%';
+  mobileControls.style.maxWidth = '550px';
+  mobileControls.style.height = '130px';
+  mobileControls.style.background = 'linear-gradient(135deg, #1e1e2e, #11111b)';
+  mobileControls.style.border = '8px solid #78350f';
+  mobileControls.style.borderTop = 'none'; // Blends seamlessly under the canvas frame
+  mobileControls.style.borderRadius = '0 0 12px 12px';
+  mobileControls.style.boxSizing = 'border-box';
+  mobileControls.style.alignItems = 'center';
+  mobileControls.style.justifyContent = 'space-between';
+  mobileControls.style.pointerEvents = 'auto';
+  mobileControls.style.boxShadow = '0 10px 20px rgba(0,0,0,0.5)';
+  
   mobileControls.innerHTML = `
     <style>
-      @keyframes pulseGlow {
-        0% { transform: scale(1); box-shadow: 0 4px 12px rgba(239,68,68,0.4); }
-        50% { transform: scale(1.06); box-shadow: 0 4px 22px rgba(239,68,68,0.7); }
-        100% { transform: scale(1); box-shadow: 0 4px 12px rgba(239,68,68,0.4); }
-      }
       .tanks-mobile-btn {
         touch-action: none;
         border: 3px solid #ffffff;
@@ -87,12 +99,16 @@ export function initTanks(container) {
         transform: scale(0.9) !important;
       }
     </style>
-    <div id="joy-base" style="position:absolute; bottom:20px; left:20px; width:90px; height:90px; background:rgba(15,23,42,0.4); backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px); border:2px solid rgba(255,255,255,0.15); border-radius:50%; pointer-events:auto; touch-action:none; box-shadow: 0 6px 20px rgba(0,0,0,0.3);">
-      <div id="joy-stick" style="position:absolute; top:27px; left:27px; width:36px; height:36px; background:rgba(255,255,255,0.7); border-radius:50%; box-shadow:0 4px 8px rgba(0,0,0,0.4); transition: transform 0.05s ease-out;"></div>
+    <!-- Virtual Joystick Area (Left Column) -->
+    <div id="joy-container" style="flex:1; display:flex; align-items:center; justify-content:flex-start; padding-left:30px; height:100%;">
+      <div id="joy-base" style="position:relative; width:90px; height:90px; background:rgba(255,255,255,0.08); border:2px solid rgba(255,255,255,0.15); border-radius:50%; touch-action:none; box-shadow:inset 0 0 10px rgba(0,0,0,0.5);">
+        <div id="joy-stick" style="position:absolute; top:27px; left:27px; width:36px; height:36px; background:#38BDF8; border:2px solid #ffffff; border-radius:50%; box-shadow:0 4px 8px rgba(0,0,0,0.4); transition: transform 0.05s ease-out;"></div>
+      </div>
     </div>
-    <div style="position:absolute; bottom:20px; right:20px; pointer-events:auto; display:flex; gap:12px; align-items:center;">
-      <button id="btn-mine" class="tanks-mobile-btn" style="width:50px; height:50px; border-radius:50%; background:rgba(245,158,11,0.65); font-size:0.8rem; letter-spacing:0.5px;">MINE</button>
-      <button id="btn-shoot" class="tanks-mobile-btn" style="width:70px; height:70px; border-radius:50%; background:rgba(239,68,68,0.7); font-size:1rem; letter-spacing:0.5px; animation: pulseGlow 2s infinite;">FIRE 🔥</button>
+    
+    <!-- Action Area (Right Column) -->
+    <div id="action-container" style="flex:1; display:flex; align-items:center; justify-content:flex-end; padding-right:35px; height:100%;">
+      <button id="btn-mine" class="tanks-mobile-btn" style="width:70px; height:70px; border-radius:50%; background:linear-gradient(135deg, #F59E0B, #D97706); border:3px solid #ffffff; font-size:0.95rem; letter-spacing:0.5px; box-shadow: 0 6px 15px rgba(245,158,11,0.4);">MINE 💣</button>
     </div>
   `;
   wrapper.appendChild(mobileControls);
@@ -938,84 +954,49 @@ export function initTanks(container) {
 
   // Mobile Touch Controls
   let joyRect;
-  let lastTouchX = 0;
-  let lastTouchY = 0;
-  let aimTouchId = null;
-  let touchStartX = 0;
-  let touchStartY = 0;
 
   const enableMobileUI = () => {
     if (!isMobile) {
       isMobile = true;
-      mobileControls.style.display = 'block';
+      mobileControls.style.display = 'flex'; // Use flex layout for bottom bar console
+      canvas.style.borderRadius = '8px 8px 0 0'; // Round top corners of canvas to match arcade look
     }
   };
   window.addEventListener('touchstart', enableMobileUI, {passive: true});
 
-  // Trackpad relative dragging to move crosshair smoothly
+  // Tap-to-fire on the battlefield canvas absolutely
   canvas.addEventListener('touchstart', (e) => {
     enableMobileUI();
-    if (!isGameOver && aimTouchId === null) {
-      const touch = e.changedTouches[0];
-      aimTouchId = touch.identifier;
-      lastTouchX = touch.clientX;
-      lastTouchY = touch.clientY;
-      touchStartX = touch.clientX;
-      touchStartY = touch.clientY;
+    if (!isGameOver) {
+      const rect = canvas.getBoundingClientRect();
+      const scaleX = canvas.width / rect.width;
+      const scaleY = canvas.height / rect.height;
+      for (let i = 0; i < e.changedTouches.length; i++) {
+        const touch = e.changedTouches[i];
+        mouseX = (touch.clientX - rect.left) * scaleX;
+        mouseY = (touch.clientY - rect.top) * scaleY;
+        shoot(player, mouseX, mouseY);
+      }
     }
   }, {passive: false});
 
   canvas.addEventListener('touchmove', (e) => {
     if (isMobile) e.preventDefault();
     if (isGameOver) return;
-
     const rect = canvas.getBoundingClientRect();
     const scaleX = canvas.width / rect.width;
     const scaleY = canvas.height / rect.height;
-
     for (let i = 0; i < e.changedTouches.length; i++) {
       const touch = e.changedTouches[i];
-      if (touch.identifier === aimTouchId) {
-        const deltaX = touch.clientX - lastTouchX;
-        const deltaY = touch.clientY - lastTouchY;
-
-        // Premium sensitivity factor of 1.8 for fast, professional control
-        const sensitivity = 1.8;
-
-        mouseX += deltaX * scaleX * sensitivity;
-        mouseY += deltaY * scaleY * sensitivity;
-
-        // Keep inside canvas bounds
-        mouseX = Math.max(0, Math.min(canvas.width, mouseX));
-        mouseY = Math.max(0, Math.min(canvas.height, mouseY));
-
-        lastTouchX = touch.clientX;
-        lastTouchY = touch.clientY;
-      }
+      mouseX = (touch.clientX - rect.left) * scaleX;
+      mouseY = (touch.clientY - rect.top) * scaleY;
     }
   }, {passive: false});
-
-  const endAimTouch = (e) => {
-    for (let i = 0; i < e.changedTouches.length; i++) {
-      const touch = e.changedTouches[i];
-      if (touch.identifier === aimTouchId) {
-        // If movement was extremely minor (less than 8px), treat it as a quick TAP-SHOOT!
-        const totalDist = Math.hypot(touch.clientX - touchStartX, touch.clientY - touchStartY);
-        if (totalDist < 8 && !isGameOver) {
-          shoot(player, mouseX, mouseY);
-        }
-        aimTouchId = null;
-      }
-    }
-  };
-  canvas.addEventListener('touchend', endAimTouch);
-  canvas.addEventListener('touchcancel', endAimTouch);
 
   // Joystick & button handlers
   const joyBase = document.getElementById('joy-base');
   const joyStick = document.getElementById('joy-stick');
   const btnMine = document.getElementById('btn-mine');
-  const btnShoot = document.getElementById('btn-shoot');
 
   if (joyBase && joyStick) {
     function updateJoy(touch) {
@@ -1075,15 +1056,6 @@ export function initTanks(container) {
       e.stopPropagation();
       enableMobileUI();
       if (!isGameOver) dropMine(player);
-    }, {passive: false});
-  }
-
-  if (btnShoot) {
-    btnShoot.addEventListener('touchstart', (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      enableMobileUI();
-      if (!isGameOver) shoot(player, mouseX, mouseY);
     }, {passive: false});
   }
 
