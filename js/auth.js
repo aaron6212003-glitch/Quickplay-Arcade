@@ -15,6 +15,21 @@ const inputEmail = document.getElementById('auth-email');
 const inputPassword = document.getElementById('auth-password');
 const authContainer = document.getElementById('auth-container');
 
+// Toggle Password Visibility Logic
+const btnTogglePassword = document.getElementById('auth-toggle-password');
+function resetPasswordVisibility() {
+  if (inputPassword) inputPassword.setAttribute('type', 'password');
+  if (btnTogglePassword) btnTogglePassword.textContent = '👁️';
+}
+
+if (btnTogglePassword && inputPassword) {
+  btnTogglePassword.addEventListener('click', () => {
+    const isPassword = inputPassword.getAttribute('type') === 'password';
+    inputPassword.setAttribute('type', isPassword ? 'text' : 'password');
+    btnTogglePassword.textContent = isPassword ? '🙈' : '👁️';
+  });
+}
+
 let isSignupMode = false;
 
 // Toggle Modal
@@ -22,12 +37,14 @@ if (btnLoginTrigger) {
   btnLoginTrigger.addEventListener('click', () => {
     modal.style.display = 'flex';
     errorMsg.style.display = 'none';
+    resetPasswordVisibility();
   });
 }
 
 if (btnClose) {
   btnClose.addEventListener('click', () => {
     modal.style.display = 'none';
+    resetPasswordVisibility();
   });
 }
 
@@ -125,6 +142,7 @@ if (btnSubmit) {
       inputEmail.value = '';
       inputPassword.value = '';
       inputUsername.value = '';
+      resetPasswordVisibility();
       
       // Prevent browser auto-fill from leaking into the search bar
       setTimeout(() => {
@@ -176,7 +194,10 @@ if (btnGoogleLogin) {
         });
       }
       
-      if (modal) modal.style.display = 'none';
+      if (modal) {
+        modal.style.display = 'none';
+        resetPasswordVisibility();
+      }
     } catch (error) {
       console.error(error);
       if (errorMsg) {

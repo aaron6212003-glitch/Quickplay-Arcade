@@ -239,7 +239,10 @@
     
     <input type="text" id="auth-username" class="auth-input" placeholder="Username (for new signups)" style="display: none;" />
     <input type="email" id="auth-email" class="auth-input" placeholder="Email Address" />
-    <input type="password" id="auth-password" class="auth-input" placeholder="Password" />
+    <div class="auth-password-container">
+      <input type="password" id="auth-password" class="auth-input" placeholder="Password" />
+      <button id="auth-toggle-password" class="auth-password-toggle" type="button" aria-label="Toggle Password Visibility">👁️</button>
+    </div>
     
     <button id="auth-submit" class="auth-submit-btn">Log In</button>
  
