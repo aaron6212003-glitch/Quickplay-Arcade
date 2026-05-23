@@ -52,58 +52,101 @@ if (game) {
     });
   }
 
-  // Load specific game logic if it exists
+  // Load specific game logic if it exists (using a unified pre-screen start card)
   const gameContainer = document.getElementById('game-container');
   const comingSoon = document.getElementById('coming-soon');
+  const preScreen = document.getElementById('game-pre-screen');
   
-  if (gameId === 'color-guess') {
+  const activeGames = ['color-guess', 'higher-lower', 'word-rush', 'word-gravity', 'math-avalanche', 'tanks', 'cyber-bot', 'neon-plinko'];
+  
+  if (activeGames.includes(gameId)) {
     comingSoon.style.display = 'none';
-    gameContainer.style.display = 'block';
-    import('./games/color-guess.js').then(module => {
-      module.init(gameContainer);
+    gameContainer.style.display = 'none';
+    preScreen.style.display = 'flex';
+    
+    // Format rules HTML to leverage pre-screen layout classes
+    let rulesHtml = game.rules || '';
+    rulesHtml = rulesHtml
+      .replace(/style='display:\s*flex;\s*gap:\s*12px;'/g, 'class="pre-screen-list-item"')
+      .replace(/style="display:\s*flex;\s*gap:\s*12px;"/g, 'class="pre-screen-list-item"');
+      
+    preScreen.innerHTML = `
+      <div class="pre-screen-icon">${game.emoji}</div>
+      <h2 class="pre-screen-title">${game.title}</h2>
+      <p class="pre-screen-desc">${game.description}</p>
+      
+      <div class="pre-screen-divider"></div>
+      
+      <h3 class="pre-screen-section-title">🕹️ How to Play</h3>
+      <div class="pre-screen-list">
+        ${rulesHtml}
+      </div>
+      
+      <div class="pre-screen-divider"></div>
+      
+      <h3 class="pre-screen-section-title">🪙 How to Score</h3>
+      <div class="pre-screen-list">
+        <div class="pre-screen-list-item">
+          <span>⭐</span>
+          <div>Earn exactly <strong>+10 XP</strong> per successful action (capped at 100 XP max).</div>
+        </div>
+        <div class="pre-screen-list-item">
+          <span>🪙</span>
+          <div>Earn exactly <strong>+10 Coins</strong> per successful action (capped at 100 Coins max).</div>
+        </div>
+        ${isDaily ? `
+        <div class="pre-screen-list-item" style="color: #F59E0B; border: 1px dashed rgba(245,158,11,0.3); padding: 10px 14px; border-radius: 12px; background: rgba(245,158,11,0.05); margin-top: 5px; width: 100%; box-sizing: border-box;">
+          <span>🔥</span>
+          <div><strong>Daily Challenge Bonus:</strong> Get <strong>+25 XP</strong> & <strong>+15 Coins</strong> for finishing this run!</div>
+        </div>
+        ` : ''}
+      </div>
+      
+      <button class="pre-screen-start-btn" id="start-game-btn">Start Game</button>
+    `;
+    
+    document.getElementById('start-game-btn').addEventListener('click', () => {
+      preScreen.style.display = 'none';
+      gameContainer.style.display = 'block';
+      
+      if (gameId === 'color-guess') {
+        import('./games/color-guess.js').then(module => {
+          module.init(gameContainer);
+        });
+      } else if (gameId === 'higher-lower') {
+        import('./games/higher-lower.js').then(module => {
+          module.init(gameContainer);
+        });
+      } else if (gameId === 'word-rush') {
+        import('./games/word-rush.js').then(module => {
+          module.init(gameContainer);
+        });
+      } else if (gameId === 'word-gravity') {
+        import('./games/word-gravity.js').then(module => {
+          module.init(gameContainer);
+        });
+      } else if (gameId === 'math-avalanche') {
+        import('./games/math-avalanche.js').then(module => {
+          module.init(gameContainer);
+        });
+      } else if (gameId === 'tanks') {
+        import('./games/tanks.js').then(module => {
+          module.initTanks(gameContainer);
+        });
+      } else if (gameId === 'cyber-bot') {
+        import('./games/cyber-bot.js').then(module => {
+          module.init(gameContainer);
+        });
+      } else if (gameId === 'neon-plinko') {
+        import('./games/neon-plinko.js').then(module => {
+          module.init(gameContainer);
+        });
+      }
     });
-  } else if (gameId === 'higher-lower') {
-    comingSoon.style.display = 'none';
-    gameContainer.style.display = 'block';
-    import('./games/higher-lower.js').then(module => {
-      module.init(gameContainer);
-    });
-  } else if (gameId === 'word-rush') {
-    comingSoon.style.display = 'none';
-    gameContainer.style.display = 'block';
-    import('./games/word-rush.js').then(module => {
-      module.init(gameContainer);
-    });
-  } else if (gameId === 'word-gravity') {
-    comingSoon.style.display = 'none';
-    gameContainer.style.display = 'block';
-    import('./games/word-gravity.js').then(module => {
-      module.init(gameContainer);
-    });
-  } else if (gameId === 'math-avalanche') {
-    comingSoon.style.display = 'none';
-    gameContainer.style.display = 'block';
-    import('./games/math-avalanche.js').then(module => {
-      module.init(gameContainer);
-    });
-  } else if (gameId === 'tanks') {
-    comingSoon.style.display = 'none';
-    gameContainer.style.display = 'block';
-    import('./games/tanks.js').then(module => {
-      module.initTanks(gameContainer);
-    });
-  } else if (gameId === 'cyber-bot') {
-    comingSoon.style.display = 'none';
-    gameContainer.style.display = 'block';
-    import('./games/cyber-bot.js').then(module => {
-      module.init(gameContainer);
-    });
-  } else if (gameId === 'neon-plinko') {
-    comingSoon.style.display = 'none';
-    gameContainer.style.display = 'block';
-    import('./games/neon-plinko.js').then(module => {
-      module.init(gameContainer);
-    });
+  } else {
+    comingSoon.style.display = 'block';
+    gameContainer.style.display = 'none';
+    preScreen.style.display = 'none';
   }
 
 } else {

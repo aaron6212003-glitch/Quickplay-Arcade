@@ -3,6 +3,55 @@ import { getDailyGame, getYesterdayDateString } from './daily.js';
 
 let activeRankingsTab = 'daily'; // 'daily' or 'alltime'
 
+// --- CLASH ROYALE LEVEL PROGRESSION CALCULATOR ---
+function getLevelData(totalXP) {
+  const levels = [
+    { lvl: 1, xpToNext: 100 },
+    { lvl: 2, xpToNext: 250 },
+    { lvl: 3, xpToNext: 500 },
+    { lvl: 4, xpToNext: 1000 },
+    { lvl: 5, xpToNext: 2500 },
+    { lvl: 6, xpToNext: 5000 },
+    { lvl: 7, xpToNext: 10000 },
+    { lvl: 8, xpToNext: 25000 }
+  ];
+
+  let currentLvl = 1;
+  let accumulatedXP = 0;
+  let xpNeeded = 100;
+
+  for (let i = 0; i < levels.length; i++) {
+    const lvlInfo = levels[i];
+    if (totalXP >= accumulatedXP + lvlInfo.xpToNext) {
+      accumulatedXP += lvlInfo.xpToNext;
+      currentLvl = lvlInfo.lvl + 1;
+    } else {
+      xpNeeded = lvlInfo.xpToNext;
+      break;
+    }
+  }
+
+  if (currentLvl >= 9) {
+    const extraXP = totalXP - accumulatedXP;
+    const extraLevels = Math.floor(extraXP / 50000);
+    currentLvl = 9 + extraLevels;
+    accumulatedXP = accumulatedXP + (extraLevels * 50000);
+    xpNeeded = 50000;
+  }
+
+  const xpProgress = totalXP - accumulatedXP;
+  const xpPercent = Math.min(100, Math.max(0, (xpProgress / xpNeeded) * 100));
+
+  return {
+    level: currentLvl,
+    xpForCurrentLevel: accumulatedXP,
+    xpForNextLevel: accumulatedXP + xpNeeded,
+    xpNeeded: xpNeeded,
+    xpProgress: xpProgress,
+    xpPercent: xpPercent
+  };
+}
+
 // --- PREMIUM TOAST NOTIFICATION ---
 function showToast(message, type = 'success') {
   let toastContainer = document.getElementById('toast-container');
@@ -122,20 +171,23 @@ window.saveScore = async function(gameName, score) {
       dateString: dateString
     });
     
-    // 2. Map raw score to normalized XP (Max 100) and Coins (Max 50) using balanced game multipliers
+    // 2. Map raw score to normalized XP and Coins (exactly +10 XP/Coins per action, capped at 100 per match)
     const gameConfigs = {
-      'Higher or Lower': { xpMult: 5.0, coinMult: 2.5, maxXp: 100, maxCoins: 50 },
-      'Word Rush':       { xpMult: 4.0, coinMult: 2.0, maxXp: 100, maxCoins: 50 },
-      'Color Guess':     { xpMult: 0.15, coinMult: 0.075, maxXp: 100, maxCoins: 50 },
-      'Math Avalanche':  { xpMult: 0.08, coinMult: 0.04,  maxXp: 100, maxCoins: 50 },
-      'Word Gravity':    { xpMult: 0.08, coinMult: 0.04,  maxXp: 100, maxCoins: 50 },
-      'Toy Tanks':       { xpMult: 0.02, coinMult: 0.01,  maxXp: 100, maxCoins: 50 }
+      'Higher or Lower': { mult: 10.0, max: 100 },
+      'Word Rush':       { mult: 10.0, max: 100 },
+      'Color Guess':     { mult: 0.25, max: 100 }, // score / 4
+      'Math Avalanche':  { mult: 0.3333, max: 100 }, // score / 3
+      'Word Gravity':    { mult: 0.3333, max: 100 }, // score / 3
+      'Toy Tanks':       { mult: 0.1, max: 100 }  // score / 10
     };
 
-    const config = gameConfigs[gameName] || { xpMult: 0.1, coinMult: 0.05, maxXp: 100, maxCoins: 50 };
+    const config = gameConfigs[gameName] || { mult: 0.1, max: 100 };
 
-    let xpEarned = Math.max(5, Math.min(config.maxXp, Math.round(score * config.xpMult)));
-    let coinsEarned = Math.max(5, Math.min(config.maxCoins, Math.round(score * config.coinMult)));
+    let baseEarned = Math.round(score * config.mult);
+    
+    // Ensure players get at least 10 XP/Coins if score > 0, otherwise 0
+    let xpEarned = score > 0 ? Math.max(10, Math.min(config.max, baseEarned)) : 0;
+    let coinsEarned = score > 0 ? Math.max(10, Math.min(config.max, baseEarned)) : 0;
 
     if (isDaily) {
       xpEarned += 25; // +25 XP Bonus for daily challenge run
@@ -390,17 +442,12 @@ window.showPlayerCard = async function(uid, fallbackUsername, fallbackScore) {
   statGames.innerText = gamesPlayed.toLocaleString();
   cardTitleBadge.innerText = activeTitle;
 
-  // Compute gamer level progression math
-  const level = Math.floor(Math.sqrt(totalPoints / 10)) + 1;
-  const xpForCurrentLevel = Math.pow(level - 1, 2) * 10;
-  const xpForNextLevel = Math.pow(level, 2) * 10;
-  const xpNeeded = xpForNextLevel - xpForCurrentLevel;
-  const xpProgress = totalPoints - xpForCurrentLevel;
-  const xpPercent = Math.min(100, Math.max(0, (xpProgress / xpNeeded) * 100));
-
-  profileLevel.innerText = `LVL ${level}`;
-  xpProgressBar.style.width = `${xpPercent}%`;
-  xpProgressText.innerText = `${xpProgress} / ${xpNeeded} XP to next level`;
+  // Compute gamer level progression math (Clash Royale slower quadratic curve)
+  const lvlData = getLevelData(totalPoints);
+ 
+  profileLevel.innerText = `LVL ${lvlData.level}`;
+  xpProgressBar.style.width = `${lvlData.xpPercent}%`;
+  xpProgressText.innerText = `${lvlData.xpProgress} / ${lvlData.xpNeeded} XP to next level`;
 
   // Dynamically color coordinate Slogan Badge based on rarity levels
   let badgeColor = "#94a3b8"; // common

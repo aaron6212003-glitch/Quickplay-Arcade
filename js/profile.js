@@ -42,6 +42,55 @@ const btnEditModalSave = document.getElementById('btn-edit-modal-save');
 let currentUserDoc = null;
 let selectedAvatar = "👾"; // default
 
+// --- CLASH ROYALE LEVEL PROGRESSION CALCULATOR ---
+function getLevelData(totalXP) {
+  const levels = [
+    { lvl: 1, xpToNext: 100 },
+    { lvl: 2, xpToNext: 250 },
+    { lvl: 3, xpToNext: 500 },
+    { lvl: 4, xpToNext: 1000 },
+    { lvl: 5, xpToNext: 2500 },
+    { lvl: 6, xpToNext: 5000 },
+    { lvl: 7, xpToNext: 10000 },
+    { lvl: 8, xpToNext: 25000 }
+  ];
+
+  let currentLvl = 1;
+  let accumulatedXP = 0;
+  let xpNeeded = 100;
+
+  for (let i = 0; i < levels.length; i++) {
+    const lvlInfo = levels[i];
+    if (totalXP >= accumulatedXP + lvlInfo.xpToNext) {
+      accumulatedXP += lvlInfo.xpToNext;
+      currentLvl = lvlInfo.lvl + 1;
+    } else {
+      xpNeeded = lvlInfo.xpToNext;
+      break;
+    }
+  }
+
+  if (currentLvl >= 9) {
+    const extraXP = totalXP - accumulatedXP;
+    const extraLevels = Math.floor(extraXP / 50000);
+    currentLvl = 9 + extraLevels;
+    accumulatedXP = accumulatedXP + (extraLevels * 50000);
+    xpNeeded = 50000;
+  }
+
+  const xpProgress = totalXP - accumulatedXP;
+  const xpPercent = Math.min(100, Math.max(0, (xpProgress / xpNeeded) * 100));
+
+  return {
+    level: currentLvl,
+    xpForCurrentLevel: accumulatedXP,
+    xpForNextLevel: accumulatedXP + xpNeeded,
+    xpNeeded: xpNeeded,
+    xpProgress: xpProgress,
+    xpPercent: xpPercent
+  };
+}
+
 // --- PREMIUM TOAST NOTIFICATION ---
 function showToast(message, type = 'success') {
   let toastContainer = document.getElementById('toast-container');
@@ -215,18 +264,13 @@ onAuthStateChanged(auth, async (user) => {
         btnEditProfile.innerText = isDefaultProfile ? "Set Up Profile" : "Edit Profile";
       }
       
-      // XP & Gamer Leveling math calculations
+      // XP & Gamer Leveling math calculations (Clash Royale slower quadratic curve)
       const totalPoints = data.totalPoints || 0;
-      const level = Math.floor(Math.sqrt(totalPoints / 10)) + 1;
-      const xpForCurrentLevel = Math.pow(level - 1, 2) * 10;
-      const xpForNextLevel = Math.pow(level, 2) * 10;
-      const xpNeeded = xpForNextLevel - xpForCurrentLevel;
-      const xpProgress = totalPoints - xpForCurrentLevel;
-      const xpPercent = Math.min(100, Math.max(0, (xpProgress / xpNeeded) * 100));
+      const lvlData = getLevelData(totalPoints);
       
-      if (profileLevel) profileLevel.innerText = `LVL ${level}`;
-      if (xpProgressBar) xpProgressBar.style.width = `${xpPercent}%`;
-      if (xpProgressText) xpProgressText.innerText = `${xpProgress} / ${xpNeeded} XP to next level`;
+      if (profileLevel) profileLevel.innerText = `LVL ${lvlData.level}`;
+      if (xpProgressBar) xpProgressBar.style.width = `${lvlData.xpPercent}%`;
+      if (xpProgressText) xpProgressText.innerText = `${lvlData.xpProgress} / ${lvlData.xpNeeded} XP to next level`;
       
       // Update Analytics stats
       if (pointsEl) pointsEl.innerText = totalPoints.toLocaleString();
