@@ -640,25 +640,21 @@
 </div>
 
 <!-- ===== AUTH MODAL ===== -->
-<div id="auth-modal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 1000; align-items: center; justify-content: center;">
-  <div style="background: #1e293b; padding: 30px; border-radius: 16px; width: 90%; max-width: 400px; text-align: center; border: 1px solid #334155; position: relative;">
-    <button id="auth-close" style="position: absolute; top: 10px; right: 15px; background: transparent; border: none; color: #94a3b8; font-size: 1.5rem; cursor: pointer;">✕</button>
-    <h2 id="auth-title" style="margin-bottom: 20px; font-weight: 900; color: #fff;">Log In</h2>
+<div id="auth-modal" class="auth-overlay" style="display: none;">
+  <div class="auth-card">
+    <button id="auth-close" class="auth-close">✕</button>
+    <h2 id="auth-title" class="auth-title">Log In</h2>
     <div id="auth-error" style="color: #EF4444; background: rgba(239, 68, 68, 0.1); padding: 10px; border-radius: 8px; margin-bottom: 15px; font-size: 0.9rem; display: none;"></div>
-    <input type="text" id="auth-username" placeholder="Username (for new signups)" style="display: none; width: 100%; padding: 12px; margin-bottom: 15px; border-radius: 8px; border: 1px solid #334155; background: #0f172a; color: white;" />
-    <input type="email" id="auth-email" placeholder="Email Address" style="width: 100%; padding: 12px; margin-bottom: 15px; border-radius: 8px; border: 1px solid #334155; background: #0f172a; color: white;" />
-    <input type="password" id="auth-password" placeholder="Password" style="width: 100%; padding: 12px; margin-bottom: 20px; border-radius: 8px; border: 1px solid #334155; background: #0f172a; color: white;" />
-    <button id="auth-submit" class="btn btn--primary" style="width: 100%; margin-bottom: 15px;">Log In</button>
+    <input type="text" id="auth-username" class="auth-input" placeholder="Username (for new signups)" style="display: none;" />
+    <input type="email" id="auth-email" class="auth-input" placeholder="Email Address" />
+    <input type="password" id="auth-password" class="auth-input" placeholder="Password" />
+    <button id="auth-submit" class="auth-submit-btn">Log In</button>
 
     <!-- Divider -->
-    <div style="display: flex; align-items: center; justify-content: center; margin: 15px 0; color: #64748b; font-size: 0.8rem; font-weight: 700; text-transform: uppercase; gap: 10px;">
-      <div style="height: 1px; background: #334155; flex: 1;"></div>
-      <span>or</span>
-      <div style="height: 1px; background: #334155; flex: 1;"></div>
-    </div>
+    <div class="auth-divider">or</div>
     
     <!-- Google Login Button -->
-    <button id="btn-google-login" class="btn btn--google-auth" style="width: 100%; margin-bottom: 15px; display: flex; align-items: center; justify-content: center; gap: 10px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); color: #fff; font-weight: 800; font-size: 0.9rem; padding: 12px; border-radius: 8px; cursor: pointer; transition: all 0.2s;">
+    <button id="btn-google-login" class="auth-google-btn">
       <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
         <path d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.875 2.684-6.615z" fill="#4285F4"/>
         <path d="M9 18c2.43 0 4.467-.806 5.956-2.184l-2.908-2.258c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 009 18z" fill="#34A853"/>
@@ -668,9 +664,9 @@
       <span>Continue with Google</span>
     </button>
     
-    <p style="color: #94a3b8; font-size: 0.9rem;">
+    <p class="auth-toggle-container">
       <span id="auth-toggle-text">Don't have an account?</span> 
-      <a href="#" id="auth-toggle-link" style="color: #38BDF8; font-weight: 700; text-decoration: none;">Sign Up</a>
+      <a href="#" id="auth-toggle-link" class="auth-toggle-link">Sign Up</a>
     </p>
   </div>
 </div>
