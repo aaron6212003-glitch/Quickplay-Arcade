@@ -182,45 +182,38 @@ export function init(container) {
       else numCount++;
     });
 
-    // Adaptive spawn logic: if operators are below 35% of total tiles, force an operator to drop!
+    // Enforce 45% operator ratio: if operators are below 45%, force an operator to drop!
     const totalTiles = numCount + opCount;
-    let spawnOp = Math.random() < 0.4; // 40% default operator drop rate
-    if (totalTiles >= 3 && (opCount / totalTiles) < 0.35) {
+    let spawnOp = Math.random() < 0.45; // 45% baseline operator spawn rate
+    if (totalTiles > 0 && (opCount / totalTiles) < 0.45) {
       spawnOp = true;
     }
 
     if (spawnOp) {
-      // Dynamic operator pool based on current score
-      let activeOperators = ["+", "-"];
-      if (score >= 250) {
+      // Dynamic operator pool: multiplication is unlocked immediately! Division unlocks at score 100.
+      let activeOperators = ["+", "-", "×"];
+      if (score >= 100) {
         activeOperators = ["+", "-", "×", "÷"];
-      } else if (score >= 100) {
-        activeOperators = ["+", "-", "×"];
       }
       return { type: 'op', val: activeOperators[Math.floor(Math.random() * activeOperators.length)] };
     } else {
-      // Dynamic numbers pool based on current score (starts simple, scales up)
-      let activeNumbers = ["1", "2", "3", "4", "5"];
-      if (score >= 250) {
+      // Dynamic numbers pool: starts with 1-6 for easy target combos, expands to 1-9 at score 100
+      let activeNumbers = ["1", "2", "3", "4", "5", "6"];
+      if (score >= 100) {
         activeNumbers = ["1", "2", "3", "4", "5", "6", "7", "8", "9"];
-      } else if (score >= 100) {
-        activeNumbers = ["1", "2", "3", "4", "5", "6", "7"];
       }
       return { type: 'num', val: activeNumbers[Math.floor(Math.random() * activeNumbers.length)] };
     }
   }
 
   function generateTarget() {
-    // Dynamic target brackets based on current score
+    // Dynamic target brackets: starts at 1-20, expands to 5-60 at score 100
     let minTarget = 1;
-    let maxTarget = 15;
+    let maxTarget = 20;
     
-    if (score >= 250) {
-      minTarget = 10;
-      maxTarget = 80;
-    } else if (score >= 100) {
+    if (score >= 100) {
       minTarget = 5;
-      maxTarget = 30;
+      maxTarget = 60;
     }
 
     currentTarget = Math.floor(Math.random() * (maxTarget - minTarget + 1)) + minTarget;
