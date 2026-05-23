@@ -64,11 +64,35 @@ export function initTanks(container) {
   mobileControls.style.inset = '0';
   mobileControls.style.pointerEvents = 'none';
   mobileControls.innerHTML = `
-    <div id="joy-base" style="position:absolute; bottom:20px; left:20px; width:120px; height:120px; background:rgba(0,0,0,0.2); border-radius:50%; pointer-events:auto; touch-action:none;">
-      <div id="joy-stick" style="position:absolute; top:35px; left:35px; width:50px; height:50px; background:rgba(255,255,255,0.6); border-radius:50%; box-shadow:0 4px 10px rgba(0,0,0,0.3);"></div>
+    <style>
+      @keyframes pulseGlow {
+        0% { transform: scale(1); box-shadow: 0 4px 12px rgba(239,68,68,0.4); }
+        50% { transform: scale(1.06); box-shadow: 0 4px 22px rgba(239,68,68,0.7); }
+        100% { transform: scale(1); box-shadow: 0 4px 12px rgba(239,68,68,0.4); }
+      }
+      .tanks-mobile-btn {
+        touch-action: none;
+        border: 3px solid #ffffff;
+        color: #ffffff;
+        font-weight: 900;
+        font-family: 'Outfit', sans-serif;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: transform 0.1s;
+      }
+      .tanks-mobile-btn:active {
+        transform: scale(0.9) !important;
+      }
+    </style>
+    <div id="joy-base" style="position:absolute; bottom:20px; left:20px; width:90px; height:90px; background:rgba(15,23,42,0.4); backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px); border:2px solid rgba(255,255,255,0.15); border-radius:50%; pointer-events:auto; touch-action:none; box-shadow: 0 6px 20px rgba(0,0,0,0.3);">
+      <div id="joy-stick" style="position:absolute; top:27px; left:27px; width:36px; height:36px; background:rgba(255,255,255,0.7); border-radius:50%; box-shadow:0 4px 8px rgba(0,0,0,0.4); transition: transform 0.05s ease-out;"></div>
     </div>
-    <div style="position:absolute; bottom:20px; right:20px; pointer-events:auto; display:flex; gap:10px; align-items:flex-end;">
-      <button id="btn-mine" style="width:60px; height:60px; border-radius:50%; background:rgba(56,189,248,0.6); border:3px solid #fff; color:#fff; font-weight:900; touch-action:none;">MINE</button>
+    <div style="position:absolute; bottom:20px; right:20px; pointer-events:auto; display:flex; gap:12px; align-items:center;">
+      <button id="btn-mine" class="tanks-mobile-btn" style="width:50px; height:50px; border-radius:50%; background:rgba(245,158,11,0.65); font-size:0.8rem; letter-spacing:0.5px;">MINE</button>
+      <button id="btn-shoot" class="tanks-mobile-btn" style="width:70px; height:70px; border-radius:50%; background:rgba(239,68,68,0.7); font-size:1rem; letter-spacing:0.5px; animation: pulseGlow 2s infinite;">FIRE 🔥</button>
     </div>
   `;
   wrapper.appendChild(mobileControls);
@@ -913,55 +937,107 @@ export function initTanks(container) {
   });
 
   // Mobile Touch Controls
-  const joyBase = document.getElementById('joy-base');
-  const joyStick = document.getElementById('joy-stick');
-  const btnMine = document.getElementById('btn-mine');
   let joyRect;
+  let lastTouchX = 0;
+  let lastTouchY = 0;
+  let aimTouchId = null;
+  let touchStartX = 0;
+  let touchStartY = 0;
 
-  canvas.addEventListener('touchstart', (e) => {
+  const enableMobileUI = () => {
     if (!isMobile) {
       isMobile = true;
       mobileControls.style.display = 'block';
     }
-    if (!isGameOver) {
-      const rect = canvas.getBoundingClientRect();
-      const scaleX = canvas.width / rect.width;
-      const scaleY = canvas.height / rect.height;
-      for (let i = 0; i < e.changedTouches.length; i++) {
-        const touch = e.changedTouches[i];
-        mouseX = (touch.clientX - rect.left) * scaleX;
-        mouseY = (touch.clientY - rect.top) * scaleY;
-        shoot(player, mouseX, mouseY);
-      }
+  };
+  window.addEventListener('touchstart', enableMobileUI, {passive: true});
+
+  // Trackpad relative dragging to move crosshair smoothly
+  canvas.addEventListener('touchstart', (e) => {
+    enableMobileUI();
+    if (!isGameOver && aimTouchId === null) {
+      const touch = e.changedTouches[0];
+      aimTouchId = touch.identifier;
+      lastTouchX = touch.clientX;
+      lastTouchY = touch.clientY;
+      touchStartX = touch.clientX;
+      touchStartY = touch.clientY;
     }
   }, {passive: false});
 
   canvas.addEventListener('touchmove', (e) => {
     if (isMobile) e.preventDefault();
+    if (isGameOver) return;
+
     const rect = canvas.getBoundingClientRect();
+    const scaleX = canvas.width / rect.width;
+    const scaleY = canvas.height / rect.height;
+
     for (let i = 0; i < e.changedTouches.length; i++) {
-      mouseX = (e.changedTouches[i].clientX - rect.left) * (canvas.width / rect.width);
-      mouseY = (e.changedTouches[i].clientY - rect.top) * (canvas.height / rect.height);
+      const touch = e.changedTouches[i];
+      if (touch.identifier === aimTouchId) {
+        const deltaX = touch.clientX - lastTouchX;
+        const deltaY = touch.clientY - lastTouchY;
+
+        // Premium sensitivity factor of 1.8 for fast, professional control
+        const sensitivity = 1.8;
+
+        mouseX += deltaX * scaleX * sensitivity;
+        mouseY += deltaY * scaleY * sensitivity;
+
+        // Keep inside canvas bounds
+        mouseX = Math.max(0, Math.min(canvas.width, mouseX));
+        mouseY = Math.max(0, Math.min(canvas.height, mouseY));
+
+        lastTouchX = touch.clientX;
+        lastTouchY = touch.clientY;
+      }
     }
   }, {passive: false});
 
-  if (joyBase) {
+  const endAimTouch = (e) => {
+    for (let i = 0; i < e.changedTouches.length; i++) {
+      const touch = e.changedTouches[i];
+      if (touch.identifier === aimTouchId) {
+        // If movement was extremely minor (less than 8px), treat it as a quick TAP-SHOOT!
+        const totalDist = Math.hypot(touch.clientX - touchStartX, touch.clientY - touchStartY);
+        if (totalDist < 8 && !isGameOver) {
+          shoot(player, mouseX, mouseY);
+        }
+        aimTouchId = null;
+      }
+    }
+  };
+  canvas.addEventListener('touchend', endAimTouch);
+  canvas.addEventListener('touchcancel', endAimTouch);
+
+  // Joystick & button handlers
+  const joyBase = document.getElementById('joy-base');
+  const joyStick = document.getElementById('joy-stick');
+  const btnMine = document.getElementById('btn-mine');
+  const btnShoot = document.getElementById('btn-shoot');
+
+  if (joyBase && joyStick) {
     function updateJoy(touch) {
-      let nx = touch.clientX - joyRect.left - 60;
-      let ny = touch.clientY - joyRect.top - 60;
+      // 45 is exactly half of 90 (the new smaller width)
+      let nx = touch.clientX - joyRect.left - 45;
+      let ny = touch.clientY - joyRect.top - 45;
       const dist = Math.hypot(nx, ny);
-      if (dist > 40) {
-        nx = (nx / dist) * 40;
-        ny = (ny / dist) * 40;
+      
+      // 30 is the new smaller maximum stick movement distance
+      if (dist > 30) {
+        nx = (nx / dist) * 30;
+        ny = (ny / dist) * 30;
       }
       joyStick.style.transform = `translate(${nx}px, ${ny}px)`;
-      touchJoy.dx = nx / 40;
-      touchJoy.dy = ny / 40;
+      touchJoy.dx = nx / 30;
+      touchJoy.dy = ny / 30;
     }
 
     joyBase.addEventListener('touchstart', (e) => {
       e.preventDefault();
       e.stopPropagation();
+      enableMobileUI();
       const touch = e.changedTouches[0];
       touchJoy.active = true;
       touchJoy.touchId = touch.identifier;
@@ -997,7 +1073,17 @@ export function initTanks(container) {
     btnMine.addEventListener('touchstart', (e) => {
       e.preventDefault();
       e.stopPropagation();
+      enableMobileUI();
       if (!isGameOver) dropMine(player);
+    }, {passive: false});
+  }
+
+  if (btnShoot) {
+    btnShoot.addEventListener('touchstart', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      enableMobileUI();
+      if (!isGameOver) shoot(player, mouseX, mouseY);
     }, {passive: false});
   }
 
