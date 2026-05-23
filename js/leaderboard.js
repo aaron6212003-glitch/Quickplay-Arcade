@@ -97,10 +97,24 @@ window.saveScore = async function(gameName, score) {
       dateString = activeDate;
     }
 
-    // 1. Add score to the global scores collection
+    // 1. Fetch current user avatar
+    let userAvatar = "👾";
+    try {
+      const userRef = doc(db, "users", user.uid);
+      const userSnap = await getDoc(userRef);
+      if (userSnap.exists()) {
+        const uData = userSnap.data();
+        userAvatar = uData.avatar || "👾";
+      }
+    } catch (avatarError) {
+      console.log("Could not fetch user avatar for leaderboard scores:", avatarError);
+    }
+
+    // 2. Add score to the global scores collection
     await addDoc(collection(db, "scores"), {
       uid: user.uid,
       username: user.displayName || "Unknown Player",
+      avatar: userAvatar,
       game: gameName,
       score: score,
       timestamp: new Date(),
@@ -216,7 +230,11 @@ window.loadLeaderboard = async function(gameFilter = 'all') {
       html += `
         <div class="lb-row ${rank <= 3 ? 'lb-row--top' : ''} ${isCurrentUser ? 'is-me' : ''}" ${isCurrentUser ? 'style="border-left: 4px solid #38BDF8;"' : ''} onclick="window.showPlayerCard('${data.uid}', '${escapedUsername}', ${data.score})">
           <span class="lb-rank">${rankDisplay}</span>
-          <span class="lb-avatar">👾</span>
+          <span class="lb-avatar">${
+            data.avatar && (data.avatar.startsWith('http://') || data.avatar.startsWith('https://'))
+              ? `<img src="${data.avatar}" alt="Avatar">`
+              : (data.avatar || '👾')
+          }</span>
           <span class="lb-user">
             ${data.username}
             ${isCurrentUser ? '<span style="font-size:0.6rem; background:#38BDF8; color:#000; padding:2px 4px; border-radius:4px; margin-left:6px; font-weight:800;">YOU</span>' : ''}
@@ -361,7 +379,13 @@ window.showPlayerCard = async function(uid, fallbackUsername, fallbackScore) {
   cardUsername.innerText = username;
   cardTagline.innerText = `"${tagline}"`;
   cardFavGame.innerText = `🎯 Favorite: ${favGame}`;
-  cardAvatar.innerText = avatar;
+  if (cardAvatar) {
+    if (avatar.startsWith('http://') || avatar.startsWith('https://')) {
+      cardAvatar.innerHTML = `<img src="${avatar}" alt="Avatar">`;
+    } else {
+      cardAvatar.innerText = avatar;
+    }
+  }
   statPoints.innerText = totalPoints.toLocaleString();
   statGames.innerText = gamesPlayed.toLocaleString();
   cardTitleBadge.innerText = activeTitle;

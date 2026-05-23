@@ -1,4 +1,4 @@
-import { db, auth, doc, getDoc, setDoc, onAuthStateChanged, collection, query, where, getDocs, updateProfile, updateDoc, sendEmailVerification } from './firebase.js';
+import { db, auth, doc, getDoc, setDoc, onAuthStateChanged, collection, query, where, getDocs, updateProfile, updateDoc, sendEmailVerification, storage } from './firebase.js';
 
 // DOM selection
 const loadingOverlay = document.getElementById('profile-loading');
@@ -169,7 +169,13 @@ onAuthStateChanged(auth, async (user) => {
       if (cardUsername) cardUsername.innerText = username;
       if (cardTagline) cardTagline.innerText = `"${tagline}"`;
       if (cardFavGame) cardFavGame.innerText = `🎯 Favorite: ${favGame}`;
-      if (cardAvatar) cardAvatar.innerText = avatar;
+      if (cardAvatar) {
+        if (avatar.startsWith('http://') || avatar.startsWith('https://')) {
+          cardAvatar.innerHTML = `<img src="${avatar}" alt="Avatar">`;
+        } else {
+          cardAvatar.innerText = avatar;
+        }
+      }
       
       // Update custom title badge
       const titleBadge = document.getElementById('card-title-badge');
@@ -517,7 +523,13 @@ if (btnEditModalSave) {
       if (cardUsername) cardUsername.innerText = usernameVal;
       if (cardTagline) cardTagline.innerText = `"${taglineVal}"`;
       if (cardFavGame) cardFavGame.innerText = `🎯 Favorite: ${favGameVal}`;
-      if (cardAvatar) cardAvatar.innerText = selectedAvatar;
+      if (cardAvatar) {
+        if (selectedAvatar.startsWith('http://') || selectedAvatar.startsWith('https://')) {
+          cardAvatar.innerHTML = `<img src="${selectedAvatar}" alt="Avatar">`;
+        } else {
+          cardAvatar.innerText = selectedAvatar;
+        }
+      }
       if (btnEditProfile) btnEditProfile.innerText = "Edit Profile";
       
       // Trigger instant unlock of Rookie achievement in the DOM
@@ -539,4 +551,130 @@ if (btnEditModalSave) {
       btnEditModalSave.disabled = false;
     }
   });
+}
+
+// ── FIREBASE STORAGE CUSTOM AVATAR UPLOAD SYSTEM ──
+function initAvatarUpload() {
+  const dropzone = document.getElementById('avatar-upload-dropzone');
+  const fileInput = document.getElementById('avatar-upload-input');
+  const uploadIcon = document.getElementById('avatar-upload-icon');
+  const uploadText = document.getElementById('avatar-upload-text');
+  const progressContainer = document.getElementById('avatar-upload-progress');
+  const progressBar = document.getElementById('avatar-upload-progress-bar');
+
+  if (!dropzone || !fileInput) return;
+
+  // Click to open file dialog
+  dropzone.addEventListener('click', () => {
+    fileInput.click();
+  });
+
+  // Drag over styling
+  dropzone.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    dropzone.classList.add('dragging');
+  });
+
+  // Drag leave styling
+  dropzone.addEventListener('dragleave', () => {
+    dropzone.classList.remove('dragging');
+  });
+
+  // Drop handler
+  dropzone.addEventListener('drop', (e) => {
+    e.preventDefault();
+    dropzone.classList.remove('dragging');
+    if (e.dataTransfer.files.length > 0) {
+      handleAvatarFile(e.dataTransfer.files[0]);
+    }
+  });
+
+  // File input change handler
+  fileInput.addEventListener('change', (e) => {
+    if (e.target.files.length > 0) {
+      handleAvatarFile(e.target.files[0]);
+    }
+  });
+
+  // Upload handler logic
+  async function handleAvatarFile(file) {
+    const user = auth.currentUser;
+    if (!user) {
+      showToast("You must be logged in to upload avatars!", "error");
+      return;
+    }
+
+    // Size limit check (2MB)
+    if (file.size > 2 * 1024 * 1024) {
+      showToast("Image size exceeds 2MB limit!", "error");
+      return;
+    }
+
+    // Format type check
+    const validTypes = ['image/png', 'image/jpeg', 'image/webp'];
+    if (!validTypes.includes(file.type)) {
+      showToast("Invalid format! Please upload PNG, JPG, or WebP.", "error");
+      return;
+    }
+
+    // Visual loading state
+    uploadIcon.innerText = "⏳";
+    uploadText.innerText = "Uploading Image...";
+    if (progressContainer) progressContainer.style.display = 'block';
+    if (progressBar) progressBar.style.width = '10%';
+
+    try {
+      // Import storage functions from ./firebase.js dynamically or directly
+      const storageRef = ref(storage, `avatars/${user.uid}`);
+      
+      // Simulate fast progress loading
+      let progress = 10;
+      const interval = setInterval(() => {
+        if (progress < 90) {
+          progress += 15;
+          if (progressBar) progressBar.style.width = `${progress}%`;
+        }
+      }, 200);
+
+      // Perform actual upload
+      await uploadBytes(storageRef, file);
+      clearInterval(interval);
+      if (progressBar) progressBar.style.width = '100%';
+
+      const downloadUrl = await getDownloadURL(storageRef);
+
+      // Update Local preview and equip selection instantly
+      selectedAvatar = downloadUrl;
+      
+      // Clear selected classes from emoji options in the grid
+      const items = document.querySelectorAll('.avatar-item');
+      items.forEach(item => item.classList.remove('selected'));
+
+      // Complete visual state
+      uploadIcon.innerText = "✅";
+      uploadText.innerText = "Image Uploaded successfully!";
+      showToast("Custom avatar uploaded! Click 'Save Changes' to equip it. 📷", "success");
+
+      setTimeout(() => {
+        uploadIcon.innerText = "📷";
+        uploadText.innerText = "Click or Drop Image Here";
+        if (progressContainer) progressContainer.style.display = 'none';
+        if (progressBar) progressBar.style.width = '0%';
+      }, 3000);
+
+    } catch (err) {
+      console.error("Firebase Storage Upload Error:", err);
+      uploadIcon.innerText = "📷";
+      uploadText.innerText = "Click or Drop Image Here";
+      showToast("Failed to upload image. Please try again.", "error");
+      if (progressContainer) progressContainer.style.display = 'none';
+    }
+  }
+}
+
+// Bind upload system
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initAvatarUpload);
+} else {
+  initAvatarUpload();
 }

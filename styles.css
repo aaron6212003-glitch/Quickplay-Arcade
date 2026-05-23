@@ -1921,4 +1921,60 @@ body {
   100% { transform: rotate(360deg); }
 }
 
+/* --- PROFILE IMAGE & AVATAR FIT RULES --- */
+.gamer-avatar {
+  overflow: hidden !important;
+}
+.gamer-avatar img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  border-radius: 50% !important;
+}
+
+/* Leaderboard avatar image compatibility */
+.lb-avatar {
+  overflow: hidden !important;
+  border-radius: 50% !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+.lb-avatar img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  border-radius: 50% !important;
+}
+
+/* Modal avatar picker custom preview */
+.avatar-item img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  border-radius: 50% !important;
+}
+
+/* Drag & Drop Upload Zone Hover State */
+#avatar-upload-dropzone:hover {
+  border-color: #38bdf8 !important;
+  background: rgba(56, 189, 248, 0.05) !important;
+  box-shadow: 0 0 15px rgba(56, 189, 248, 0.1) !important;
+}
+#avatar-upload-dropzone.dragging {
+  border-color: #10b981 !important;
+  background: rgba(16, 185, 129, 0.1) !important;
+  transform: scale(1.02) !important;
+}
+
+/* Google Auth Button Hovers */
+.btn--google-auth:hover {
+  background: rgba(255, 255, 255, 0.08) !important;
+  border-color: rgba(255, 255, 255, 0.18) !important;
+  box-shadow: 0 4px 12px rgba(255, 255, 255, 0.05) !important;
+}
+.btn--google-auth:active {
+  transform: scale(0.98) !important;
+}
+
 

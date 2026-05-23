@@ -323,7 +323,13 @@ function updatePreviewCard(data, user) {
   if (previewUsername) previewUsername.innerText = username;
   if (previewTagline) previewTagline.innerText = `"${tagline}"`;
   if (previewFavGame) previewFavGame.innerText = `🎯 Favorite: ${favGame}`;
-  if (previewAvatar) previewAvatar.innerText = activeAvatar;
+  if (previewAvatar) {
+    if (activeAvatar.startsWith('http://') || activeAvatar.startsWith('https://')) {
+      previewAvatar.innerHTML = `<img src="${activeAvatar}" alt="Avatar">`;
+    } else {
+      previewAvatar.innerText = activeAvatar;
+    }
+  }
 
   // Ring Borders outline
   if (previewAvatarRing) {

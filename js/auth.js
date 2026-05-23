@@ -1,4 +1,4 @@
-import { auth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, updateProfile } from './firebase.js';
+import { auth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, updateProfile, GoogleAuthProvider, signInWithPopup } from './firebase.js';
 import { db, doc, setDoc, getDoc } from './firebase.js';
 
 const modal = document.getElementById('auth-modal');
@@ -142,6 +142,50 @@ if (btnSubmit) {
     } finally {
       btnSubmit.innerText = isSignupMode ? 'Sign Up' : 'Log In';
       btnSubmit.disabled = false;
+    }
+  });
+}
+
+// Handle Google Social Sign-In
+const btnGoogleLogin = document.getElementById('btn-google-login');
+if (btnGoogleLogin) {
+  btnGoogleLogin.addEventListener('click', async () => {
+    if (errorMsg) errorMsg.style.display = 'none';
+    btnGoogleLogin.disabled = true;
+    const oldText = btnGoogleLogin.innerHTML;
+    btnGoogleLogin.innerHTML = 'Connecting Google...';
+    
+    try {
+      const provider = new GoogleAuthProvider();
+      const result = await signInWithPopup(auth, provider);
+      const user = result.user;
+      
+      // Check if they have a Firestore document, if not, create it
+      const userRef = doc(db, "users", user.uid);
+      const userDoc = await getDoc(userRef);
+      
+      if (!userDoc.exists()) {
+        await setDoc(userRef, {
+          uid: user.uid,
+          username: user.displayName || "Player",
+          email: user.email,
+          totalPoints: 0,
+          gamesPlayed: 0,
+          joinDate: new Date(),
+          badges: ["new"]
+        });
+      }
+      
+      if (modal) modal.style.display = 'none';
+    } catch (error) {
+      console.error(error);
+      if (errorMsg) {
+        errorMsg.innerText = error.message.replace('Firebase: ', '');
+        errorMsg.style.display = 'block';
+      }
+    } finally {
+      btnGoogleLogin.disabled = false;
+      btnGoogleLogin.innerHTML = oldText;
     }
   });
 }
