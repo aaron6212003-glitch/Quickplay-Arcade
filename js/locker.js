@@ -1,4 +1,4 @@
-import { db, auth, doc, getDoc, setDoc, updateDoc } from './firebase.js';
+import { db, auth, doc, getDoc, setDoc, updateDoc, sendEmailVerification } from './firebase.js';
 import { onAuthStateChanged } from './firebase.js';
 
 // --- COSMETICS DEFINITION SYSTEM ---
@@ -436,6 +436,58 @@ onAuthStateChanged(auth, async (user) => {
       // Update layouts
       updateCurrencyDisplay(userDocData);
       updatePreviewCard(userDocData, user);
+
+      // ── Email Verification Rewards & Banner Loop ──
+      const verifyBanner = document.getElementById('email-verify-banner');
+      const verifyBtn = document.getElementById('btn-verify-email');
+      
+      if (verifyBanner && verifyBtn) {
+        if (user.emailVerified) {
+          // If email is verified but they haven't claimed the 100 Gems reward yet
+          if (userDocData.emailVerifiedRewardClaimed !== true) {
+            try {
+              const userRef = doc(db, "users", user.uid);
+              await updateDoc(userRef, {
+                scrap: (userDocData.scrap || 0) + 100,
+                emailVerifiedRewardClaimed: true
+              });
+              userDocData.scrap = (userDocData.scrap || 0) + 100;
+              userDocData.emailVerifiedRewardClaimed = true;
+              updateCurrencyDisplay(userDocData);
+              showToast("🎉 Email verified! +100 Gems claimed successfully! 💎", "success");
+            } catch (err) {
+              console.error("Error claiming verification reward:", err);
+            }
+          }
+          verifyBanner.style.display = 'none';
+        } else {
+          // Email is not verified and they haven't claimed the reward
+          if (userDocData.emailVerifiedRewardClaimed !== true) {
+            verifyBanner.style.display = 'flex';
+            
+            // Avoid duplicate listeners
+            const newVerifyBtn = verifyBtn.cloneNode(true);
+            verifyBtn.parentNode.replaceChild(newVerifyBtn, verifyBtn);
+            
+            newVerifyBtn.addEventListener('click', async () => {
+              newVerifyBtn.disabled = true;
+              newVerifyBtn.innerText = "Sending...";
+              try {
+                await sendEmailVerification(user);
+                showToast("✉️ Verification email sent! Check your inbox/spam folder.", "success");
+                newVerifyBtn.innerText = "Check Inbox 📥";
+              } catch (err) {
+                console.error("Error sending verification email:", err);
+                showToast("❌ Failed to send verification link. Try again later.", "error");
+                newVerifyBtn.disabled = false;
+                newVerifyBtn.innerText = "Verify Email";
+              }
+            });
+          } else {
+            verifyBanner.style.display = 'none';
+          }
+        }
+      }
 
       if (loadingOverlay) loadingOverlay.style.display = 'none';
       if (lockerContent) lockerContent.style.display = 'grid';
@@ -937,4 +989,126 @@ if (btnDevReset) {
       showToast("Sandbox: Failed to reset profile.", "error");
     }
   });
+}
+
+// ── GEMS STORE AND INTERACTIVE CHECKOUT SUITE ──
+function initGemsStore() {
+  const storeModal = document.getElementById('store-modal');
+  const checkoutModal = document.getElementById('checkout-modal');
+  const btnOpenStore = document.getElementById('btn-open-store');
+  const btnCloseStore = document.getElementById('store-close');
+  const checkoutStatus = document.getElementById('checkout-status');
+  const checkoutDesc = document.getElementById('checkout-desc');
+  const btnWatchAd = document.getElementById('btn-watch-ad');
+
+  if (!storeModal || !checkoutModal) return;
+
+  // Open Store
+  if (btnOpenStore) {
+    btnOpenStore.addEventListener('click', () => {
+      const user = auth.currentUser;
+      if (!user) {
+        showToast("⚠️ Please log in to access the Gems Store!", "warning");
+        const authModal = document.getElementById('auth-modal');
+        if (authModal) authModal.style.display = 'flex';
+        return;
+      }
+      storeModal.style.display = 'flex';
+    });
+  }
+
+  // Close Store
+  if (btnCloseStore) {
+    btnCloseStore.addEventListener('click', () => {
+      storeModal.style.display = 'none';
+    });
+  }
+
+  // Click handler for Store Modal background to close
+  storeModal.addEventListener('click', (e) => {
+    if (e.target === storeModal) {
+      storeModal.style.display = 'none';
+    }
+  });
+
+  // Watch Ad Simulator
+  if (btnWatchAd) {
+    btnWatchAd.addEventListener('click', async () => {
+      const user = auth.currentUser;
+      if (!user || !userDocData) return;
+
+      storeModal.style.display = 'none';
+      checkoutModal.style.display = 'flex';
+      checkoutStatus.innerText = "Loading Video Ad...";
+      checkoutDesc.innerText = "Buffering rewarding video stream. Please do not close the window.";
+
+      setTimeout(() => {
+        checkoutStatus.innerText = "Ad Playing (5s)...";
+        checkoutDesc.innerText = "🍿 Watching a Playhaus sponsored commercial. Earn +20 Gems upon completion!";
+        
+        setTimeout(async () => {
+          try {
+            const userRef = doc(db, "users", user.uid);
+            const nextScrap = (userDocData.scrap || 0) + 20;
+            await updateDoc(userRef, { scrap: nextScrap });
+            userDocData.scrap = nextScrap;
+            updateCurrencyDisplay(userDocData);
+            
+            checkoutModal.style.display = 'none';
+            showToast("🍿 Ad watched! Earned +20 Gems! 💎", "success");
+          } catch (err) {
+            console.error(err);
+            checkoutModal.style.display = 'none';
+            showToast("❌ Failed to claim ad reward.", "error");
+          }
+        }, 5000);
+      }, 2000);
+    });
+  }
+
+  // Tier Cards clicks
+  const storeCards = document.querySelectorAll('.store-card');
+  storeCards.forEach(card => {
+    card.addEventListener('click', async () => {
+      const user = auth.currentUser;
+      if (!user || !userDocData) return;
+
+      const gems = parseInt(card.dataset.gems);
+      const price = card.dataset.price;
+
+      storeModal.style.display = 'none';
+      checkoutModal.style.display = 'flex';
+      checkoutStatus.innerText = "Contacting App Store...";
+      checkoutDesc.innerText = `Establishing a secure Sandbox checkout connection for ${gems} Gems.`;
+
+      setTimeout(() => {
+        checkoutStatus.innerText = "Apple Pay / Stripe secure checkout active...";
+        checkoutDesc.innerText = `Processing simulated Sandbox payment of $${price}. Please authorize transaction.`;
+
+        setTimeout(async () => {
+          try {
+            const userRef = doc(db, "users", user.uid);
+            const nextScrap = (userDocData.scrap || 0) + gems;
+            await updateDoc(userRef, { scrap: nextScrap });
+            userDocData.scrap = nextScrap;
+            updateCurrencyDisplay(userDocData);
+            
+            checkoutModal.style.display = 'none';
+            showToast(`🛒 Purchase successful! +${gems} Gems credited to your locker! 💎`, "success");
+          } catch (err) {
+            console.error(err);
+            checkoutModal.style.display = 'none';
+            showToast("❌ Checkout authorization failed.", "error");
+          }
+        }, 3000);
+      }, 2000);
+    });
+  });
+}
+
+// Initialize Gems Store listeners
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initGemsStore);
+} else {
+  initGemsStore();
 }

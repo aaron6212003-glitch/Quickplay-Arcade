@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Terms of Service - Playhaus Arcade</title>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Outfit:wght@400;600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css?v=8" />
+  <style>
+    body {
+      background-color: #050811;
+      font-family: 'Outfit', sans-serif;
+      overflow-x: hidden;
+      color: #fff;
+    }
+    .profile-orb {
+      position: absolute; width: 450px; height: 450px; border-radius: 50%;
+      filter: blur(140px); opacity: 0.08; pointer-events: none; z-index: 0;
+    }
+    .profile-orb-1 { background: #38BDF8; top: 10%; left: -100px; }
+    .profile-orb-2 { background: #EC4899; bottom: 10%; right: -100px; }
+
+    .doc-container {
+      max-width: 800px;
+      margin: 120px auto 60px auto;
+      padding: 0 20px;
+      position: relative;
+      z-index: 1;
+    }
+    .doc-card {
+      background: rgba(15, 23, 42, 0.6);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 24px;
+      padding: 40px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
+    }
+    .doc-title {
+      font-size: 2.5rem;
+      font-weight: 900;
+      background: linear-gradient(135deg, #EC4899, #F59E0B);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 10px;
+      font-family: 'Outfit', sans-serif;
+    }
+    .doc-date {
+      color: #64748b;
+      font-size: 0.9rem;
+      font-weight: 700;
+      margin-bottom: 30px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    h2 {
+      font-size: 1.4rem;
+      font-weight: 800;
+      color: #EC4899;
+      margin-top: 30px;
+      margin-bottom: 15px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    p {
+      color: #94a3b8;
+      line-height: 1.7;
+      margin-bottom: 20px;
+      font-size: 1.05rem;
+    }
+    ul {
+      margin-left: 20px;
+      margin-bottom: 20px;
+      color: #94a3b8;
+      line-height: 1.7;
+    }
+    li {
+      margin-bottom: 8px;
+    }
+    .btn-back {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: #EC4899;
+      text-decoration: none;
+      font-weight: 700;
+      margin-bottom: 30px;
+      transition: transform 0.2s;
+    }
+    .btn-back:hover {
+      transform: translateX(-4px);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="profile-orb profile-orb-1"></div>
+  <div class="profile-orb profile-orb-2"></div>
+
+  <!-- ===== TOP NAV ===== -->
+  <header class="nav" id="top-nav" style="box-shadow: 0 4px 30px rgba(0,0,0,.4);">
+    <div class="nav__inner">
+      <a href="index.html" class="nav__logo">
+        <span class="nav__logo-icon">🏠</span>
+        <span>Play<strong>haus</strong></span>
+      </a>
+      <nav class="nav__links">
+        <a href="index.html" class="nav__link">Home</a>
+        <a href="locker.html" class="nav__link">Locker</a>
+        <a href="profile.html" class="nav__link">Profile</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="doc-container">
+    <a href="index.html" class="btn-back">⬅ Back to Home</a>
+    
+    <article class="doc-card">
+      <h1 class="doc-title">Terms of Service</h1>
+      <div class="doc-date">Last Updated: May 23, 2026</div>
+
+      <p>Welcome to Playhaus Arcade! By accessing or using our website, playing our games, or signing up for a custom Locker card, you agree to comply with and be bound by these Terms of Service. Please read them carefully.</p>
+
+      <h2>1. User Accounts</h2>
+      <p>To unlock premium cosmetics and submit high scores to the global leaderboard, you must sign up for an account. You agree to:</p>
+      <ul>
+        <li>Provide accurate and complete registration info.</li>
+        <li>Maintain the security and secrecy of your account credentials.</li>
+        <li>Notify us immediately of any unauthorized use or security breaches.</li>
+        <li>Accept sole responsibility for all activity occurring under your username.</li>
+      </ul>
+
+      <h2>2. Intellectual Property</h2>
+      <p>All platform software, graphic styles, interactive elements, custom card animations, and original games (including Higher or Lower, Word Rush, Toy Tanks, etc.) are the proprietary property of Playhaus Arcade and are protected by international copyright and trademark laws.</p>
+
+      <h2>3. Code of Conduct & Fair Play</h2>
+      <p>We are dedicated to maintaining a fun, friendly, and competitive environment. You agree NOT to:</p>
+      <ul>
+        <li>Use automated scripts, bots, hacks, or cheats to manipulate game scores or gain coins/gems.</li>
+        <li>Register offensive, vulgar, or impersonating usernames.</li>
+        <li>Attempt to overload or attack the database servers hosting our leaderboards.</li>
+      </ul>
+      <p>We reserve the right to ban accounts and wipe leaderboard scores that violate these fair play policies.</p>
+
+      <h2>4. Virtual Cosmetics and Currency</h2>
+      <p>Coins, Gems, and unlocked custom profile assets (avatar rings, slogans, background animations) are virtual assets for entertainment purposes only. They have zero cash value and cannot be transferred, sold, or redeemed for real-world currency.</p>
+
+      <h2>5. Simulated Gems Store purchases</h2>
+      <p>Purchases in the Gems Store represent simulated high-fidelity test transactions. Any virtual assets credited are subject to database wipes during platform resets or beta overhauls, with zero monetary liability on our part.</p>
+
+      <h2>6. Limitation of Liability</h2>
+      <p>Playhaus Arcade is provided "as is" and "as available". We make no warranties of any kind regarding server uptime, data persistence, or complete bug-free operations. We are not liable for any lost progress, score sync errors, or system issues.</p>
+    </article>
+  </main>
+
+  <script type="module" src="js/auth.js"></script>
+</body>
+</html>

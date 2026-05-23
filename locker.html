@@ -5,6 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Arcade Locker & Capsule Station - Playhaus</title>
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Outfit:wght@400;600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="manifest" href="manifest.json" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Playhaus" />
+  <link rel="apple-touch-icon" href="img/icons/apple-touch-icon.png" />
   <link rel="stylesheet" href="styles.css?v=8" />
   <style>
     body {
@@ -605,6 +610,17 @@
 </div>
 
 <div class="locker-container" id="locker-content" style="display: none;">
+  <div style="grid-column: 1 / -1; width: 100%; display: flex; flex-direction: column;">
+    <!-- ===== EMAIL VERIFICATION BANNER ===== -->
+    <div id="email-verify-banner" style="display: none; background: linear-gradient(135deg, rgba(245,158,11,0.15) 0%, rgba(239,68,68,0.15) 100%); border: 1px solid rgba(245,158,11,0.3); border-radius: 16px; padding: 14px 20px; margin-bottom: 20px; align-items: center; justify-content: space-between; gap: 15px;">
+      <div style="text-align: left; flex: 1;">
+        <div style="font-weight: 800; font-size: 0.95rem; color: #fff; display: flex; align-items: center; gap: 6px;">✉️ Secure Your Playhaus Locker</div>
+        <div style="font-size: 0.8rem; color: #94a3b8; margin-top: 4px;">Verify your email address now to claim a **Bonus 100 Gems 💎** and protect your rankings!</div>
+      </div>
+      <button class="btn btn--primary" id="btn-verify-email" style="padding: 8px 16px; font-size: 0.8rem; font-weight: 800; border-radius: 8px; box-shadow: 0 4px 10px rgba(245,158,11,0.2);">Verify Email</button>
+    </div>
+  </div>
+
   <!-- Left Side: Interactive Gamer Card Preview -->
   <section class="gamer-card" id="preview-card">
     <div class="avatar-ring" id="preview-avatar-ring">
@@ -631,12 +647,13 @@
           <div class="currency-lbl">Coins</div>
         </div>
       </div>
-      <div class="currency-box">
+      <div class="currency-box" style="position: relative;">
         <div class="currency-icon">💎</div>
-        <div class="currency-details">
+        <div class="currency-details" style="margin-right: 60px;">
           <div class="currency-val" id="text-scrap">0</div>
           <div class="currency-lbl">Gems</div>
         </div>
+        <button class="btn btn--primary" id="btn-open-store" style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); padding: 6px 12px; font-size: 0.75rem; font-weight: 800; border-radius: 8px; box-shadow: 0 4px 10px rgba(56,189,248,0.2);">+ BUY</button>
       </div>
     </div>
 
@@ -710,6 +727,21 @@
       </div>
     </div>
   </section>
+
+  <!-- ===== FOOTER ===== -->
+  <footer class="footer" style="margin-top: 60px; padding: 40px 0; border-top: 1px solid rgba(255,255,255,0.05); text-align: center;">
+    <div class="container">
+      <div class="footer__logo" style="font-size: 1.2rem; font-weight: 900; margin-bottom: 8px;">🏠 Play<strong>haus</strong></div>
+      <div class="footer__links" style="display: flex; gap: 20px; justify-content: center; margin-bottom: 15px;">
+        <a href="index.html" style="color: #64748b; text-decoration: none; font-size: 0.85rem;">Home</a>
+        <a href="index.html#rooms" style="color: #64748b; text-decoration: none; font-size: 0.85rem;">Rooms</a>
+        <a href="index.html#daily" style="color: #64748b; text-decoration: none; font-size: 0.85rem;">Daily</a>
+        <a href="privacy.html" style="color: #64748b; text-decoration: none; font-size: 0.85rem;">Privacy Policy</a>
+        <a href="terms.html" style="color: #64748b; text-decoration: none; font-size: 0.85rem;">Terms of Service</a>
+      </div>
+      <p class="footer__copy" style="color: #475569; font-size: 0.75rem;">© 2026 Playhaus. All rights reserved.</p>
+    </div>
+  </footer>
 </div>
 
 <!-- ===== AUTH MODAL ===== -->
@@ -726,6 +758,71 @@
       <span id="auth-toggle-text">Don't have an account?</span> 
       <a href="#" id="auth-toggle-link" style="color: #38BDF8; font-weight: 700; text-decoration: none;">Sign Up</a>
     </p>
+  </div>
+</div>
+
+<!-- ===== GEMS STORE MODAL ===== -->
+<div id="store-modal" style="display: none; position: fixed; inset: 0; background: rgba(5,8,17,0.85); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); z-index: 1000; align-items: center; justify-content: center;">
+  <div style="background: rgba(15,23,42,0.9); border: 1px solid rgba(255,255,255,0.08); padding: 30px; border-radius: 24px; width: 90%; max-width: 480px; text-align: center; position: relative; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);">
+    <button id="store-close" style="position: absolute; top: 15px; right: 20px; background: transparent; border: none; color: #64748b; font-size: 1.8rem; cursor: pointer; transition: color 0.2s;">✕</button>
+    <h2 style="font-family: 'Outfit', sans-serif; font-size: 1.8rem; font-weight: 900; background: linear-gradient(135deg, #F59E0B, #10B981); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 5px; margin-top: 0;">💎 Playhaus Gems Store</h2>
+    <p style="color: #94a3b8; font-size: 0.9rem; margin-bottom: 20px;">Acquire premium Gems to unlock legendary rings, card themes, and slogan tags instantly!</p>
+    
+    <!-- Ad banner bonus placeholder -->
+    <div style="background: linear-gradient(135deg, rgba(56,189,248,0.1), rgba(167,139,250,0.1)); border: 1px solid rgba(56,189,248,0.2); border-radius: 16px; padding: 12px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;">
+      <div style="text-align: left;">
+        <span style="font-size: 0.6rem; background: #38BDF8; color: #000; padding: 2px 6px; border-radius: 4px; font-weight: 800; text-transform: uppercase;">Bonus Reward</span>
+        <div style="font-size: 0.85rem; font-weight: 800; color: #fff; margin-top: 4px;">Watch Video Ad</div>
+      </div>
+      <button class="btn btn--primary" id="btn-watch-ad" style="padding: 8px 14px; font-size: 0.8rem; font-weight: 800;">+ 20 Gems 💎</button>
+    </div>
+
+    <!-- Store Tiers Grid -->
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px;">
+      <!-- Tier 1 -->
+      <div class="store-card" data-gems="100" data-price="0.99">
+        <div style="font-size: 1.8rem; margin-bottom: 8px;">💎</div>
+        <div style="font-weight: 800; font-size: 1rem; color: #fff;">100 Gems</div>
+        <div style="color: #64748b; font-size: 0.75rem; margin-bottom: 8px;">Handful of Gems</div>
+        <button class="btn btn--outline" style="width: 100%; padding: 6px 0; font-size: 0.85rem; font-weight: 800; border-color: rgba(255,255,255,0.1); pointer-events: none;">$0.99</button>
+      </div>
+      
+      <!-- Tier 2 (Popular) -->
+      <div class="store-card store-card--popular" data-gems="550" data-price="4.99">
+        <span class="store-card__tag">Best Seller</span>
+        <div style="font-size: 1.8rem; margin-bottom: 8px;">🔮</div>
+        <div style="font-weight: 800; font-size: 1rem; color: #fff;">550 Gems</div>
+        <div style="color: #a78bfa; font-size: 0.75rem; margin-bottom: 8px;">Bag of Gems</div>
+        <button class="btn btn--primary" style="width: 100%; padding: 6px 0; font-size: 0.85rem; font-weight: 800; pointer-events: none;">$4.99</button>
+      </div>
+
+      <!-- Tier 3 -->
+      <div class="store-card" data-gems="1200" data-price="9.99">
+        <div style="font-size: 1.8rem; margin-bottom: 8px;">🏺</div>
+        <div style="font-weight: 800; font-size: 1rem; color: #fff;">1,200 Gems</div>
+        <div style="color: #64748b; font-size: 0.75rem; margin-bottom: 8px;">Chest of Gems</div>
+        <button class="btn btn--outline" style="width: 100%; padding: 6px 0; font-size: 0.85rem; font-weight: 800; border-color: rgba(255,255,255,0.1); pointer-events: none;">$9.99</button>
+      </div>
+
+      <!-- Tier 4 -->
+      <div class="store-card" data-gems="6500" data-price="49.99">
+        <span class="store-card__tag" style="background:#F59E0B; color:#000;">Best Value</span>
+        <div style="font-size: 1.8rem; margin-bottom: 8px;">👑</div>
+        <div style="font-weight: 800; font-size: 1rem; color: #fff;">6,500 Gems</div>
+        <div style="color: #64748b; font-size: 0.75rem; margin-bottom: 8px;">Vault of Gems</div>
+        <button class="btn btn--outline" style="width: 100%; padding: 6px 0; font-size: 0.85rem; font-weight: 800; border-color: rgba(255,255,255,0.1); pointer-events: none;">$49.99</button>
+      </div>
+    </div>
+    <div style="color: #64748b; font-size: 0.7rem; text-transform: uppercase; font-weight: 800; letter-spacing: 0.5px;">Transactions simulated with Firebase storage hooks.</div>
+  </div>
+</div>
+
+<!-- ===== CHECKOUT MODAL ===== -->
+<div id="checkout-modal" style="display: none; position: fixed; inset: 0; background: rgba(5,8,17,0.9); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); z-index: 1100; align-items: center; justify-content: center;">
+  <div style="background: #0f172a; border: 2px solid #334155; padding: 40px; border-radius: 24px; width: 90%; max-width: 400px; text-align: center; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.8);">
+    <div class="spinner"></div>
+    <h3 style="font-family: 'Outfit', sans-serif; font-size: 1.4rem; font-weight: 900; color: #fff; margin-bottom: 10px;" id="checkout-status">Contacting App Store...</h3>
+    <p style="color: #94a3b8; font-size: 0.9rem;" id="checkout-desc">Preparing simulated Apple Pay / Stripe sandbox checkout secure channel.</p>
   </div>
 </div>
 

@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Privacy Policy - Playhaus Arcade</title>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Outfit:wght@400;600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css?v=8" />
+  <style>
+    body {
+      background-color: #050811;
+      font-family: 'Outfit', sans-serif;
+      overflow-x: hidden;
+      color: #fff;
+    }
+    .profile-orb {
+      position: absolute; width: 450px; height: 450px; border-radius: 50%;
+      filter: blur(140px); opacity: 0.08; pointer-events: none; z-index: 0;
+    }
+    .profile-orb-1 { background: #38BDF8; top: 10%; left: -100px; }
+    .profile-orb-2 { background: #EC4899; bottom: 10%; right: -100px; }
+
+    .doc-container {
+      max-width: 800px;
+      margin: 120px auto 60px auto;
+      padding: 0 20px;
+      position: relative;
+      z-index: 1;
+    }
+    .doc-card {
+      background: rgba(15, 23, 42, 0.6);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 24px;
+      padding: 40px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
+    }
+    .doc-title {
+      font-size: 2.5rem;
+      font-weight: 900;
+      background: linear-gradient(135deg, #38BDF8, #A78BFA);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 10px;
+      font-family: 'Outfit', sans-serif;
+    }
+    .doc-date {
+      color: #64748b;
+      font-size: 0.9rem;
+      font-weight: 700;
+      margin-bottom: 30px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    h2 {
+      font-size: 1.4rem;
+      font-weight: 800;
+      color: #38BDF8;
+      margin-top: 30px;
+      margin-bottom: 15px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    p {
+      color: #94a3b8;
+      line-height: 1.7;
+      margin-bottom: 20px;
+      font-size: 1.05rem;
+    }
+    ul {
+      margin-left: 20px;
+      margin-bottom: 20px;
+      color: #94a3b8;
+      line-height: 1.7;
+    }
+    li {
+      margin-bottom: 8px;
+    }
+    .btn-back {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: #38BDF8;
+      text-decoration: none;
+      font-weight: 700;
+      margin-bottom: 30px;
+      transition: transform 0.2s;
+    }
+    .btn-back:hover {
+      transform: translateX(-4px);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="profile-orb profile-orb-1"></div>
+  <div class="profile-orb profile-orb-2"></div>
+
+  <!-- ===== TOP NAV ===== -->
+  <header class="nav" id="top-nav" style="box-shadow: 0 4px 30px rgba(0,0,0,.4);">
+    <div class="nav__inner">
+      <a href="index.html" class="nav__logo">
+        <span class="nav__logo-icon">🏠</span>
+        <span>Play<strong>haus</strong></span>
+      </a>
+      <nav class="nav__links">
+        <a href="index.html" class="nav__link">Home</a>
+        <a href="locker.html" class="nav__link">Locker</a>
+        <a href="profile.html" class="nav__link">Profile</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="doc-container">
+    <a href="index.html" class="btn-back">⬅ Back to Home</a>
+    
+    <article class="doc-card">
+      <h1 class="doc-title">Privacy Policy</h1>
+      <div class="doc-date">Last Updated: May 23, 2026</div>
+
+      <p>Welcome to Playhaus Arcade ("we", "our", or "us"). We are committed to protecting your privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our web platform and games.</p>
+
+      <h2>1. Information We Collect</h2>
+      <p>We collect information to provide a better gaming experience, handle high scores, and sync custom cosmetics across devices:</p>
+      <ul>
+        <li><strong>Account Information:</strong> When you register, we collect your email address, chosen username, and password using Firebase Authentication.</li>
+        <li><strong>Game Data:</strong> We store scores, experience points (XP), accumulated coins, game streaks, favorite games, and unlockable cosmetics in our secure Firebase database.</li>
+        <li><strong>Cookies & Local Storage:</strong> We use local storage to maintain session states, manage guest gamer profiles, and optimize game load speeds.</li>
+      </ul>
+
+      <h2>2. How We Use Your Information</h2>
+      <p>We use the collected information for the following purposes:</p>
+      <ul>
+        <li>To maintain and personalize your profile card, equipped themes, borders, and custom avatars.</li>
+        <li>To publish and display global leaderboards and award "Yesterday's Champion" crowns.</li>
+        <li>To sync progress and allow guest profile recovery or premium store unlock flows.</li>
+        <li>To prevent cheating and maintain high-score leaderboard integrity.</li>
+      </ul>
+
+      <h2>3. Sharing and Disclosing Data</h2>
+      <p>Your privacy is important. We do not sell your personal data to advertisers. Information is only shared under the following conditions:</p>
+      <ul>
+        <li><strong>Public Leaderboards:</strong> Your custom username, equipped card cosmetics, and scores are displayed publicly on the high scores leaderboard.</li>
+        <li><strong>Service Providers:</strong> We use Google Firebase (Authentication & Firestore) and Vercel for hosting, identity, and database management, subject to their respective privacy terms.</li>
+      </ul>
+
+      <h2>4. Data Security</h2>
+      <p>We implement strict commercial-grade security measures via Firebase security rules to prevent unauthorized access, alteration, or disclosure of user accounts and game scores. However, please remember that no web transmission is 100% secure.</p>
+
+      <h2>5. Your Rights and Choices</h2>
+      <p>You have full control over your digital locker profile. You can log out at any time or update your card details. If you wish to permanently delete your account and all associated Firestore statistics, please contact our support team at support@playhaus.com.</p>
+
+      <h2>6. Children's Privacy</h2>
+      <p>Playhaus Arcade is designed for users of all ages. We do not knowingly collect personal identifiable information from children under the age of 13 without appropriate parental guidance.</p>
+    </article>
+  </main>
+
+  <script type="module" src="js/auth.js"></script>
+</body>
+</html>

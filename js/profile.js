@@ -1,4 +1,4 @@
-import { db, auth, doc, getDoc, setDoc, onAuthStateChanged, collection, query, where, getDocs, updateProfile } from './firebase.js';
+import { db, auth, doc, getDoc, setDoc, onAuthStateChanged, collection, query, where, getDocs, updateProfile, updateDoc, sendEmailVerification } from './firebase.js';
 
 // DOM selection
 const loadingOverlay = document.getElementById('profile-loading');
@@ -340,6 +340,57 @@ onAuthStateChanged(auth, async (user) => {
         if (rankEl) rankEl.innerText = "#?";
       }
       
+      // ── Email Verification Rewards & Banner Loop ──
+      const verifyBanner = document.getElementById('email-verify-banner');
+      const verifyBtn = document.getElementById('btn-verify-email');
+      
+      if (verifyBanner && verifyBtn) {
+        if (user.emailVerified) {
+          // If email is verified but they haven't claimed the 100 Gems reward yet
+          if (currentUserDoc.emailVerifiedRewardClaimed !== true) {
+            try {
+              const userRef = doc(db, "users", user.uid);
+              await updateDoc(userRef, {
+                scrap: (currentUserDoc.scrap || 0) + 100,
+                emailVerifiedRewardClaimed: true
+              });
+              currentUserDoc.scrap = (currentUserDoc.scrap || 0) + 100;
+              currentUserDoc.emailVerifiedRewardClaimed = true;
+              showToast("🎉 Email verified! +100 Gems claimed successfully! 💎", "success");
+            } catch (err) {
+              console.error("Error claiming verification reward:", err);
+            }
+          }
+          verifyBanner.style.display = 'none';
+        } else {
+          // Email is not verified and they haven't claimed the reward
+          if (currentUserDoc.emailVerifiedRewardClaimed !== true) {
+            verifyBanner.style.display = 'flex';
+            
+            // Avoid duplicate listeners
+            const newVerifyBtn = verifyBtn.cloneNode(true);
+            verifyBtn.parentNode.replaceChild(newVerifyBtn, verifyBtn);
+            
+            newVerifyBtn.addEventListener('click', async () => {
+              newVerifyBtn.disabled = true;
+              newVerifyBtn.innerText = "Sending...";
+              try {
+                await sendEmailVerification(user);
+                showToast("✉️ Verification email sent! Check your inbox/spam folder.", "success");
+                newVerifyBtn.innerText = "Check Inbox 📥";
+              } catch (err) {
+                console.error("Error sending verification email:", err);
+                showToast("❌ Failed to send verification link. Try again later.", "error");
+                newVerifyBtn.disabled = false;
+                newVerifyBtn.innerText = "Verify Email";
+              }
+            });
+          } else {
+            verifyBanner.style.display = 'none';
+          }
+        }
+      }
+
       // Toggle visibility from loading overlay to profile panels
       if (loadingOverlay) loadingOverlay.style.display = 'none';
       if (profileContent) profileContent.style.display = 'grid';
