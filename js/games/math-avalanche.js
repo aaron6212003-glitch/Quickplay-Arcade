@@ -174,18 +174,56 @@ export function init(container) {
 
   // --- LOGIC ---
   function getRandomBlock() {
-    // 70% chance number, 30% chance operator
-    if (Math.random() < 0.7) {
-      return { type: 'num', val: NUMBERS[Math.floor(Math.random() * NUMBERS.length)] };
+    // Count active operator and number blocks on the board
+    let numCount = 0;
+    let opCount = 0;
+    Object.values(tiles).forEach(t => {
+      if (t.type === 'op') opCount++;
+      else numCount++;
+    });
+
+    // Adaptive spawn logic: if operators are below 35% of total tiles, force an operator to drop!
+    const totalTiles = numCount + opCount;
+    let spawnOp = Math.random() < 0.4; // 40% default operator drop rate
+    if (totalTiles >= 3 && (opCount / totalTiles) < 0.35) {
+      spawnOp = true;
+    }
+
+    if (spawnOp) {
+      // Dynamic operator pool based on current score
+      let activeOperators = ["+", "-"];
+      if (score >= 250) {
+        activeOperators = ["+", "-", "×", "÷"];
+      } else if (score >= 100) {
+        activeOperators = ["+", "-", "×"];
+      }
+      return { type: 'op', val: activeOperators[Math.floor(Math.random() * activeOperators.length)] };
     } else {
-      return { type: 'op', val: OPERATORS[Math.floor(Math.random() * OPERATORS.length)] };
+      // Dynamic numbers pool based on current score (starts simple, scales up)
+      let activeNumbers = ["1", "2", "3", "4", "5"];
+      if (score >= 250) {
+        activeNumbers = ["1", "2", "3", "4", "5", "6", "7", "8", "9"];
+      } else if (score >= 100) {
+        activeNumbers = ["1", "2", "3", "4", "5", "6", "7"];
+      }
+      return { type: 'num', val: activeNumbers[Math.floor(Math.random() * activeNumbers.length)] };
     }
   }
 
   function generateTarget() {
-    // Pick a random possible target
-    // To keep it simple but fun, target is between 1 and 40
-    currentTarget = Math.floor(Math.random() * 40) + 1;
+    // Dynamic target brackets based on current score
+    let minTarget = 1;
+    let maxTarget = 15;
+    
+    if (score >= 250) {
+      minTarget = 10;
+      maxTarget = 80;
+    } else if (score >= 100) {
+      minTarget = 5;
+      maxTarget = 30;
+    }
+
+    currentTarget = Math.floor(Math.random() * (maxTarget - minTarget + 1)) + minTarget;
     
     // Animate target change
     elTargetVal.style.transform = 'scale(1.5)';
