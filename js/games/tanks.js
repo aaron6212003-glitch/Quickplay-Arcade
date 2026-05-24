@@ -2,10 +2,10 @@ export function initTanks(container) {
   // Setup Canvas (Taller and narrower arcade ratio)
   const canvas = document.createElement('canvas');
   canvas.width = 550;
-  canvas.height = 700;
+  canvas.height = 900; // Taller play area
   canvas.style.width = '100%';
   canvas.style.maxWidth = '550px';
-  canvas.style.height = 'auto';
+  canvas.style.height = '900px'; // Fixed taller height
   canvas.style.display = 'block';
   canvas.style.margin = '0 auto';
   canvas.style.background = '#e7e5e4'; // Corkboard/paper background
@@ -79,6 +79,7 @@ export function initTanks(container) {
   mobileControls.style.justifyContent = 'space-between';
   mobileControls.style.pointerEvents = 'auto';
   mobileControls.style.boxShadow = '0 10px 20px rgba(0,0,0,0.5)';
+  mobileControls.style.marginTop = '10px'; // Separate joystick panel from game canvas
   
   mobileControls.innerHTML = `
     <style>
@@ -128,10 +129,10 @@ export function initTanks(container) {
   let mouseX = canvas.width / 2;
   let mouseY = canvas.height / 2;
   
-  // Touch Joy
+  // Touch control variables
   let touchJoy = { active: false, dx: 0, dy: 0, touchId: null };
   let isMobile = false;
-  
+
   // Entities
   let player;
   let enemies = [];
@@ -292,19 +293,58 @@ export function initTanks(container) {
       ctx.save();
       ctx.translate(this.x, this.y);
       
-      // Shadow
+      const angle = Math.atan2(this.vy, this.vx);
+      ctx.rotate(angle);
+      
+      // Shadow (drawn slightly offset based on 3D height)
+      ctx.save();
+      ctx.translate(2, 3); // shadow offset
+      ctx.fillStyle = 'rgba(0,0,0,0.35)';
       ctx.beginPath();
-      ctx.arc(3, 3, this.radius, 0, Math.PI * 2);
-      ctx.fillStyle = 'rgba(0,0,0,0.3)';
+      ctx.moveTo(-6, -3);
+      ctx.lineTo(2, -3);
+      ctx.quadraticCurveTo(7, 0, 7, 0); // Pointy tip at the front
+      ctx.quadraticCurveTo(7, 0, 2, 3);
+      ctx.lineTo(-6, 3);
+      ctx.quadraticCurveTo(-8, 0, -6, -3); // Rounded back
+      ctx.closePath();
+      ctx.fill();
+      ctx.restore();
+
+      // Sleek pointed shell/bullet
+      ctx.beginPath();
+      ctx.moveTo(-6, -3);
+      ctx.lineTo(2, -3);
+      ctx.quadraticCurveTo(7, 0, 7, 0); // Pointy tip
+      ctx.quadraticCurveTo(7, 0, 2, 3);
+      ctx.lineTo(-6, 3);
+      ctx.quadraticCurveTo(-8, 0, -6, -3); // Rounded back
+      ctx.closePath();
+      
+      // Fill color: player is gold brass shell, enemy is dark steel gray
+      ctx.fillStyle = this.isPlayer ? '#fbbf24' : '#64748b';
+      ctx.fill();
+      
+      // Tip overlay for detail
+      ctx.beginPath();
+      ctx.moveTo(1, -3);
+      ctx.quadraticCurveTo(7, 0, 7, 0);
+      ctx.quadraticCurveTo(7, 0, 1, 3);
+      ctx.closePath();
+      ctx.fillStyle = this.isPlayer ? '#ea580c' : '#334155'; // Copper/Steel tip
       ctx.fill();
 
-      // Bullet
+      // Border outline
       ctx.beginPath();
-      ctx.arc(0, 0, this.radius, 0, Math.PI * 2);
-      ctx.fillStyle = this.isPlayer ? '#fcd34d' : '#1e293b';
-      ctx.fill();
-      ctx.strokeStyle = '#000';
-      ctx.lineWidth = 1;
+      ctx.moveTo(-6, -3);
+      ctx.lineTo(2, -3);
+      ctx.quadraticCurveTo(7, 0, 7, 0);
+      ctx.quadraticCurveTo(7, 0, 2, 3);
+      ctx.lineTo(-6, 3);
+      ctx.quadraticCurveTo(-8, 0, -6, -3);
+      ctx.closePath();
+      ctx.strokeStyle = '#000000';
+      ctx.lineWidth = 1.2;
       ctx.stroke();
       
       ctx.restore();
@@ -512,20 +552,31 @@ export function initTanks(container) {
 
     // Blocks
     for (let b of blocks) {
-      if (AABB(entity.x, entity.y, entity.radius, b.x, b.y, b.w, b.h)) {
+      const closestX = Math.max(b.x, Math.min(entity.x, b.x + b.w));
+      const closestY = Math.max(b.y, Math.min(entity.y, b.y + b.h));
+      const distX = entity.x - closestX;
+      const distY = entity.y - closestY;
+      const distance = Math.hypot(distX, distY);
+      
+      if (distance < entity.radius) {
         collided = true;
-        // Simple slide resolution
-        // Find closest edge
-        const distL = Math.abs(entity.x - b.x);
-        const distR = Math.abs(entity.x - (b.x + b.w));
-        const distT = Math.abs(entity.y - b.y);
-        const distB = Math.abs(entity.y - (b.y + b.h));
-        const min = Math.min(distL, distR, distT, distB);
-        
-        if (min === distL) entity.x = b.x - entity.radius;
-        else if (min === distR) entity.x = b.x + b.w + entity.radius;
-        else if (min === distT) entity.y = b.y - entity.radius;
-        else if (min === distB) entity.y = b.y + b.h + entity.radius;
+        if (distance > 0.001) {
+          // Smoothly push out along normal vector to allow perfect sliding
+          const overlap = entity.radius - distance;
+          entity.x += (distX / distance) * overlap;
+          entity.y += (distY / distance) * overlap;
+        } else {
+          // If perfectly centered, resolve by pushing to the closest side
+          const distL = entity.x - b.x;
+          const distR = (b.x + b.w) - entity.x;
+          const distT = entity.y - b.y;
+          const distB = (b.y + b.h) - entity.y;
+          const min = Math.min(distL, distR, distT, distB);
+          if (min === distL) entity.x = b.x - entity.radius;
+          else if (min === distR) entity.x = b.x + b.w + entity.radius;
+          else if (min === distT) entity.y = b.y - entity.radius;
+          else if (min === distB) entity.y = b.y + b.h + entity.radius;
+        }
       }
     }
     return collided;
@@ -568,7 +619,15 @@ export function initTanks(container) {
     if (Date.now() - tank.lastShot < tank.cooldown) return;
 
     tank.lastShot = Date.now();
-    const angle = tank.turretAngle; // Use exact turret angle for accuracy
+    
+    // Calculate the angle directly to target (tx, ty) for perfect player accuracy!
+    let angle = tank.turretAngle;
+    if (tank.isPlayer) {
+      angle = Math.atan2(ty - tank.y, tx - tank.x);
+      // Snap turret to the clicked angle instantly so the barrel matches the shot!
+      tank.turretAngle = angle;
+    }
+    
     const speed = tank.isPlayer ? 6 : 4;
     // Spawn bullet at end of barrel
     const bx = tank.x + Math.cos(angle) * (tank.radius + 15);
@@ -893,11 +952,20 @@ export function initTanks(container) {
     
     // Draw Aiming Guide for Player
     if (!isGameOver) {
+      // Outer faint glowing path
       ctx.beginPath();
       ctx.moveTo(player.x, player.y);
       ctx.lineTo(mouseX, mouseY);
-      ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
-      ctx.setLineDash([5, 5]);
+      ctx.strokeStyle = 'rgba(239, 68, 68, 0.15)';
+      ctx.lineWidth = 6;
+      ctx.stroke();
+
+      // Sharp dashed laser guide
+      ctx.beginPath();
+      ctx.moveTo(player.x, player.y);
+      ctx.lineTo(mouseX, mouseY);
+      ctx.strokeStyle = 'rgba(239, 68, 68, 0.65)';
+      ctx.setLineDash([8, 4]);
       ctx.lineWidth = 2;
       ctx.stroke();
       ctx.setLineDash([]);
