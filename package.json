@@ -1,5 +1,13 @@
 {
+  "name": "playhaus",
+  "version": "1.0.0",
+  "scripts": {
+    "build": "mkdir -p www && cp -R index.html game.html locker.html profile.html privacy.html terms.html styles.css manifest.json sw.js js img data www 2>/dev/null || true"
+  },
   "dependencies": {
+    "@capacitor/cli": "^8.3.4",
+    "@capacitor/core": "^8.3.4",
+    "@capacitor/ios": "^8.3.4",
     "@supabase/supabase-js": "^2.105.4"
   }
 }

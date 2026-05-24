@@ -1,0 +1,10 @@
+{
+  "appId": "com.aaronstephens.playhaus",
+  "appName": "Playhaus",
+  "webDir": "www",
+  "bundledWebRuntime": false,
+  "server": {
+    "url": "https://theplayhaus.vercel.app",
+    "cleartext": true
+  }
+}
