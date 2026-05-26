@@ -278,49 +278,63 @@ if (game) {
       
       preScreen.style.display = 'none';
       gameContainer.style.display = 'block';
+      document.body.classList.add('game-active');
       
       // Trigger Countdown!
       startCountdown(() => {
-        // Auto-center viewport again to ensure focus is perfectly locked
-        gameContainer.scrollIntoView({ behavior: 'auto', block: 'center' });
-        const targetScroll = gameContainer.offsetTop - (window.innerHeight - 700) / 2;
-        window.scrollTo({ top: targetScroll, behavior: 'auto' });
+        function centerActiveGame() {
+          setTimeout(() => {
+            gameContainer.scrollIntoView({ behavior: 'auto', block: 'center' });
+            const containerHeight = gameContainer.offsetHeight || 700;
+            const targetScroll = gameContainer.offsetTop - (window.innerHeight - containerHeight) / 2;
+            window.scrollTo({ top: targetScroll, behavior: 'auto' });
+          }, 60); // 60ms delay ensures browser layout calculations are final
+        }
 
         if (gameId === 'color-guess') {
           import('./games/color-guess.js').then(module => {
             module.init(gameContainer);
+            centerActiveGame();
           });
         } else if (gameId === 'higher-lower') {
           import('./games/higher-lower.js').then(module => {
             module.init(gameContainer);
+            centerActiveGame();
           });
         } else if (gameId === 'word-rush') {
           import('./games/word-rush.js').then(module => {
             module.init(gameContainer);
+            centerActiveGame();
           });
         } else if (gameId === 'word-gravity') {
           import('./games/word-gravity.js').then(module => {
             module.init(gameContainer);
+            centerActiveGame();
           });
         } else if (gameId === 'math-avalanche') {
           import('./games/math-avalanche.js').then(module => {
             module.init(gameContainer);
+            centerActiveGame();
           });
         } else if (gameId === 'tanks') {
           import('./games/tanks.js').then(module => {
             module.initTanks(gameContainer);
+            centerActiveGame();
           });
         } else if (gameId === 'cyber-bot') {
           import('./games/cyber-bot.js').then(module => {
             module.init(gameContainer);
+            centerActiveGame();
           });
         } else if (gameId === 'neon-plinko') {
           import('./games/neon-plinko.js').then(module => {
             module.init(gameContainer);
+            centerActiveGame();
           });
         } else if (gameId === 'pop-lock') {
           import('./games/pop-lock.js').then(module => {
             module.init(gameContainer);
+            centerActiveGame();
           });
         }
       });

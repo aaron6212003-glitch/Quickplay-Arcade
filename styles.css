@@ -2448,7 +2448,7 @@ body {
   border-radius: 24px !important;
   padding: 40px 30px !important;
   box-shadow: 0 20px 40px rgba(0,0,0,0.4) !important;
-  display: flex !important;
+  display: flex;
   flex-direction: column !important;
   align-items: center !important;
   width: 100% !important;
@@ -2551,6 +2551,71 @@ body {
 }
 .pre-screen-start-btn:active {
   transform: translateY(0) scale(0.98) !important;
+}
+
+/* ==========================================================================
+   🎮 FULLSCREEN DISTRACTION-FREE ARCADE CONSOLE VIEW (body.game-active)
+   ========================================================================== */
+
+body.game-active #top-nav {
+  display: none !important;
+}
+
+body.game-active #bottom-nav {
+  display: none !important;
+}
+
+body.game-active .back-link {
+  display: none !important;
+}
+
+body.game-active #game-header {
+  display: none !important;
+}
+
+body.game-active #game-pre-screen {
+  display: none !important;
+}
+
+body.game-active .more-games-section {
+  display: none !important;
+}
+
+body.game-active {
+  background: radial-gradient(circle, #0e0e1e 0%, #03030a 100%) !important;
+  overscroll-behavior-y: none !important;
+  overflow: hidden !important;
+}
+
+body.game-active .game-main {
+  padding: 0 !important;
+  margin: 0 !important;
+  height: 100vh !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  overflow: hidden !important;
+  box-sizing: border-box !important;
+}
+
+body.game-active .container {
+  padding: 0 !important;
+  margin: 0 !important;
+  width: 100% !important;
+  max-width: 550px !important;
+  height: 100vh !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+body.game-active #game-container {
+  margin: 0 auto !important;
+  width: 100% !important;
+  max-height: 100vh !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
 }
 
 

@@ -27,6 +27,44 @@ export function init(container) {
   wrapper.appendChild(canvas);
 
   container.appendChild(wrapper);
+
+  // Floating Exit Button (Translucent glassmorphic Close)
+  const exitBtn = document.createElement('button');
+  exitBtn.innerHTML = '✕';
+  exitBtn.style.cssText = `
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.12);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: white;
+    font-size: 16px;
+    font-weight: 800;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    transition: background 0.2s, transform 0.1s;
+  `;
+  exitBtn.addEventListener('pointerdown', (e) => {
+    e.stopPropagation();
+    e.preventDefault();
+    cancelAnimationFrame(animationId);
+    document.body.classList.remove('game-active');
+    window.location.href = 'index.html';
+  });
+  // hover effect
+  exitBtn.addEventListener('mouseenter', () => { exitBtn.style.background = 'rgba(255, 255, 255, 0.25)'; exitBtn.style.transform = 'scale(1.05)'; });
+  exitBtn.addEventListener('mouseleave', () => { exitBtn.style.background = 'rgba(255, 255, 255, 0.12)'; exitBtn.style.transform = 'scale(1)'; });
+  
+  wrapper.appendChild(exitBtn);
+
   const ctx = canvas.getContext('2d');
 
   // --- AUDIO SYNTHESISER (Web Audio API) ---
@@ -93,8 +131,8 @@ export function init(container) {
 
   // Dial Properties
   const centerX = canvas.width / 2;
-  const centerY = canvas.height / 2 + 30; // slightly offset down to leave room for lock shackle
-  const dialRadius = 110;
+  const centerY = canvas.height / 2; // perfectly centered vertically
+  const dialRadius = 140; // larger dial for a bold arcade machine aesthetic!
 
   // Indicator Needle
   let indicatorAngle = -Math.PI / 2; // Starts at top
@@ -111,6 +149,7 @@ export function init(container) {
   let screenShake = 0;
   let shackleYOffset = 0; // Animates up when unlocked
   let dialScale = 1; // Pulses on click
+  let buttonScale = 1; // Pulses on click
   let backgroundPulse = 0;
 
   // Spawn target at a safe angle away from current indicator
@@ -155,11 +194,11 @@ export function init(container) {
       this.decay = Math.random() * 0.03 + 0.02;
     }
 
-    update() {
-      this.x += this.vx;
-      this.y += this.vy;
-      this.vy += 0.12; // gravity drift
-      this.life -= this.decay;
+    update(dt) {
+      this.x += this.vx * dt;
+      this.y += this.vy * dt;
+      this.vy += 0.12 * dt; // gravity drift
+      this.life -= this.decay * dt;
     }
 
     draw(c) {
@@ -242,26 +281,26 @@ export function init(container) {
   }
 
   // --- GAME LOOP ---
-  function update() {
+  function update(dt) {
     // Screen Shake Decay
     if (screenShake > 0) {
-      screenShake *= 0.9;
+      screenShake *= Math.pow(0.9, dt);
       if (screenShake < 0.2) screenShake = 0;
     }
 
     // Dial Pulse Decay
     if (dialScale > 1) {
-      dialScale -= 0.015;
+      dialScale -= 0.015 * dt;
     }
 
     // Background Pulse Decay
     if (backgroundPulse > 0) {
-      backgroundPulse -= 0.015;
+      backgroundPulse -= 0.015 * dt;
     }
 
     if (!isGameOver && !isLevelCleared) {
-      // Advance indicator needle angle
-      indicatorAngle += speed;
+      // Advance indicator needle angle scaled by delta time!
+      indicatorAngle += speed * dt;
       // keep in standard bounds
       if (indicatorAngle > Math.PI * 2) indicatorAngle -= Math.PI * 2;
       if (indicatorAngle < 0) indicatorAngle += Math.PI * 2;
@@ -270,7 +309,7 @@ export function init(container) {
     // Shackle unlocking animation
     if (isLevelCleared) {
       if (shackleYOffset > -40) {
-        shackleYOffset -= 4; // slide shackle up
+        shackleYOffset -= 4 * dt; // slide shackle up
       } else {
         // After shackle pops, load next level
         isLevelCleared = false;
@@ -281,7 +320,7 @@ export function init(container) {
 
     // Update Particles
     for (let i = particles.length - 1; i >= 0; i--) {
-      particles[i].update();
+      particles[i].update(dt);
       if (particles[i].life <= 0) {
         particles.splice(i, 1);
       }
@@ -315,27 +354,74 @@ export function init(container) {
     // ==========================================
     ctx.save();
     ctx.translate(centerX, centerY - 60 + shackleYOffset);
-    ctx.strokeStyle = '#64748b'; // Steel grey
-    ctx.lineWidth = 22;
-    ctx.lineCap = 'round';
     ctx.shadowColor = 'rgba(0, 0, 0, 0.4)';
     ctx.shadowBlur = 10;
     ctx.shadowOffsetY = 6;
+    ctx.lineCap = 'round';
     
+    // U-Bar Base shadow/dark layer
+    ctx.strokeStyle = '#1e293b'; // dark border steel
+    ctx.lineWidth = 26;
     ctx.beginPath();
-    // Drawn as a U shape
     ctx.moveTo(-65, 30);
     ctx.lineTo(-65, -45);
     ctx.arc(0, -45, 65, Math.PI, 0); // U-loop top arch
     ctx.lineTo(65, 30);
     ctx.stroke();
+
+    // U-Bar Main steel body
+    ctx.strokeStyle = '#475569'; // steel grey
+    ctx.lineWidth = 20;
+    ctx.beginPath();
+    ctx.moveTo(-65, 30);
+    ctx.lineTo(-65, -45);
+    ctx.arc(0, -45, 65, Math.PI, 0);
+    ctx.lineTo(65, 30);
+    ctx.stroke();
+
+    // U-Bar Core shiny cylinder reflection
+    ctx.strokeStyle = '#94a3b8'; // light steel
+    ctx.lineWidth = 10;
+    ctx.beginPath();
+    ctx.moveTo(-65, 30);
+    ctx.lineTo(-65, -45);
+    ctx.arc(0, -45, 65, Math.PI, 0);
+    ctx.lineTo(65, 30);
+    ctx.stroke();
     
-    // Gold metallic accent rings on shackle bases
-    ctx.strokeStyle = '#d97706';
+    // U-Bar Brightest highlight (offset slightly left to simulate directional lighting!)
+    ctx.save();
+    ctx.strokeStyle = '#ffffff';
+    ctx.lineWidth = 3;
+    ctx.globalAlpha = 0.5;
+    ctx.beginPath();
+    ctx.moveTo(-68, 30);
+    ctx.lineTo(-68, -45);
+    ctx.arc(0, -45, 68, Math.PI, 0);
+    ctx.lineTo(62, 30);
+    ctx.stroke();
+    ctx.restore();
+    
+    // Shiny gold brass bushing bases
     ctx.lineWidth = 6;
+    ctx.lineCap = 'butt';
+    
+    const leftBushGrad = ctx.createLinearGradient(-80, 0, -50, 0);
+    leftBushGrad.addColorStop(0, '#78350f'); // Dark gold
+    leftBushGrad.addColorStop(0.5, '#f59e0b'); // Bright brass
+    leftBushGrad.addColorStop(1, '#d97706'); // Medium gold
+    ctx.strokeStyle = leftBushGrad;
     ctx.beginPath();
     ctx.moveTo(-78, 20);
     ctx.lineTo(-52, 20);
+    ctx.stroke();
+    
+    const rightBushGrad = ctx.createLinearGradient(52, 0, 82, 0);
+    rightBushGrad.addColorStop(0, '#78350f');
+    rightBushGrad.addColorStop(0.5, '#f59e0b');
+    rightBushGrad.addColorStop(1, '#d97706');
+    ctx.strokeStyle = rightBushGrad;
+    ctx.beginPath();
     ctx.moveTo(52, 20);
     ctx.lineTo(78, 20);
     ctx.stroke();
@@ -350,15 +436,25 @@ export function init(container) {
     // Scale body on hits
     ctx.scale(dialScale, dialScale);
 
-    // Drop Shadow
-    ctx.shadowColor = 'rgba(0, 0, 0, 0.6)';
-    ctx.shadowBlur = 20;
-    ctx.shadowOffsetY = 15;
-
-    // Outermost steel rim
+    // Dynamic Outer Neon Glow Ring
+    ctx.save();
     ctx.beginPath();
     ctx.arc(0, 0, dialRadius + 45, 0, Math.PI * 2);
-    ctx.fillStyle = 'linear-gradient(135deg, #1e293b, #0f172a)'; // slate grey
+    ctx.shadowColor = level % 2 === 0 ? '#ec4899' : '#06b6d4';
+    ctx.shadowBlur = 25;
+    ctx.strokeStyle = level % 2 === 0 ? 'rgba(236,72,153,0.5)' : 'rgba(6,182,212,0.5)';
+    ctx.lineWidth = 4;
+    ctx.stroke();
+    ctx.restore();
+
+    // Drop Shadow for main casing body
+    ctx.shadowColor = 'rgba(0, 0, 0, 0.7)';
+    ctx.shadowBlur = 24;
+    ctx.shadowOffsetY = 15;
+
+    // Outermost steel rim dial body
+    ctx.beginPath();
+    ctx.arc(0, 0, dialRadius + 45, 0, Math.PI * 2);
     const casingGrad = ctx.createRadialGradient(0, 0, 80, 0, 0, dialRadius + 45);
     casingGrad.addColorStop(0, '#1e293b');
     casingGrad.addColorStop(0.7, '#0f172a');
@@ -366,38 +462,96 @@ export function init(container) {
     ctx.fillStyle = casingGrad;
     ctx.fill();
     
-    // Glowing Neon circular slot path
+    // Reset shadow
+    ctx.shadowColor = 'transparent';
+    ctx.shadowBlur = 0;
+    ctx.shadowOffsetY = 0;
+
+    // Brushed Silver Outer Bezel ring
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(0, 0, dialRadius + 42, 0, Math.PI * 2);
+    const metalGrad = ctx.createLinearGradient(-dialRadius - 45, -dialRadius - 45, dialRadius + 45, dialRadius + 45);
+    metalGrad.addColorStop(0, '#f1f5f9');
+    metalGrad.addColorStop(0.25, '#94a3b8');
+    metalGrad.addColorStop(0.5, '#475569');
+    metalGrad.addColorStop(0.75, '#cbd5e1');
+    metalGrad.addColorStop(1, '#1e293b');
+    ctx.strokeStyle = metalGrad;
+    ctx.lineWidth = 6;
+    ctx.stroke();
+    ctx.restore();
+
+    // Padlock dynamic neon glowing background ring
+    ctx.beginPath();
+    ctx.arc(0, 0, dialRadius, 0, Math.PI * 2);
+    ctx.strokeStyle = level % 2 === 0 ? 'rgba(236, 72, 153, 0.12)' : 'rgba(34, 211, 238, 0.12)';
+    ctx.lineWidth = 28;
+    ctx.stroke();
+
+    // 3D Neon Level Progress Ring (drawn around dialRadius in slot)
+    const popped = targetPops - remainingPops;
+    const progressRatio = popped / targetPops;
+    if (progressRatio > 0) {
+      ctx.save();
+      ctx.beginPath();
+      // Clockwise progress starting from 12 o'clock (-Math.PI / 2)
+      ctx.arc(0, 0, dialRadius, -Math.PI / 2, -Math.PI / 2 + progressRatio * Math.PI * 2);
+      ctx.strokeStyle = level % 2 === 0 ? '#ec4899' : '#06b6d4';
+      ctx.lineWidth = 14;
+      ctx.lineCap = 'round';
+      ctx.shadowColor = level % 2 === 0 ? '#ec4899' : '#06b6d4';
+      ctx.shadowBlur = 18;
+      ctx.stroke();
+      ctx.restore();
+    }
+
+
+    // Glowing Neon circular slot path outline
     ctx.beginPath();
     ctx.arc(0, 0, dialRadius, 0, Math.PI * 2);
     ctx.strokeStyle = 'rgba(255, 255, 255, 0.05)';
     ctx.lineWidth = 14;
     ctx.stroke();
 
-    // Outer rim highlight
+    // Diagonal Glass Reflection Highlight sweep
+    ctx.save();
     ctx.beginPath();
-    ctx.arc(0, 0, dialRadius + 43, 0, Math.PI * 2);
-    ctx.strokeStyle = 'rgba(255,255,255,0.06)';
-    ctx.lineWidth = 2;
-    ctx.stroke();
-
-    // Center metallic combination hub wheel
+    ctx.arc(0, 0, dialRadius + 38, 0, Math.PI * 2);
+    ctx.clip(); // clip inside bevel
+    const shineGrad = ctx.createLinearGradient(-150, -150, 150, 150);
+    shineGrad.addColorStop(0, 'rgba(255, 255, 255, 0.18)');
+    shineGrad.addColorStop(0.28, 'rgba(255, 255, 255, 0.06)');
+    shineGrad.addColorStop(0.35, 'rgba(255, 255, 255, 0)');
+    shineGrad.addColorStop(1, 'rgba(255, 255, 255, 0)');
+    ctx.fillStyle = shineGrad;
+    ctx.fill();
+    ctx.restore();
+    // Center metallic combination hub wheel (radial brushed metal safe dial texture)
+    ctx.save();
     ctx.beginPath();
     ctx.arc(0, 0, dialRadius - 38, 0, Math.PI * 2);
-    const innerGrad = ctx.createRadialGradient(0, 0, 10, 0, 0, dialRadius - 38);
-    innerGrad.addColorStop(0, '#334155');
-    innerGrad.addColorStop(0.8, '#1e293b');
-    innerGrad.addColorStop(1, '#0f172a');
+    const innerGrad = ctx.createRadialGradient(0, 0, 5, 0, 0, dialRadius - 38);
+    innerGrad.addColorStop(0, '#475569'); // slate grey steel
+    innerGrad.addColorStop(0.35, '#1e293b'); // dark steel
+    innerGrad.addColorStop(0.7, '#334155'); // medium steel
+    innerGrad.addColorStop(0.9, '#0f172a'); // deep steel bevel
+    innerGrad.addColorStop(1, '#1e293b');
     ctx.fillStyle = innerGrad;
     ctx.shadowBlur = 10;
     ctx.shadowOffsetY = 4;
+    ctx.shadowColor = 'rgba(0, 0, 0, 0.4)';
     ctx.fill();
+    ctx.restore();
     
-    // Inner glass bezel line
+    // Inner glass bezel line / glossy shine border
+    ctx.save();
     ctx.beginPath();
     ctx.arc(0, 0, dialRadius - 40, 0, Math.PI * 2);
-    ctx.strokeStyle = 'rgba(255,255,255,0.1)';
+    ctx.strokeStyle = 'rgba(255,255,255,0.12)';
     ctx.lineWidth = 1.5;
     ctx.stroke();
+    ctx.restore();
 
     // ==========================================
     // 3. DRAW TARGET POP LOCK DOT
@@ -501,11 +655,81 @@ export function init(container) {
     // Standard control message
     if (!isGameOver && !isLevelCleared) {
       ctx.textAlign = 'center';
-      ctx.font = '700 15px "Outfit", sans-serif';
+      ctx.font = '700 13px "Outfit", sans-serif';
       ctx.fillStyle = 'rgba(255, 255, 255, 0.45)';
-      ctx.fillText('TAP/CLICK ANYWHERE WHEN RED INDICATOR COVERS TARGET!', canvas.width / 2, canvas.height - 40);
+      ctx.fillText('TAP THE RED DOME BUTTON WHEN CYAN DOT OVERLAPS TARGET!', canvas.width / 2, canvas.height - 150);
     }
     ctx.restore();
+
+    // ==========================================
+    // DRAW ARCADE "TAP" PUSH BUTTON AT BOTTOM
+    // ==========================================
+    if (!isGameOver) {
+      ctx.save();
+      const btnY = canvas.height - 80;
+      
+      // Let the button visually compress down when pressed!
+      ctx.translate(centerX, btnY);
+      ctx.scale(buttonScale, buttonScale);
+      
+      const btnRad = 45;
+      
+      // Button Outer Chrome Bezel
+      ctx.beginPath();
+      ctx.arc(0, 0, btnRad, 0, Math.PI * 2);
+      const bezelGrad = ctx.createLinearGradient(-40, -40, 40, 40);
+      bezelGrad.addColorStop(0, '#cbd5e1'); // shiny light metal
+      bezelGrad.addColorStop(0.5, '#475569');
+      bezelGrad.addColorStop(1, '#0f172a'); // dark metal shadow
+      ctx.fillStyle = bezelGrad;
+      ctx.shadowColor = 'rgba(0,0,0,0.5)';
+      ctx.shadowBlur = 12;
+      ctx.shadowOffsetY = 6;
+      ctx.fill();
+      
+      // Bezel inner silver highlight ring
+      ctx.beginPath();
+      ctx.arc(0, 0, btnRad - 3, 0, Math.PI * 2);
+      ctx.strokeStyle = '#f1f5f9';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
+      // Red Dome Button (3D radial sphere gradient)
+      ctx.beginPath();
+      ctx.arc(0, 0, btnRad - 8, 0, Math.PI * 2);
+      const domeGrad = ctx.createRadialGradient(-10, -10, 2, 0, 0, btnRad - 8);
+      // Make it glow even brighter when clicked!
+      if (buttonScale < 0.98) {
+        domeGrad.addColorStop(0, '#fca5a5'); // super hot pink-red
+        domeGrad.addColorStop(0.4, '#ef4444');
+        domeGrad.addColorStop(1, '#7f1d1d');
+      } else {
+        domeGrad.addColorStop(0, '#f87171');
+        domeGrad.addColorStop(0.6, '#dc2626');
+        domeGrad.addColorStop(1, '#991b1b');
+      }
+      ctx.fillStyle = domeGrad;
+      ctx.shadowColor = '#ef4444';
+      ctx.shadowBlur = buttonScale < 0.98 ? 25 : 15;
+      ctx.fill();
+
+      // Sleek shiny curved gloss highlight on the red dome itself
+      ctx.beginPath();
+      ctx.ellipse(-10, -12, 16, 8, Math.PI / 4, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.35)';
+      ctx.fill();
+
+      // "TAP" text inside button
+      ctx.font = '900 18px "Outfit", sans-serif';
+      ctx.fillStyle = '#ffffff';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.shadowBlur = 4;
+      ctx.shadowColor = '#000000';
+      ctx.shadowOffsetY = 1;
+      ctx.fillText('TAP', 0, 0);
+      ctx.restore();
+    }
 
     // ==========================================
     // 8. GAME OVER OVERLAY SCREEN
@@ -567,23 +791,23 @@ export function init(container) {
       // 1. Play Again Button (Neon pink)
       ctx.fillStyle = '#ec4899';
       ctx.beginPath();
-      ctx.roundRect(-130, 170, 260, 48, 24);
+      ctx.roundRect(-130, 150, 260, 48, 24);
       ctx.fill();
       
       ctx.fillStyle = '#ffffff';
       ctx.font = '900 16px "Outfit", sans-serif';
-      ctx.fillText('TRY AGAIN', 0, 194);
+      ctx.fillText('TRY AGAIN', 0, 174);
 
       // 2. Exit to Lobby Button (Outline style)
       ctx.strokeStyle = 'rgba(255,255,255,0.2)';
       ctx.lineWidth = 2;
       ctx.beginPath();
-      ctx.roundRect(-130, 230, 260, 48, 24);
+      ctx.roundRect(-130, 210, 260, 48, 24);
       ctx.stroke();
       
       ctx.fillStyle = 'rgba(255,255,255,0.7)';
       ctx.font = '900 16px "Outfit", sans-serif';
-      ctx.fillText('EXIT TO LOBBY', 0, 254);
+      ctx.fillText('EXIT TO LOBBY', 0, 234);
 
       ctx.restore();
     }
@@ -593,59 +817,63 @@ export function init(container) {
 
   let frameCount = 0;
   let animationId;
+  let lastTime = performance.now();
 
-  function loop() {
+  function loop(timestamp) {
+    if (!timestamp) timestamp = performance.now();
+    const dt = (timestamp - lastTime) / 16.666;
+    lastTime = timestamp;
+    
+    const cappedDt = Math.min(dt, 3.0);
+    
     frameCount++;
-    update();
+    update(cappedDt);
     draw();
     animationId = requestAnimationFrame(loop);
   }
 
-  // --- MOUSE & TOUCH EVENT HANDLERS ---
-  function handleInput(e) {
-    e.preventDefault();
-    
-    if (isGameOver) {
-      // Check which button was tapped
-      const rect = canvas.getBoundingClientRect();
-      const scaleX = canvas.width / rect.width;
-      const scaleY = canvas.height / rect.height;
-      const clickX = ((e.touches ? e.touches[0].clientX : e.clientX) - rect.left) * scaleX;
-      const clickY = ((e.touches ? e.touches[0].clientY : e.clientY) - rect.top) * scaleY;
+  // --- POINTER EVENT HANDLERS (TAP ANYWHERE) ---
+  function handlePointerDown(e) {
+    const rect = canvas.getBoundingClientRect();
+    const scaleX = canvas.width / rect.width;
+    const scaleY = canvas.height / rect.height;
+    const clickX = (e.clientX - rect.left) * scaleX;
+    const clickY = (e.clientY - rect.top) * scaleY;
 
-      // Try Again Button box: centered horizontally at centerX, y range: [centerY - 20 + 170, centerY - 20 + 218]
+    if (isGameOver) {
       const btnTryMinX = centerX - 130;
       const btnTryMaxX = centerX + 130;
-      const btnTryMinY = centerY - 20 + 170;
-      const btnTryMaxY = centerY - 20 + 218;
+      const btnTryMinY = centerY + 150; // aligned with new centerY
+      const btnTryMaxY = centerY + 198;
 
-      // Exit Button box: centered horizontally at centerX, y range: [centerY - 20 + 230, centerY - 20 + 278]
       const btnExitMinX = centerX - 130;
       const btnExitMaxX = centerX + 130;
-      const btnExitMinY = centerY - 20 + 230;
-      const btnExitMaxY = centerY - 20 + 278;
+      const btnExitMinY = centerY + 210;
+      const btnExitMaxY = centerY + 258;
 
       if (clickX >= btnTryMinX && clickX <= btnTryMaxX && clickY >= btnTryMinY && clickY <= btnTryMaxY) {
-        // Restart the game
+        e.preventDefault();
         score = 0;
         level = 1;
         isGameOver = false;
         initLevel();
       } else if (clickX >= btnExitMinX && clickX <= btnExitMaxX && clickY >= btnExitMinY && clickY <= btnExitMaxY) {
-        // Exit to main lobby
+        e.preventDefault();
         cancelAnimationFrame(animationId);
+        document.body.classList.remove('game-active');
         window.location.href = 'index.html';
       }
       return;
     }
 
-    // Normal gameplay hit checking
+    // Normal gameplay - tap ANYWHERE on the canvas!
+    e.preventDefault();
+    dialScale = 1.06; // physical bounce on click
     handleTap();
   }
 
-  // Bind Mouse & Touch Taps
-  canvas.addEventListener('mousedown', handleInput);
-  canvas.addEventListener('touchstart', handleInput, { passive: false });
+  // Bind Pointer Event
+  canvas.addEventListener('pointerdown', handlePointerDown);
 
   // --- INITIALIZATION ---
   initLevel();
