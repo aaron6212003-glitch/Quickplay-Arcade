@@ -561,24 +561,29 @@ export function init(container) {
       ctx.fillText(score, 80, 120);
 
       // Buttons
-      // Retrying and Exit instructions
-      ctx.font = '700 15px "Outfit", sans-serif';
-      ctx.fillStyle = '#ffffff';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
       
-      // Play Again Button (Procedural representation)
+      // 1. Play Again Button (Neon pink)
       ctx.fillStyle = '#ec4899';
       ctx.beginPath();
-      ctx.roundRect(-130, 180, 260, 50, 25);
+      ctx.roundRect(-130, 170, 260, 48, 24);
       ctx.fill();
       
       ctx.fillStyle = '#ffffff';
       ctx.font = '900 16px "Outfit", sans-serif';
-      ctx.fillText('TRY AGAIN', 0, 205);
+      ctx.fillText('TRY AGAIN', 0, 194);
 
-      // Exit instructions
-      ctx.font = '700 13px "Outfit", sans-serif';
-      ctx.fillStyle = 'rgba(255,255,255,0.4)';
-      ctx.fillText('TAP ANYWHERE OUTSIDE THE CARD TO RETURN TO LOBBY', 0, 265);
+      // 2. Exit to Lobby Button (Outline style)
+      ctx.strokeStyle = 'rgba(255,255,255,0.2)';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.roundRect(-130, 230, 260, 48, 24);
+      ctx.stroke();
+      
+      ctx.fillStyle = 'rgba(255,255,255,0.7)';
+      ctx.font = '900 16px "Outfit", sans-serif';
+      ctx.fillText('EXIT TO LOBBY', 0, 254);
 
       ctx.restore();
     }
@@ -601,26 +606,32 @@ export function init(container) {
     e.preventDefault();
     
     if (isGameOver) {
-      // Check if clicked the "Try Again" button boundary
+      // Check which button was tapped
       const rect = canvas.getBoundingClientRect();
       const scaleX = canvas.width / rect.width;
       const scaleY = canvas.height / rect.height;
       const clickX = ((e.touches ? e.touches[0].clientX : e.clientX) - rect.left) * scaleX;
       const clickY = ((e.touches ? e.touches[0].clientY : e.clientY) - rect.top) * scaleY;
 
-      // Retrying Button box: centered horizontally at centerX, y range: [centerY - 20 + 180, centerY - 20 + 230]
-      const btnMinX = centerX - 130;
-      const btnMaxX = centerX + 130;
-      const btnMinY = centerY - 20 + 180;
-      const btnMaxY = centerY - 20 + 230;
+      // Try Again Button box: centered horizontally at centerX, y range: [centerY - 20 + 170, centerY - 20 + 218]
+      const btnTryMinX = centerX - 130;
+      const btnTryMaxX = centerX + 130;
+      const btnTryMinY = centerY - 20 + 170;
+      const btnTryMaxY = centerY - 20 + 218;
 
-      if (clickX >= btnMinX && clickX <= btnMaxX && clickY >= btnMinY && clickY <= btnMaxY) {
+      // Exit Button box: centered horizontally at centerX, y range: [centerY - 20 + 230, centerY - 20 + 278]
+      const btnExitMinX = centerX - 130;
+      const btnExitMaxX = centerX + 130;
+      const btnExitMinY = centerY - 20 + 230;
+      const btnExitMaxY = centerY - 20 + 278;
+
+      if (clickX >= btnTryMinX && clickX <= btnTryMaxX && clickY >= btnTryMinY && clickY <= btnTryMaxY) {
         // Restart the game
         score = 0;
         level = 1;
         isGameOver = false;
         initLevel();
-      } else {
+      } else if (clickX >= btnExitMinX && clickX <= btnExitMaxX && clickY >= btnExitMinY && clickY <= btnExitMaxY) {
         // Exit to main lobby
         cancelAnimationFrame(animationId);
         window.location.href = 'index.html';

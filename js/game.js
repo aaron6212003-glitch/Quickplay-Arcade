@@ -149,6 +149,123 @@ if (game) {
     
     let loadingGame = false;
     const startBtn = document.getElementById('start-game-btn');
+    
+    function startCountdown(callback) {
+      gameContainer.innerHTML = '';
+      
+      const overlay = document.createElement('div');
+      overlay.id = 'countdown-overlay';
+      overlay.style.cssText = `
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        max-width: 550px;
+        height: 700px;
+        background: radial-gradient(circle, #101026 0%, #050512 100%);
+        border: 8px solid #334155;
+        border-radius: 16px;
+        color: #fff;
+        font-family: 'Outfit', sans-serif;
+        box-shadow: 0 15px 30px rgba(0,0,0,0.5);
+        margin: 0 auto;
+        position: relative;
+        overflow: hidden;
+      `;
+      
+      const numberEl = document.createElement('div');
+      numberEl.style.cssText = `
+        font-size: 8rem;
+        font-weight: 900;
+        background: linear-gradient(135deg, #FF6B6B, #A78BFA, #38BDF8);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        transform: scale(0.5);
+        opacity: 0;
+        transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.4s ease;
+      `;
+      
+      const labelEl = document.createElement('div');
+      labelEl.innerText = "GET READY";
+      labelEl.style.cssText = `
+        font-size: 1.2rem;
+        font-weight: 800;
+        color: rgba(255, 255, 255, 0.4);
+        letter-spacing: 4px;
+        margin-top: 20px;
+        text-transform: uppercase;
+      `;
+      
+      overlay.appendChild(numberEl);
+      overlay.appendChild(labelEl);
+      gameContainer.appendChild(overlay);
+      
+      // Auto-center viewport directly onto the countdown card!
+      gameContainer.scrollIntoView({ behavior: 'auto', block: 'center' });
+      const targetScroll = gameContainer.offsetTop - (window.innerHeight - 700) / 2;
+      window.scrollTo({ top: targetScroll, behavior: 'auto' });
+
+      // Synthesize Countdown Audio
+      const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      function beep(freq, duration) {
+        try {
+          if (audioCtx.state === 'suspended') audioCtx.resume();
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          osc.connect(gain);
+          gain.connect(audioCtx.destination);
+          osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+          gain.gain.setValueAtTime(0.12, audioCtx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+          osc.start();
+          osc.stop(audioCtx.currentTime + duration + 0.05);
+        } catch (e) {
+          console.log("Audio count beep failed:", e);
+        }
+      }
+
+      let count = 3;
+      function tick() {
+        if (count > 0) {
+          numberEl.innerText = count;
+          beep(880, 0.15); // short crisp A5 beep
+          
+          // Trigger pop-up animations
+          numberEl.style.transform = 'scale(0.5)';
+          numberEl.style.opacity = '0';
+          setTimeout(() => {
+            numberEl.style.transform = 'scale(1.2)';
+            numberEl.style.opacity = '1';
+          }, 50);
+          
+          count--;
+          setTimeout(tick, 1000);
+        } else if (count === 0) {
+          numberEl.innerText = "GO!";
+          labelEl.innerText = "GET SET...";
+          beep(1760, 0.35); // high triumphant A6 chime
+          
+          numberEl.style.transform = 'scale(0.5)';
+          numberEl.style.opacity = '0';
+          setTimeout(() => {
+            numberEl.style.transform = 'scale(1.4)';
+            numberEl.style.opacity = '1';
+          }, 50);
+          
+          count--;
+          setTimeout(tick, 700);
+        } else {
+          // Finish and trigger load
+          gameContainer.innerHTML = '';
+          callback();
+        }
+      }
+      
+      // Start counting
+      tick();
+    }
+
     startBtn.addEventListener('click', () => {
       if (loadingGame) return;
       loadingGame = true;
@@ -159,54 +276,54 @@ if (game) {
       startBtn.style.opacity = "0.7";
       startBtn.style.cursor = "default";
       
-      // Wipe container to be absolutely safe from duplicate elements
-      gameContainer.innerHTML = '';
-      
       preScreen.style.display = 'none';
       gameContainer.style.display = 'block';
       
-      // Center the game container beautifully in the user's viewport
-      setTimeout(() => {
-        gameContainer.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      }, 100);
-      
-      if (gameId === 'color-guess') {
-        import('./games/color-guess.js').then(module => {
-          module.init(gameContainer);
-        });
-      } else if (gameId === 'higher-lower') {
-        import('./games/higher-lower.js').then(module => {
-          module.init(gameContainer);
-        });
-      } else if (gameId === 'word-rush') {
-        import('./games/word-rush.js').then(module => {
-          module.init(gameContainer);
-        });
-      } else if (gameId === 'word-gravity') {
-        import('./games/word-gravity.js').then(module => {
-          module.init(gameContainer);
-        });
-      } else if (gameId === 'math-avalanche') {
-        import('./games/math-avalanche.js').then(module => {
-          module.init(gameContainer);
-        });
-      } else if (gameId === 'tanks') {
-        import('./games/tanks.js').then(module => {
-          module.initTanks(gameContainer);
-        });
-      } else if (gameId === 'cyber-bot') {
-        import('./games/cyber-bot.js').then(module => {
-          module.init(gameContainer);
-        });
-      } else if (gameId === 'neon-plinko') {
-        import('./games/neon-plinko.js').then(module => {
-          module.init(gameContainer);
-        });
-      } else if (gameId === 'pop-lock') {
-        import('./games/pop-lock.js').then(module => {
-          module.init(gameContainer);
-        });
-      }
+      // Trigger Countdown!
+      startCountdown(() => {
+        // Auto-center viewport again to ensure focus is perfectly locked
+        gameContainer.scrollIntoView({ behavior: 'auto', block: 'center' });
+        const targetScroll = gameContainer.offsetTop - (window.innerHeight - 700) / 2;
+        window.scrollTo({ top: targetScroll, behavior: 'auto' });
+
+        if (gameId === 'color-guess') {
+          import('./games/color-guess.js').then(module => {
+            module.init(gameContainer);
+          });
+        } else if (gameId === 'higher-lower') {
+          import('./games/higher-lower.js').then(module => {
+            module.init(gameContainer);
+          });
+        } else if (gameId === 'word-rush') {
+          import('./games/word-rush.js').then(module => {
+            module.init(gameContainer);
+          });
+        } else if (gameId === 'word-gravity') {
+          import('./games/word-gravity.js').then(module => {
+            module.init(gameContainer);
+          });
+        } else if (gameId === 'math-avalanche') {
+          import('./games/math-avalanche.js').then(module => {
+            module.init(gameContainer);
+          });
+        } else if (gameId === 'tanks') {
+          import('./games/tanks.js').then(module => {
+            module.initTanks(gameContainer);
+          });
+        } else if (gameId === 'cyber-bot') {
+          import('./games/cyber-bot.js').then(module => {
+            module.init(gameContainer);
+          });
+        } else if (gameId === 'neon-plinko') {
+          import('./games/neon-plinko.js').then(module => {
+            module.init(gameContainer);
+          });
+        } else if (gameId === 'pop-lock') {
+          import('./games/pop-lock.js').then(module => {
+            module.init(gameContainer);
+          });
+        }
+      });
     });
   } else {
     comingSoon.style.display = 'block';
