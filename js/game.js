@@ -105,7 +105,7 @@ if (game) {
   const comingSoon = document.getElementById('coming-soon');
   const preScreen = document.getElementById('game-pre-screen');
   
-  const activeGames = ['color-guess', 'higher-lower', 'word-rush', 'word-gravity', 'math-avalanche', 'tanks', 'cyber-bot', 'neon-plinko'];
+  const activeGames = ['color-guess', 'higher-lower', 'word-rush', 'word-gravity', 'math-avalanche', 'tanks', 'cyber-bot', 'neon-plinko', 'pop-lock'];
   
   if (activeGames.includes(gameId)) {
     comingSoon.style.display = 'none';
@@ -200,6 +200,10 @@ if (game) {
         });
       } else if (gameId === 'neon-plinko') {
         import('./games/neon-plinko.js').then(module => {
+          module.init(gameContainer);
+        });
+      } else if (gameId === 'pop-lock') {
+        import('./games/pop-lock.js').then(module => {
           module.init(gameContainer);
         });
       }

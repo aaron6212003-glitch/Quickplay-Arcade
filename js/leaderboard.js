@@ -178,7 +178,8 @@ window.saveScore = async function(gameName, score) {
       'Color Guess':     { mult: 0.25, max: 100 }, // score / 4
       'Math Avalanche':  { mult: 0.3333, max: 100 }, // score / 3
       'Word Gravity':    { mult: 0.3333, max: 100 }, // score / 3
-      'Toy Tanks':       { mult: 0.1, max: 100 }  // score / 10
+      'Toy Tanks':       { mult: 0.1, max: 100 }, // score / 10
+      'Pop Lock':        { mult: 10.0, max: 100 }  // each target popped = 10 XP/Coins
     };
 
     const config = gameConfigs[gameName] || { mult: 0.1, max: 100 };
