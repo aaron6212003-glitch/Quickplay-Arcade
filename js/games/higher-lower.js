@@ -33,21 +33,54 @@ export function init(container) {
       }
       
       .hl-score-banner {
-        position: absolute; top: 22px; left: 0; right: 0; z-index: 10;
+        position: absolute; top: 18px; left: 0; right: 0; z-index: 10;
         display: flex; justify-content: center; gap: 15px; pointer-events: none;
       }
       .hl-score-pill {
-        background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(10px);
+        background: rgba(15, 23, 42, 0.75); backdrop-filter: blur(10px);
         -webkit-backdrop-filter: blur(10px);
-        padding: 8px 24px; border-radius: 50px; border: 1px solid rgba(255,255,255,0.08);
-        font-weight: 800; font-size: 1rem; color: #fff; text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+        padding: 6px 20px; border-radius: 50px; border: 1px solid rgba(255,255,255,0.08);
+        font-weight: 800; font-size: 0.9rem; color: #fff; text-shadow: 0 2px 4px rgba(0,0,0,0.5);
         box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+      }
+
+      /* Premium Top Question & Button Panel */
+      .hl-question-panel {
+        background: rgba(15, 23, 42, 0.65);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 16px;
+        padding: 14px 16px;
+        margin: 58px 12px 10px 12px; /* Margins to accommodate score banner and spacing */
+        text-align: center;
+        z-index: 10;
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+      }
+      .hl-question-text {
+        font-size: clamp(0.95rem, 3.5vw, 1.25rem);
+        font-weight: 700;
+        color: #fff;
+        line-height: 1.35;
+        margin-bottom: 10px;
+        padding: 0 5px;
+      }
+      .hl-question-btn-row {
+        display: flex;
+        justify-content: center;
+        gap: 12px;
+        width: 100%;
+        transition: opacity 0.2s ease;
+      }
+      .hl-question-btn-row.disabled {
+        pointer-events: none;
+        opacity: 0.45;
       }
       
       .hl-card {
         flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
         width: 100%; position: relative; transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.5s ease;
-        padding: 35px 20px; text-align: center; color: white; z-index: 2;
+        padding: clamp(12px, 3vh, 22px) 20px; text-align: center; color: white; z-index: 2;
         background: rgba(15, 23, 42, 0.45);
         backdrop-filter: blur(15px);
         -webkit-backdrop-filter: blur(15px);
@@ -81,53 +114,71 @@ export function init(container) {
       }
       
       .hl-vs-circle {
-        position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-        width: 64px; height: 64px;
+        position: absolute; top: 62.5%; left: 50%; transform: translate(-50%, -50%);
+        width: 50px; height: 50px;
         background: linear-gradient(135deg, #0f172a, #1e293b);
         border-radius: 50%;
         display: flex; align-items: center; justify-content: center; z-index: 10;
-        font-weight: 900; font-size: 1.15rem; color: #fff;
+        font-weight: 900; font-size: 1rem; color: #fff;
         border: 2px solid rgba(255,255,255,0.15);
-        box-shadow: 0 0 30px rgba(56, 189, 248, 0.25), inset 0 2px 4px rgba(255,255,255,0.2);
+        box-shadow: 0 0 20px rgba(56, 189, 248, 0.2), inset 0 2px 4px rgba(255,255,255,0.2);
         letter-spacing: 1px;
         transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
       }
       
       .hl-name {
-        font-size: 2.8rem; font-weight: 900; margin-bottom: 8px;
+        font-size: clamp(1.35rem, 5vw, 2.1rem); font-weight: 900; margin-bottom: 4px;
         text-shadow: 0 4px 15px rgba(0,0,0,0.6);
-        text-transform: uppercase; letter-spacing: -1.5px; line-height: 1.05;
+        text-transform: uppercase; letter-spacing: -0.8px; line-height: 1.1;
         background: linear-gradient(to bottom, #ffffff, #e2e8f0);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
+        word-break: break-word;
+        max-width: 100%;
+        padding: 0 10px;
       }
       .hl-subtitle {
-        font-size: 0.95rem; font-weight: 800; opacity: 0.75;
-        text-transform: uppercase; letter-spacing: 3px; margin-bottom: 20px;
+        font-size: 0.85rem; font-weight: 800; opacity: 0.55;
+        text-transform: uppercase; letter-spacing: 2px; margin-bottom: 12px;
         color: #38BDF8;
         text-shadow: 0 2px 4px rgba(0,0,0,0.2);
       }
       .hl-card-bottom .hl-subtitle {
-        color: rgba(255, 255, 255, 0.4);
-        text-transform: lowercase;
-        font-style: italic;
-        font-size: 1.1rem;
-        font-weight: 400;
-        letter-spacing: 1px;
-        margin-bottom: 15px;
-        text-shadow: none;
+        color: #38BDF8;
+        font-style: normal;
+        font-size: 0.85rem;
+        font-weight: 800;
+        letter-spacing: 2px;
+        margin-bottom: 12px;
+        text-shadow: 0 2px 4px rgba(0,0,0,0.2);
       }
       
-      .hl-value-container { min-height: 80px; display: flex; align-items: center; justify-content: center; }
+      .hl-value-container { min-height: 60px; display: flex; align-items: center; justify-content: center; }
       .hl-value {
-        font-size: 3.8rem; font-weight: 900; color: #FCD34D;
+        font-size: clamp(1.8rem, 7.5vw, 2.9rem); font-weight: 900; color: #FCD34D;
         text-shadow: 0 0 25px rgba(252, 211, 77, 0.6);
+        letter-spacing: -0.5px;
+      }
+
+      /* Animated Glowing Mystery Box Placeholder */
+      .hl-value-mystery {
+        font-size: 2.2rem;
+        font-weight: 900;
+        color: rgba(255, 255, 255, 0.25);
+        text-shadow: 0 0 15px rgba(255, 255, 255, 0.05);
+        border: 2px dashed rgba(255, 255, 255, 0.15);
+        padding: 2px 28px;
+        border-radius: 12px;
+        animation: pulseMystery 2s infinite ease-in-out;
+      }
+      @keyframes pulseMystery {
+        0%, 100% { opacity: 0.6; transform: scale(1); }
+        50% { opacity: 1; transform: scale(1.05); }
       }
       
-      .hl-btn-group { display: flex; flex-direction: column; gap: 12px; width: 100%; max-width: 320px; }
       .hl-btn {
         background: transparent; color: white; border: 2px solid rgba(255,255,255,0.25);
-        padding: 14px 28px; border-radius: 50px; font-size: 1.25rem; font-weight: 800;
+        padding: 10px 24px; border-radius: 50px; font-size: 1.05rem; font-weight: 800;
         cursor: pointer; transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1); text-transform: uppercase;
         display: flex; align-items: center; justify-content: center; gap: 8px;
         backdrop-filter: blur(5px);
@@ -249,9 +300,20 @@ export function init(container) {
         <div class="hl-score-pill">Score: <span id="hl-score">0</span></div>
         <div class="hl-score-pill">Best: <span id="hl-high-score">0</span></div>
       </div>
+
+      <!-- Premium Top Question & Button Panel -->
+      <div class="hl-question-panel" id="hl-question-panel">
+        <div class="hl-question-text" id="hl-question-text">
+          Loading question...
+        </div>
+        <div class="hl-question-btn-row" id="hl-question-btn-row">
+          <button class="hl-btn hl-btn-higher" onclick="guess('higher')">Higher ⬆️</button>
+          <button class="hl-btn hl-btn-lower" onclick="guess('lower')">Lower ⬇️</button>
+        </div>
+      </div>
       
       <div class="hl-card hl-card-top" id="card-top">
-        <div class="hl-subtitle">"Monthly Searches"</div>
+        <div class="hl-subtitle" id="top-subtitle">Loading...</div>
         <div class="hl-name" id="top-name">Minecraft</div>
         <div class="hl-value-container">
           <div class="hl-value anim-pop" id="top-value">30,000,000</div>
@@ -262,13 +324,10 @@ export function init(container) {
       
       <div class="hl-card hl-card-bottom" id="card-bottom">
         <div class="hl-name" id="bottom-name">Bitcoin</div>
-        <div class="hl-subtitle">has</div>
+        <div class="hl-subtitle" id="bottom-subtitle">Loading...</div>
         
         <div class="hl-value-container" id="bottom-value-container">
-          <div class="hl-btn-group" id="btn-group">
-            <button class="hl-btn hl-btn-higher" onclick="guess('higher')">Higher ⬆️</button>
-            <button class="hl-btn hl-btn-lower" onclick="guess('lower')">Lower ⬇️</button>
-          </div>
+          <div class="hl-value-mystery">?</div>
         </div>
       </div>
 
@@ -460,12 +519,13 @@ export function init(container) {
   const elScore = container.querySelector('#hl-score');
   const elHighScore = container.querySelector('#hl-high-score');
   const elTopName = container.querySelector('#top-name');
-  const elTopSubtitle = container.querySelector('.hl-card-top .hl-subtitle');
+  const elTopSubtitle = container.querySelector('#top-subtitle');
   const elTopValue = container.querySelector('#top-value');
   const elBottomName = container.querySelector('#bottom-name');
-  const elBottomSubtitle = container.querySelector('.hl-card-bottom .hl-subtitle');
+  const elBottomSubtitle = container.querySelector('#bottom-subtitle');
   const elBottomContainer = container.querySelector('#bottom-value-container');
-  const elBtnGroup = container.querySelector('#btn-group');
+  const elQuestionText = container.querySelector('#hl-question-text');
+  const elBtnRow = container.querySelector('#hl-question-btn-row');
   const elGameOver = container.querySelector('#game-over-overlay');
   const elFinalScore = container.querySelector('#final-score-display');
   const cardTop = container.querySelector('#card-top');
@@ -622,17 +682,33 @@ export function init(container) {
     startTimer();
   }
 
+  function getQuestionText(category, item1, item2) {
+    if (category === "Monthly Google Searches") {
+      return `Does <strong style="color: #38BDF8;">${item2}</strong> have higher or lower Monthly Searches than <strong style="color: #10B981;">${item1}</strong>?`;
+    } else if (category === "Net Worth") {
+      return `Is <strong style="color: #38BDF8;">${item2}</strong>'s Net Worth higher or lower than <strong style="color: #10B981;">${item1}</strong>'s?`;
+    } else if (category === "Box Office Gross") {
+      return `Is <strong style="color: #38BDF8;">${item2}</strong>'s Box Office Gross higher or lower than <strong style="color: #10B981;">${item1}</strong>'s?`;
+    } else if (category === "Instagram Followers") {
+      return `Does <strong style="color: #38BDF8;">${item2}</strong> have more or fewer Instagram Followers than <strong style="color: #10B981;">${item1}</strong>?`;
+    }
+    return `Is <strong style="color: #38BDF8;">${item2}</strong> higher or lower than <strong style="color: #10B981;">${item1}</strong>?`;
+  }
+
   function renderCards() {
-    elTopSubtitle.innerText = `"${currentCategoryName}"`;
+    // Generate comparison question text and inject it
+    elQuestionText.innerHTML = getQuestionText(currentCategoryName, currentCard.name, nextCard.name);
+    elBtnRow.classList.remove('disabled');
+
+    elTopSubtitle.innerText = currentCategoryName;
     elTopName.innerText = currentCard.name;
     elTopValue.innerText = formatNumber(currentCard.val);
     
     elBottomName.innerText = nextCard.name;
-    elBottomSubtitle.innerText = "has";
+    elBottomSubtitle.innerText = currentCategoryName;
     
-    // Reset bottom container back to buttons
-    elBottomContainer.innerHTML = '';
-    elBottomContainer.appendChild(elBtnGroup);
+    // Reset bottom container back to mystery placeholder
+    elBottomContainer.innerHTML = '<div class="hl-value-mystery">?</div>';
     
     cardBottom.classList.remove('anim-slide-up');
     void cardBottom.offsetWidth; // trigger reflow
@@ -643,6 +719,7 @@ export function init(container) {
     if (isTransitioning) return;
     isTransitioning = true;
     stopTimer(); // Freeze timer immediately
+    elBtnRow.classList.add('disabled'); // Disable top buttons visually and physically during reveal
 
     // Reveal value
     const isHigher = nextCard.val >= currentCard.val;

@@ -264,9 +264,16 @@ window.loadLeaderboard = async function(gameFilter = 'all') {
 
     let allScores = Array.from(bestScoresMap.values());
     allScores.sort((a, b) => b.score - a.score);
-    allScores = allScores.slice(0, 10);
     
-    if (allScores.length === 0) {
+    // Find if the current user is in the full rankings list
+    const currentUserScoreIndex = allScores.findIndex(s => auth.currentUser && s.uid === auth.currentUser.uid);
+    const hasCurrentUser = currentUserScoreIndex !== -1;
+    const currentUserRank = currentUserScoreIndex + 1;
+    const isCurrentUserInTop10 = hasCurrentUser && currentUserRank <= 10;
+
+    const top10Scores = allScores.slice(0, 10);
+    
+    if (top10Scores.length === 0) {
       table.innerHTML = '<div style="text-align:center; padding:20px; color:#94a3b8;">No scores yet for this board! Be the first to play.</div>';
       return;
     }
@@ -275,7 +282,7 @@ window.loadLeaderboard = async function(gameFilter = 'all') {
     let rank = 1;
     const medals = ["🥇", "🥈", "🥉"];
 
-    allScores.forEach((data) => {
+    top10Scores.forEach((data) => {
       const rankDisplay = rank <= 3 ? medals[rank - 1] : `#${rank}`;
       const isCurrentUser = auth.currentUser && auth.currentUser.uid === data.uid;
       const escapedUsername = (data.username || "Gamer").replace(/'/g, "\\'");
@@ -298,6 +305,30 @@ window.loadLeaderboard = async function(gameFilter = 'all') {
       `;
       rank++;
     });
+
+    // If current user is logged in, has a score, but is ranked > 10, append a sleek divider and their personal ranking row!
+    if (hasCurrentUser && !isCurrentUserInTop10) {
+      const data = allScores[currentUserScoreIndex];
+      const escapedUsername = (data.username || "Gamer").replace(/'/g, "\\'");
+      
+      html += `
+        <div class="lb-divider-dots" style="display: flex; justify-content: center; align-items: center; padding: 12px 0; color: rgba(255,255,255,0.15); font-weight: 900; font-size: 1.2rem; letter-spacing: 4px; pointer-events: none;">•••</div>
+        <div class="lb-row is-me" style="border-left: 4px solid #38BDF8; background: rgba(56, 189, 248, 0.05); margin-top: 4px;" onclick="window.showPlayerCard('${data.uid}', '${escapedUsername}', ${data.score})">
+          <span class="lb-rank">#${currentUserRank}</span>
+          <span class="lb-avatar">${
+            data.avatar && (data.avatar.startsWith('http://') || data.avatar.startsWith('https://'))
+              ? `<img src="${data.avatar}" alt="Avatar">`
+              : (data.avatar || '👾')
+          }</span>
+          <span class="lb-user">
+            ${data.username}
+            <span style="font-size:0.6rem; background:#38BDF8; color:#000; padding:2px 4px; border-radius:4px; margin-left:6px; font-weight:800;">YOU</span>
+          </span>
+          <span class="lb-game">${data.game}</span>
+          <span class="lb-score">${data.score.toLocaleString()}</span>
+        </div>
+      `;
+    }
 
     table.innerHTML = html;
   } catch (e) {
