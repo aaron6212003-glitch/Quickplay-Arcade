@@ -1,4 +1,5 @@
 import { GAMES } from '../data/games.js';
+import { auth, db, onAuthStateChanged, doc, getDoc, setDoc, increment } from './firebase.js';
 
 // ── Get game id from URL ─────────────────────────────────────────────────────
 const params = new URLSearchParams(window.location.search);
@@ -50,7 +51,7 @@ if (game) {
         </div>
         <div class="pre-screen-list-item" style="margin-bottom: 8px;">
           <span>🖱️</span>
-          <div>Aim & Shoot: <strong>Move Mouse</strong> and <strong>Left Click</strong></div>
+          <div>Aim & Shoot: <strong>Move Mouse</strong> and <strong>Left Click</strong> — crosshair auto-locks onto enemies!</div>
         </div>
         <div class="pre-screen-list-item">
           <span>💣</span>
@@ -58,15 +59,15 @@ if (game) {
         </div>
       </div>
       
-      <div style="background: rgba(255,255,255,0.03); padding: 14px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.06); width: 100%; box-sizing: border-box; text-align: left;">
+      <div style="background: rgba(255,255,255,0.03); padding: 14px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.06); margin-bottom: 12px; width: 100%; box-sizing: border-box; text-align: left;">
         <div style="font-weight: 900; color: #a78bfa; font-size: 0.95rem; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.5px; display: flex; align-items: center; gap: 6px;">📱 Mobile Controls</div>
         <div class="pre-screen-list-item" style="margin-bottom: 8px;">
           <span>🕹️</span>
           <div>Drive: Use the <strong>Virtual Joystick</strong> in the bottom panel</div>
         </div>
         <div class="pre-screen-list-item" style="margin-bottom: 8px;">
-          <span>👆</span>
-          <div>Aim & Shoot: <strong>Tap anywhere</strong> on the play board!</div>
+          <span>🚀</span>
+          <div>Fire: Tap <strong>FIRE</strong> — auto-aims at locked target. Each shot cycles to the next enemy!</div>
         </div>
         <div class="pre-screen-list-item">
           <span>💣</span>
@@ -74,9 +75,28 @@ if (game) {
         </div>
       </div>
       
+      <div style="background: rgba(255,255,255,0.03); padding: 14px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.06); margin-bottom: 12px; width: 100%; box-sizing: border-box; text-align: left;">
+        <div style="font-weight: 900; color: #fbbf24; font-size: 0.95rem; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.5px; display: flex; align-items: center; gap: 6px;">⚠️ Enemy Types</div>
+        <div class="pre-screen-list-item" style="margin-bottom: 6px;"><span>🟤</span><div><strong>Brown</strong> — Stationary, easy target</div></div>
+        <div class="pre-screen-list-item" style="margin-bottom: 6px;"><span>⚫</span><div><strong>Grey</strong> — Moves & shoots</div></div>
+        <div class="pre-screen-list-item" style="margin-bottom: 6px;"><span>🟢</span><div><strong>Green</strong> — Fast, fires bouncing bullets</div></div>
+        <div class="pre-screen-list-item" style="margin-bottom: 6px;"><span>🟠</span><div><strong>Orange Kamikaze</strong> — Rushes you, explodes on contact!</div></div>
+        <div class="pre-screen-list-item" style="margin-bottom: 6px;"><span>🔴</span><div><strong>Red Sniper</strong> — Slow, fires fast accurate bullets</div></div>
+        <div class="pre-screen-list-item"><span>👾</span><div><strong>Boss (every 5 levels)</strong> — 5 HP, always drops a powerup!</div></div>
+      </div>
+
+      <div style="background: rgba(255,255,255,0.03); padding: 14px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.06); width: 100%; box-sizing: border-box; text-align: left;">
+        <div style="font-weight: 900; color: #10b981; font-size: 0.95rem; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.5px; display: flex; align-items: center; gap: 6px;">⚡ Powerups</div>
+        <div class="pre-screen-list-item" style="margin-bottom: 6px;"><span>⚡</span><div><strong>Rapid Fire</strong> — 4x fire rate for 5 seconds</div></div>
+        <div class="pre-screen-list-item" style="margin-bottom: 6px;"><span>🛡️</span><div><strong>Force Shield</strong> — Absorbs all hits for 5 seconds</div></div>
+        <div class="pre-screen-list-item" style="margin-bottom: 6px;"><span>✨</span><div><strong>Trishot</strong> — Fire 3 spread bullets for 6 seconds</div></div>
+        <div class="pre-screen-list-item" style="margin-bottom: 6px;"><span>❄️</span><div><strong>EMP Freeze</strong> — Freezes all enemies for 4 seconds</div></div>
+        <div class="pre-screen-list-item"><span>🪙</span><div><strong>Coin Drop</strong> — +250 bonus points instantly</div></div>
+      </div>
+
       <div class="pre-screen-list-item" style="margin-top: 15px; text-align: left; width: 100%;">
         <span>🔄</span>
-        <div>Bullets bounce off walls <strong>ONCE</strong>! Use bounce shots around corners to catch enemies off guard.</div>
+        <div>Your bullets bounce off walls <strong>ONCE</strong>! Use bounce shots around corners to catch enemies off guard.</div>
       </div>
     `;
   } else {
@@ -111,45 +131,7 @@ if (game) {
     comingSoon.style.display = 'none';
     gameContainer.style.display = 'none';
     preScreen.style.display = 'flex';
-      
-    preScreen.innerHTML = `
-      <div class="pre-screen-icon">${game.emoji}</div>
-      <h2 class="pre-screen-title">${game.title}</h2>
-      <p class="pre-screen-desc">${game.description}</p>
-      
-      <div class="pre-screen-divider"></div>
-      
-      <h3 class="pre-screen-section-title">🕹️ How to Play</h3>
-      <div class="pre-screen-list">
-        ${rulesHtml}
-      </div>
-      
-      <div class="pre-screen-divider"></div>
-      
-      <h3 class="pre-screen-section-title">🪙 How to Score</h3>
-      <div class="pre-screen-list">
-        <div class="pre-screen-list-item">
-          <span>⭐</span>
-          <div>Earn exactly <strong>+10 XP</strong> per successful action (capped at 100 XP max).</div>
-        </div>
-        <div class="pre-screen-list-item">
-          <span>🪙</span>
-          <div>Earn exactly <strong>+10 Coins</strong> per successful action (capped at 100 Coins max).</div>
-        </div>
-        ${isDaily ? `
-        <div class="pre-screen-list-item" style="color: #F59E0B; border: 1px dashed rgba(245,158,11,0.3); padding: 10px 14px; border-radius: 12px; background: rgba(245,158,11,0.05); margin-top: 5px; width: 100%; box-sizing: border-box;">
-          <span>🔥</span>
-          <div><strong>Daily Challenge Bonus:</strong> Get <strong>+25 XP</strong> & <strong>+15 Coins</strong> for finishing this run!</div>
-        </div>
-        ` : ''}
-      </div>
-      
-      <button class="pre-screen-start-btn" id="start-game-btn">Start Game</button>
-    `;
-    
-    let loadingGame = false;
-    const startBtn = document.getElementById('start-game-btn');
-    
+
     function startCountdown(callback) {
       gameContainer.innerHTML = '';
       
@@ -266,78 +248,155 @@ if (game) {
       tick();
     }
 
-    startBtn.addEventListener('click', () => {
-      if (loadingGame) return;
-      loadingGame = true;
-      
-      // Disable button immediately to prevent duplicate imports and glitches!
-      startBtn.disabled = true;
-      startBtn.innerText = "Starting...";
-      startBtn.style.opacity = "0.7";
-      startBtn.style.cursor = "default";
-      
-      preScreen.style.display = 'none';
-      gameContainer.style.display = 'block';
-      document.body.classList.add('game-active');
-      
-      // Trigger Countdown!
-      startCountdown(() => {
-        function centerActiveGame() {
-          setTimeout(() => {
-            gameContainer.scrollIntoView({ behavior: 'auto', block: 'center' });
-            const containerHeight = gameContainer.offsetHeight || 700;
-            const targetScroll = gameContainer.offsetTop - (window.innerHeight - containerHeight) / 2;
-            window.scrollTo({ top: targetScroll, behavior: 'auto' });
-          }, 60); // 60ms delay ensures browser layout calculations are final
-        }
+    onAuthStateChanged(auth, async (user) => {
+      let attemptsPlayed = 0;
+      let remainingAttempts = 3;
+      const today = new Date();
+      const yyyy = today.getUTCFullYear();
+      const mm = String(today.getUTCMonth() + 1).padStart(2, '0');
+      const dd = String(today.getUTCDate()).padStart(2, '0');
+      const dateString = `${yyyy}-${mm}-${dd}`;
 
-        if (gameId === 'color-guess') {
-          import('./games/color-guess.js').then(module => {
-            module.init(gameContainer);
-            centerActiveGame();
-          });
-        } else if (gameId === 'higher-lower') {
-          import('./games/higher-lower.js').then(module => {
-            module.init(gameContainer);
-            centerActiveGame();
-          });
-        } else if (gameId === 'word-rush') {
-          import('./games/word-rush.js').then(module => {
-            module.init(gameContainer);
-            centerActiveGame();
-          });
-        } else if (gameId === 'word-gravity') {
-          import('./games/word-gravity.js').then(module => {
-            module.init(gameContainer);
-            centerActiveGame();
-          });
-        } else if (gameId === 'math-avalanche') {
-          import('./games/math-avalanche.js').then(module => {
-            module.init(gameContainer);
-            centerActiveGame();
-          });
-        } else if (gameId === 'tanks') {
-          import('./games/tanks.js').then(module => {
-            module.initTanks(gameContainer);
-            centerActiveGame();
-          });
-        } else if (gameId === 'cyber-bot') {
-          import('./games/cyber-bot.js').then(module => {
-            module.init(gameContainer);
-            centerActiveGame();
-          });
-        } else if (gameId === 'neon-plinko') {
-          import('./games/neon-plinko.js').then(module => {
-            module.init(gameContainer);
-            centerActiveGame();
-          });
-        } else if (gameId === 'pop-lock') {
-          import('./games/pop-lock.js').then(module => {
-            module.init(gameContainer);
-            centerActiveGame();
-          });
+      if (user) {
+        try {
+          const attemptsRef = doc(db, "users", user.uid, "dailyAttempts", `${dateString}_${gameId}`);
+          const attemptsSnap = await getDoc(attemptsRef);
+          if (attemptsSnap.exists()) {
+            attemptsPlayed = attemptsSnap.data().attempts || 0;
+            remainingAttempts = Math.max(0, 3 - attemptsPlayed);
+          }
+        } catch (e) {
+          console.error("Error fetching daily attempts:", e);
         }
-      });
+      }
+
+      preScreen.innerHTML = `
+        <div class="pre-screen-icon" style="font-size: 3.5rem !important; margin-bottom: 12px !important; height: 3.5rem !important; display: flex !important; align-items: center !important; justify-content: center !important;">${game.emoji}</div>
+        <h2 class="pre-screen-title" style="font-size: 1.8rem !important; margin-bottom: 8px !important; text-align: center !important; width: 100% !important;">${game.title}</h2>
+        <p class="pre-screen-desc" style="font-size: 0.95rem !important; margin-bottom: 16px !important; line-height: 1.4 !important; color: #94a3b8 !important; text-align: center !important;">${game.description}</p>
+        
+        <div class="mode-select-row" style="display:flex; flex-direction:column; gap:10px; width:100%; max-width:400px; margin: 15px auto 10px auto;">
+          <button class="pre-screen-start-btn" id="practice-mode-btn" style="background: rgba(16, 185, 129, 0.15); border: 2px solid #10B981; color: #10B981; box-shadow: 0 0 15px rgba(16, 185, 129, 0.15); margin-top: 0; padding: 12px 24px; font-weight: 800; font-size: 1rem; border-radius: 12px; cursor: pointer; transition: all 0.2s;">🟢 Practice Mode (Unlimited)</button>
+          
+          ${user ? (
+            remainingAttempts > 0 ? `
+              <button class="pre-screen-start-btn" id="competitive-mode-btn" style="background: linear-gradient(135deg, #38BDF8, #818CF8); border: none; color: #fff; box-shadow: 0 4px 20px rgba(56, 189, 248, 0.3); margin-top: 0; padding: 12px 24px; font-weight: 800; font-size: 1rem; border-radius: 12px; cursor: pointer; transition: all 0.2s;">🏆 Competitive Mode (${remainingAttempts}/3 remaining)</button>
+            ` : `
+              <button class="pre-screen-start-btn" id="competitive-mode-btn" disabled style="background: rgba(255,255,255,0.05); border: 2px dashed rgba(255,255,255,0.15); color: rgba(255,255,255,0.25); cursor: not-allowed; padding: 12px 24px; font-weight: 800; font-size: 1rem; border-radius: 12px; box-shadow: none;">🔒 Locked (0/3 remaining today)</button>
+            `
+          ) : `
+            <button class="pre-screen-start-btn" id="competitive-mode-btn" disabled style="background: rgba(255,255,255,0.05); border: 2px dashed rgba(255,255,255,0.15); color: rgba(255,255,255,0.25); cursor: not-allowed; padding: 12px 24px; font-weight: 800; font-size: 1rem; border-radius: 12px; box-shadow: none;">🔒 Log In to Play Competitive</button>
+          `}
+        </div>
+
+        <p style="font-size: 0.8rem; color: #64748b; margin-top: 5px; text-align: center; font-weight: 700;">
+          🏆 Competitive scores post to Leaderboards and award XP ⭐ & Coins 🪙.
+        </p>
+
+        <div class="pre-screen-divider" style="margin: 15px 0 !important;"></div>
+
+        <button id="pre-screen-rules-toggle" style="background: transparent; border: none; color: #a78bfa; font-weight: 800; font-size: 0.95rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; padding: 5px 15px; margin: 0 auto; transition: color 0.2s;">
+          📖 View Rules & Controls
+        </button>
+      `;
+
+      let loadingGame = false;
+      const practiceBtn = document.getElementById('practice-mode-btn');
+      const competitiveBtn = document.getElementById('competitive-mode-btn');
+      const rulesToggle = document.getElementById('pre-screen-rules-toggle');
+
+      if (rulesToggle) {
+        rulesToggle.addEventListener('click', () => {
+          document.getElementById('rules-content').innerHTML = rulesHtml;
+          document.getElementById('rules-modal').style.display = 'flex';
+        });
+      }
+
+      function launchGameSequence() {
+        preScreen.style.display = 'none';
+        gameContainer.style.display = 'block';
+        document.body.classList.add('game-active');
+
+        // Trigger Countdown!
+        startCountdown(() => {
+          function centerActiveGame() {
+            setTimeout(() => {
+              gameContainer.scrollIntoView({ behavior: 'auto', block: 'center' });
+              const containerHeight = gameContainer.offsetHeight || 700;
+              const targetScroll = gameContainer.offsetTop - (window.innerHeight - containerHeight) / 2;
+              window.scrollTo({ top: targetScroll, behavior: 'auto' });
+            }, 60);
+          }
+
+          const modules = {
+            'color-guess': './games/color-guess.js',
+            'higher-lower': './games/higher-lower.js',
+            'word-rush': './games/word-rush.js',
+            'word-gravity': './games/word-gravity.js',
+            'math-avalanche': './games/math-avalanche.js',
+            'cyber-bot': './games/cyber-bot.js',
+            'neon-plinko': './games/neon-plinko.js',
+            'pop-lock': './games/pop-lock.js'
+          };
+
+          if (gameId === 'tanks') {
+            import('./games/tanks.js').then(module => {
+              module.initTanks(gameContainer);
+              centerActiveGame();
+            });
+          } else {
+            const path = modules[gameId];
+            if (path) {
+              import(path).then(module => {
+                module.init(gameContainer);
+                centerActiveGame();
+              });
+            }
+          }
+        });
+      }
+
+      if (practiceBtn) {
+        practiceBtn.addEventListener('click', () => {
+          if (loadingGame) return;
+          loadingGame = true;
+          window.isPracticeMode = true;
+          
+          practiceBtn.disabled = true;
+          practiceBtn.innerText = "Starting Practice...";
+          practiceBtn.style.opacity = "0.7";
+          if (competitiveBtn) competitiveBtn.disabled = true;
+
+          launchGameSequence();
+        });
+      }
+
+      if (competitiveBtn && user && remainingAttempts > 0) {
+        competitiveBtn.addEventListener('click', async () => {
+          if (loadingGame) return;
+          loadingGame = true;
+          window.isPracticeMode = false;
+
+          competitiveBtn.disabled = true;
+          competitiveBtn.innerText = "Registering Attempt...";
+          competitiveBtn.style.opacity = "0.7";
+          if (practiceBtn) practiceBtn.disabled = true;
+
+          try {
+            // Immediate anti-cheat attempts deduction
+            const attemptsRef = doc(db, "users", user.uid, "dailyAttempts", `${dateString}_${gameId}`);
+            await setDoc(attemptsRef, {
+              attempts: increment(1),
+              lastAttempt: new Date()
+            }, { merge: true });
+            console.log(`Competitive run start successfully recorded: ${attemptsPlayed + 1}/3 attempts.`);
+          } catch (e) {
+            console.error("Could not increment daily attempts:", e);
+          }
+
+          launchGameSequence();
+        });
+      }
     });
   } else {
     comingSoon.style.display = 'block';
@@ -390,3 +449,13 @@ document.getElementById('random-game-btn')?.addEventListener('click', () => {
   const pick = GAMES[Math.floor(Math.random() * GAMES.length)];
   window.location.href = `game.html?id=${pick.id}`;
 });
+
+// ── Hamburger Menu Toggle ───────────────────────────────────────────────────
+const hamburger = document.getElementById('hamburger');
+const mobileMenu = document.getElementById('mobile-menu');
+if (hamburger && mobileMenu) {
+  hamburger.addEventListener('click', () => {
+    mobileMenu.classList.toggle('open');
+  });
+}
+

@@ -1,11 +1,14 @@
 export function initTanks(container) {
-  // Setup Canvas (Taller and narrower arcade ratio)
+  // Setup Canvas (Taller and responsive arcade ratio)
   const canvas = document.createElement('canvas');
   canvas.width = 550;
   canvas.height = 900; // Taller play area
   canvas.style.width = '100%';
   canvas.style.maxWidth = '550px';
-  canvas.style.height = '900px'; // Fixed taller height
+  canvas.style.height = 'auto'; // Let height scale responsively
+  canvas.style.maxHeight = 'calc(100vh - 160px)'; // Avoid cutting off screen
+  canvas.style.aspectRatio = '550 / 900'; // Maintain correct aspect ratio
+  canvas.style.objectFit = 'contain';
   canvas.style.display = 'block';
   canvas.style.margin = '0 auto';
   canvas.style.background = '#e7e5e4'; // Corkboard/paper background
@@ -24,6 +27,8 @@ export function initTanks(container) {
   wrapper.style.width = '100%';
   wrapper.style.maxWidth = '550px';
   wrapper.style.margin = '0 auto';
+  wrapper.style.maxHeight = '100vh';
+  wrapper.style.justifyContent = 'center';
   
   // Score display
   const scoreDisplay = document.createElement('div');
@@ -46,7 +51,7 @@ export function initTanks(container) {
   livesDisplay.style.color = '#dc2626';
   livesDisplay.style.fontFamily = 'monospace';
   livesDisplay.innerText = '♥♥•';
-
+ 
   // Level display (Centered at the top to clear room for bottom panel)
   const levelDisplay = document.createElement('div');
   levelDisplay.style.position = 'absolute';
@@ -58,18 +63,18 @@ export function initTanks(container) {
   levelDisplay.style.color = '#78350f';
   levelDisplay.style.fontFamily = 'monospace';
   levelDisplay.innerText = 'LEVEL 1';
-
+ 
   wrapper.appendChild(canvas);
   wrapper.appendChild(scoreDisplay);
   wrapper.appendChild(livesDisplay);
   wrapper.appendChild(levelDisplay);
-
+ 
   // Mobile Controls Overlay (Dedicated panel below the canvas, blending into the wooden frame!)
   const mobileControls = document.createElement('div');
   mobileControls.style.display = 'none'; // hidden until touch trigger
   mobileControls.style.width = '100%';
   mobileControls.style.maxWidth = '550px';
-  mobileControls.style.height = '130px';
+  mobileControls.style.height = '120px'; // Shorter height to fit viewports
   mobileControls.style.background = 'linear-gradient(135deg, #1e1e2e, #11111b)';
   mobileControls.style.border = '8px solid #78350f';
   mobileControls.style.borderTop = 'none'; // Blends seamlessly under the canvas frame
@@ -79,7 +84,7 @@ export function initTanks(container) {
   mobileControls.style.justifyContent = 'space-between';
   mobileControls.style.pointerEvents = 'auto';
   mobileControls.style.boxShadow = '0 10px 20px rgba(0,0,0,0.5)';
-  mobileControls.style.marginTop = '10px'; // Separate joystick panel from game canvas
+  mobileControls.style.marginTop = '0px'; // Blend directly under canvas
   
   mobileControls.innerHTML = `
     <style>
@@ -108,8 +113,15 @@ export function initTanks(container) {
     </div>
     
     <!-- Action Area (Right Column) -->
-    <div id="action-container" style="flex:1; display:flex; align-items:center; justify-content:flex-end; padding-right:35px; height:100%;">
-      <button id="btn-mine" class="tanks-mobile-btn" style="width:70px; height:70px; border-radius:50%; background:linear-gradient(135deg, #F59E0B, #D97706); border:3px solid #ffffff; font-size:0.95rem; letter-spacing:0.5px; box-shadow: 0 6px 15px rgba(245,158,11,0.4);">MINE 💣</button>
+    <div id="action-container" style="flex:1.8; display:flex; align-items:center; justify-content:flex-end; gap:16px; padding-right:25px; height:100%;">
+      <button id="btn-mine" class="tanks-mobile-btn" style="width:65px; height:65px; border-radius:50%; background:linear-gradient(135deg, #F59E0B, #D97706); border:3px solid #ffffff; font-size:0.8rem; letter-spacing:0.5px; box-shadow: 0 6px 15px rgba(245,158,11,0.4); display:flex; flex-direction:column; align-items:center; justify-content:center; flex-shrink:0;">
+        <span>MINE</span>
+        <span style="font-size:1.1rem; line-height:1;">💣</span>
+      </button>
+      <button id="btn-shoot" class="tanks-mobile-btn" style="width:76px; height:76px; border-radius:50%; background:linear-gradient(135deg, #ef4444, #b91c1c); border:3.5px solid #ffffff; font-size:0.9rem; font-weight:900; letter-spacing:0.5px; box-shadow: 0 6px 20px rgba(239,68,68,0.5); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px; flex-shrink:0;">
+        <span>FIRE</span>
+        <span style="font-size:1.3rem; line-height:1;">🚀</span>
+      </button>
     </div>
   `;
   wrapper.appendChild(mobileControls);
@@ -124,6 +136,9 @@ export function initTanks(container) {
   let lives = 3;
   let level = 1;
   let frameCount = 0;
+  let screenShake = 0; // Screen shake intensity, fades over time
+  let lockedTargetIndex = 0; // Which enemy the crosshair is locked onto
+  let autoTarget = null; // Module-scope so draw() can reference it for crosshair color
   
   const keys = { w:false, a:false, s:false, d:false, ArrowUp:false, ArrowDown:false, ArrowLeft:false, ArrowRight:false };
   let mouseX = canvas.width / 2;
@@ -131,7 +146,11 @@ export function initTanks(container) {
   
   // Touch control variables
   let touchJoy = { active: false, dx: 0, dy: 0, touchId: null };
-  let isMobile = false;
+  let isMobile = 'ontouchstart' in window || navigator.maxTouchPoints > 0 || window.innerWidth <= 768;
+  if (isMobile) {
+    mobileControls.style.display = 'flex';
+    canvas.style.borderRadius = '8px 8px 0 0';
+  }
 
   // Entities
   let player;
@@ -141,6 +160,61 @@ export function initTanks(container) {
   let particles = [];
   let blocks = [];
   let tracks = []; // Tank tread marks
+  let powerups = []; // Floating arcade powerup items
+
+  class PowerUp {
+    constructor(x, y, type) {
+      this.x = x;
+      this.y = y;
+      this.type = type; // 'rapid', 'shield', 'coin', 'trishot', 'emp'
+      this.radius = 14;
+      this.life = 600; // 10 seconds to collect
+    }
+    
+    draw(ctx) {
+      ctx.save();
+      ctx.translate(this.x, this.y);
+      
+      const colors = {
+        rapid: '#38bdf8', // Cyan
+        shield: '#a78bfa', // Purple
+        coin: '#fbbf24', // Gold
+        trishot: '#10b981', // Green
+        emp: '#06b6d4' // Cyan electric
+      };
+      
+      const emojis = {
+        rapid: '⚡',
+        shield: '🛡️',
+        coin: '🪙',
+        trishot: '✨',
+        emp: '❄️'
+      };
+      
+      const color = colors[this.type] || '#fff';
+      
+      // Floating neon aura pulse
+      ctx.beginPath();
+      ctx.arc(0, 0, this.radius + Math.sin(frameCount * 0.1) * 3, 0, Math.PI * 2);
+      ctx.fillStyle = color + '33'; // transparent aura
+      ctx.fill();
+      
+      ctx.beginPath();
+      ctx.arc(0, 0, this.radius, 0, Math.PI * 2);
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 2.5;
+      ctx.stroke();
+      ctx.fillStyle = 'rgba(15, 23, 42, 0.8)';
+      ctx.fill();
+      
+      ctx.font = '14px Outfit';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(emojis[this.type], 0, 1);
+      
+      ctx.restore();
+    }
+  }
 
   function roundRect(ctx, x, y, width, height, radius) {
     ctx.beginPath();
@@ -168,12 +242,19 @@ export function initTanks(container) {
       this.lastShot = 0;
       this.vx = 0;
       this.vy = 0;
+      this.rapidTimer = 0; // Rapid fire powerup frames
+      this.shieldTimer = 0; // Invincible bubble shield frames
+      this.trishotTimer = 0; // Spread/Trishot powerup frames
+      this.frozenTimer = 0; // Stunned/EMP frames
+      this.flashTimer = 0; // Hit impact white-flash frames
+      this.hp = 1;
+      this.maxHp = 1;
       
       // Spawn protection
       this.invincible = isPlayer ? 120 : 0; // 2 seconds at 60fps
       this.startDelay = isPlayer ? 0 : 120; // Enemies wait 2s before acting
       
-      // Types: player (blue), brown (stationary), grey (moving), green (fast, bounces)
+      // Types: player (blue), brown (stationary), grey (moving), green (fast, bounces), boss (giant purple)
       if (isPlayer) {
         this.color = '#2563eb'; // Blue
         this.speed = 2.5;
@@ -194,6 +275,24 @@ export function initTanks(container) {
         this.speed = 1.8;
         this.cooldown = 800;
         this.maxBullets = 2;
+      } else if (type === 'orange') {
+        this.color = '#ea580c'; // Orange (Kamikaze)
+        this.speed = 2.4; // Chases player very fast!
+        this.cooldown = 999999; // Never fires bullets
+        this.maxBullets = 0;
+      } else if (type === 'red') {
+        this.color = '#dc2626'; // Red (Sniper)
+        this.speed = 0.6; // Very slow sniper
+        this.cooldown = 1800; // Slow deliberate shots
+        this.maxBullets = 1;
+      } else if (type === 'boss') {
+        this.color = '#7c3aed'; // Deep purple Boss
+        this.speed = 0.8;
+        this.cooldown = 1400;
+        this.maxBullets = 3;
+        this.radius = 28;
+        this.hp = 5;
+        this.maxHp = 5;
       }
       
       // Enemy AI stuff
@@ -271,6 +370,34 @@ export function initTanks(container) {
         ctx.fill();
       }
 
+      // Glowing Force Shield Bubble (if active on player)
+      if (this.isPlayer && this.shieldTimer > 0) {
+        ctx.save();
+        ctx.shadowColor = '#a78bfa';
+        ctx.shadowBlur = 10;
+        ctx.beginPath();
+        // Dynamic pulsating bubble radius
+        ctx.arc(0, 0, this.radius + 12 + Math.sin(frameCount * 0.15) * 2, 0, Math.PI * 2);
+        ctx.strokeStyle = '#a78bfa'; // Purple glowing forcefield
+        ctx.lineWidth = 3;
+        ctx.stroke();
+        ctx.restore();
+        
+        ctx.fillStyle = 'rgba(167, 139, 250, 0.18)';
+        ctx.fill();
+        
+        // Inner spinning neon dots for premium look
+        ctx.save();
+        ctx.rotate(frameCount * 0.04);
+        ctx.fillStyle = '#818cf8';
+        for (let a = 0; a < Math.PI * 2; a += Math.PI / 3) {
+          ctx.beginPath();
+          ctx.arc(Math.cos(a) * (this.radius + 12), Math.sin(a) * (this.radius + 12), 2, 0, Math.PI * 2);
+          ctx.fill();
+        }
+        ctx.restore();
+      }
+
       ctx.restore(); // Undo turret rotation
       ctx.restore(); // Undo translate
     }
@@ -321,8 +448,8 @@ export function initTanks(container) {
       ctx.quadraticCurveTo(-8, 0, -6, -3); // Rounded back
       ctx.closePath();
       
-      // Fill color: player is gold brass shell, enemy is dark steel gray
-      ctx.fillStyle = this.isPlayer ? '#fbbf24' : '#64748b';
+      // Fill color: player is gold brass shell, Sniper is orange, standard enemy is dark steel gray
+      ctx.fillStyle = this.isPlayer ? '#fbbf24' : (this.speed > 7 ? '#f97316' : '#64748b');
       ctx.fill();
       
       // Tip overlay for detail
@@ -331,7 +458,7 @@ export function initTanks(container) {
       ctx.quadraticCurveTo(7, 0, 7, 0);
       ctx.quadraticCurveTo(7, 0, 1, 3);
       ctx.closePath();
-      ctx.fillStyle = this.isPlayer ? '#ea580c' : '#334155'; // Copper/Steel tip
+      ctx.fillStyle = this.isPlayer ? '#ea580c' : (this.speed > 7 ? '#dc2626' : '#334155'); // Copper/Red tip
       ctx.fill();
 
       // Border outline
@@ -441,14 +568,13 @@ export function initTanks(container) {
     }
   }
 
-  function spawnExplosion(x, y) {
-    // Screen shake
-    const intensity = 8;
-    canvas.style.transform = `translate(${(Math.random()-0.5)*intensity}px, ${(Math.random()-0.5)*intensity}px)`;
-    setTimeout(() => { canvas.style.transform = 'translate(0,0)'; }, 50);
+  function spawnExplosion(x, y, big = false) {
+    // Screen shake (bigger for bosses!)
+    screenShake = big ? 22 : 10;
 
-    // Smoke and sparks
-    for(let i=0; i<15; i++) {
+    // Smoke and sparks (more for big explosions!)
+    const count = big ? 30 : 15;
+    for(let i=0; i<count; i++) {
       particles.push(new Particle(x, y, 'smoke'));
       particles.push(new Particle(x, y, 'spark'));
       particles.push(new Particle(x, y, 'wood'));
@@ -462,6 +588,7 @@ export function initTanks(container) {
     mines = [];
     particles = [];
     tracks = [];
+    powerups = [];
     
     // Spawn player safely at bottom center
     player = new Tank(canvas.width/2, canvas.height - 50, 'player', true);
@@ -492,12 +619,16 @@ export function initTanks(container) {
       blocks.push({ x: bx, y: by, w: bw, h: bh });
     }
 
-    // Spawn enemies
+    // Spawn enemies (with Boss every 5 levels!)
+    const isBossLevel = level % 5 === 0;
     let totalEnemies = 1;
     if (level === 2) totalEnemies = 2;
-    if (level === 3) totalEnemies = 2;
+    if (level === 3) totalEnemies = 3;
     if (level === 4) totalEnemies = 3;
-    if (level >= 5) totalEnemies = Math.min(3 + Math.floor((level - 5) / 2), 10);
+    if (level >= 5) totalEnemies = Math.min(4 + Math.floor((level - 5) / 2), 10);
+
+    // Speed scaling — enemies get faster every 5 levels
+    const speedBonus = Math.floor(level / 5) * 0.2;
 
     for(let i=0; i<totalEnemies; i++) {
       let ex, ey;
@@ -512,23 +643,63 @@ export function initTanks(container) {
       
       let type = 'brown';
       
-      // Level progression logic
-      if (level >= 3 && i === totalEnemies - 1) type = 'grey';
-      if (level >= 4 && i % 2 === 0) type = 'grey';
-      if (level >= 6 && i === 0) type = 'green';
-      if (level >= 10) {
+      // Boss spawns as the first enemy on every 5th level
+      if (isBossLevel && i === 0) {
+        type = 'boss';
+      } else if (level === 1) {
+        type = 'brown'; // Tutorial: stationary
+      } else if (level === 2) {
+        type = Math.random() < 0.5 ? 'brown' : 'grey';
+      } else if (level === 3) {
         const rand = Math.random();
-        if (rand < 0.3) type = 'green';
-        else if (rand < 0.7) type = 'grey';
+        if (rand < 0.4) type = 'grey';
+        else if (rand < 0.7) type = 'orange'; // Introduce Kamikaze at Lvl 3!
+        else type = 'brown';
+      } else if (level === 4) {
+        const rand = Math.random();
+        if (rand < 0.4) type = 'grey';
+        else if (rand < 0.7) type = 'green'; // Introduce Fast Green at Lvl 4!
+        else if (rand < 0.9) type = 'orange';
+        else type = 'brown';
+      } else if (level >= 5) {
+        // Red Snipers appear at Level 5!
+        const rand = Math.random();
+        if (rand < 0.2) type = 'red'; // 20% Sniper
+        else if (rand < 0.4) type = 'orange'; // 20% Kamikaze
+        else if (rand < 0.7) type = 'green'; // 30% Green
+        else if (rand < 0.9) type = 'grey'; // 20% Grey
+        else type = 'brown'; // 10% Brown
       }
+      
+      if (level >= 10) {
+        // Higher stakes! Less brown tanks, more snipers and green tanks
+        if (!isBossLevel || i > 0) {
+          const rand = Math.random();
+          if (rand < 0.25) type = 'red';
+          else if (rand < 0.5) type = 'orange';
+          else if (rand < 0.75) type = 'green';
+          else type = 'grey';
+        }
+      }
+      
       if (level >= 15) {
-        const rand = Math.random();
-        if (rand < 0.5) type = 'green';
-        else type = 'grey'; // No brown tanks past level 15
+        // Elite tier! Only Sniper, Kamikaze, and fast Green tanks
+        if (!isBossLevel || i > 0) {
+          const rand = Math.random();
+          if (rand < 0.35) type = 'red';
+          else if (rand < 0.7) type = 'orange';
+          else type = 'green';
+        }
       }
 
-      enemies.push(new Tank(ex, ey, type, false));
+      const tank = new Tank(ex, ey, type, false);
+      // Apply speed bonus for non-boss non-stationary enemies
+      if (type !== 'boss' && type !== 'brown') tank.speed += speedBonus;
+      enemies.push(tank);
     }
+
+    // Reset locked target index for new level
+    lockedTargetIndex = 0;
   }
 
   function AABB(x, y, r, rx, ry, rw, rh) {
@@ -540,6 +711,18 @@ export function initTanks(container) {
     let distY = y - testY;
     let distance = Math.sqrt((distX*distX) + (distY*distY));
     return distance <= r;
+  }
+
+  function lineIntersectsRect(x1, y1, x2, y2, rx, ry, rw, rh) {
+    // Raycast: check 10 points along the path between player and target
+    for (let t = 0.05; t < 0.95; t += 0.1) {
+      const px = x1 + (x2 - x1) * t;
+      const py = y1 + (y2 - y1) * t;
+      if (px >= rx && px <= rx + rw && py >= ry && py <= ry + rh) {
+        return true;
+      }
+    }
+    return false;
   }
 
   function checkBlockCollisions(entity) {
@@ -615,8 +798,11 @@ export function initTanks(container) {
 
   function shoot(tank, tx, ty) {
     const activeBullets = bullets.filter(b => b.isPlayer === tank.isPlayer && b.active).length;
-    if (activeBullets >= tank.maxBullets) return;
-    if (Date.now() - tank.lastShot < tank.cooldown) return;
+    const maxB = (tank.isPlayer && tank.rapidTimer > 0) ? 8 : tank.maxBullets;
+    if (activeBullets >= maxB) return;
+    
+    const activeCooldown = (tank.isPlayer && tank.rapidTimer > 0) ? 120 : tank.cooldown;
+    if (Date.now() - tank.lastShot < activeCooldown) return;
 
     tank.lastShot = Date.now();
     
@@ -628,7 +814,7 @@ export function initTanks(container) {
       tank.turretAngle = angle;
     }
     
-    const speed = tank.isPlayer ? 6 : 4;
+    const speed = tank.isPlayer ? 6 : (tank.type === 'red' ? 9 : (tank.type === 'boss' ? 5 : 4));
     // Spawn bullet at end of barrel
     const bx = tank.x + Math.cos(angle) * (tank.radius + 15);
     const by = tank.y + Math.sin(angle) * (tank.radius + 15);
@@ -638,12 +824,28 @@ export function initTanks(container) {
 
     bullets.push(new Bullet(bx, by, Math.cos(angle)*speed, Math.sin(angle)*speed, tank.isPlayer, bounces));
     
+    // Trishot! Spread 2 extra bullets at ±18 degrees
+    if (tank.isPlayer && tank.trishotTimer > 0) {
+      const spread = 0.31; // ~18 degrees
+      for (const offset of [-spread, spread]) {
+        const a2 = angle + offset;
+        const bx2 = tank.x + Math.cos(a2) * (tank.radius + 15);
+        const by2 = tank.y + Math.sin(a2) * (tank.radius + 15);
+        bullets.push(new Bullet(bx2, by2, Math.cos(a2)*speed, Math.sin(a2)*speed, true, bounces));
+      }
+    }
+    
     // Recoil effect
     tank.x -= Math.cos(angle) * 3;
     tank.y -= Math.sin(angle) * 3;
     
     // Muzzle flash
     particles.push(new Particle(bx, by, 'smoke'));
+
+    // After firing, cycle the locked target to the next enemy!
+    if (tank.isPlayer && enemies.length > 1) {
+      lockedTargetIndex = (lockedTargetIndex + 1) % enemies.length;
+    }
   }
 
   function dropMine(tank) {
@@ -705,8 +907,58 @@ export function initTanks(container) {
     player.y += player.vy;
     checkBlockCollisions(player);
 
-    // Smooth turret rotation to mouse
-    const targetTurretAngle = Math.atan2(mouseY - player.y, mouseX - player.x);
+    let targetTurretAngle;
+    autoTarget = null;
+
+    if (enemies.length > 0) {
+      // Auto-aim: try to lock onto the cycled target index first
+      // Clamp index in case enemies were removed
+      if (lockedTargetIndex >= enemies.length) lockedTargetIndex = 0;
+      const preferredTarget = enemies[lockedTargetIndex];
+
+      // Check if preferred target has line-of-sight
+      let preferredLoS = true;
+      for (let b of blocks) {
+        if (lineIntersectsRect(player.x, player.y, preferredTarget.x, preferredTarget.y, b.x, b.y, b.w, b.h)) {
+          preferredLoS = false;
+          break;
+        }
+      }
+
+      if (preferredLoS) {
+        autoTarget = preferredTarget;
+      } else {
+        // Fall back to closest in line-of-sight
+        let minDist = Infinity;
+        for (let e of enemies) {
+          const dist = Math.hypot(e.x - player.x, e.y - player.y);
+          if (dist < minDist) {
+            let lineOfSight = true;
+            for (let b of blocks) {
+              if (lineIntersectsRect(player.x, player.y, e.x, e.y, b.x, b.y, b.w, b.h)) {
+                lineOfSight = false;
+                break;
+              }
+            }
+            if (lineOfSight) {
+              minDist = dist;
+              autoTarget = e;
+            }
+          }
+        }
+      }
+    }
+
+    if (autoTarget) {
+      // Aim turret directly at target smoothly, and automatically snap the crosshair!
+      mouseX = autoTarget.x;
+      mouseY = autoTarget.y;
+      targetTurretAngle = Math.atan2(autoTarget.y - player.y, autoTarget.x - player.x);
+    } else {
+      // Manual aim
+      targetTurretAngle = Math.atan2(mouseY - player.y, mouseX - player.x);
+    }
+
     let tDiff = targetTurretAngle - player.turretAngle;
     while (tDiff < -Math.PI) tDiff += Math.PI*2;
     while (tDiff > Math.PI) tDiff -= Math.PI*2;
@@ -720,29 +972,65 @@ export function initTanks(container) {
         e.startDelay--;
         continue; // Don't move or shoot while starting
       }
+
+      // EMP freeze — skip movement and shooting if frozen!
+      if (e.frozenTimer > 0) {
+        e.frozenTimer--;
+        // Draw freeze crackle effect is handled in draw()
+        continue;
+      }
+
+      // Hit flash timer
+      if (e.flashTimer > 0) e.flashTimer--;
       
       // Movement
       if (e.speed > 0) {
-        e.moveTimer--;
-        if (e.moveTimer <= 0) {
-          e.targetAngle = Math.random() * Math.PI * 2;
-          e.moveTimer = 60 + Math.random() * 120;
-        }
-        e.vx = Math.cos(e.targetAngle) * e.speed;
-        e.vy = Math.sin(e.targetAngle) * e.speed;
-        e.x += e.vx;
-        e.y += e.vy;
-        
-        // Rotate body smoothly
-        let eDiff = e.targetAngle - e.angle;
-        while (eDiff < -Math.PI) eDiff += Math.PI*2;
-        while (eDiff > Math.PI) eDiff -= Math.PI*2;
-        e.angle += eDiff * 0.1;
+        if (e.type === 'orange') {
+          // Kamikaze chases the player directly
+          e.targetAngle = Math.atan2(player.y - e.y, player.x - e.x);
+          e.vx = Math.cos(e.targetAngle) * e.speed;
+          e.vy = Math.sin(e.targetAngle) * e.speed;
+          e.x += e.vx;
+          e.y += e.vy;
+          
+          let eDiff = e.targetAngle - e.angle;
+          while (eDiff < -Math.PI) eDiff += Math.PI*2;
+          while (eDiff > Math.PI) eDiff -= Math.PI*2;
+          e.angle += eDiff * 0.1;
 
-        addTrack(e);
-        
-        if (checkBlockCollisions(e)) {
-           e.moveTimer = 0; // Turn around
+          addTrack(e);
+          checkBlockCollisions(e);
+
+          // Explode on player contact!
+          if (player.invincible <= 0 && Math.hypot(player.x - e.x, player.y - e.y) < player.radius + e.radius) {
+            spawnExplosion(e.x, e.y);
+            enemies.splice(i, 1);
+            playerHit();
+            continue;
+          }
+        } else {
+          // Standard wandering AI movement
+          e.moveTimer--;
+          if (e.moveTimer <= 0) {
+            e.targetAngle = Math.random() * Math.PI * 2;
+            e.moveTimer = 60 + Math.random() * 120;
+          }
+          e.vx = Math.cos(e.targetAngle) * e.speed;
+          e.vy = Math.sin(e.targetAngle) * e.speed;
+          e.x += e.vx;
+          e.y += e.vy;
+          
+          // Rotate body smoothly
+          let eDiff = e.targetAngle - e.angle;
+          while (eDiff < -Math.PI) eDiff += Math.PI*2;
+          while (eDiff > Math.PI) eDiff -= Math.PI*2;
+          e.angle += eDiff * 0.1;
+
+          addTrack(e);
+          
+          if (checkBlockCollisions(e)) {
+             e.moveTimer = 0; // Turn around
+          }
         }
       }
 
@@ -803,9 +1091,34 @@ export function initTanks(container) {
           let e = enemies[j];
           if (Math.hypot(e.x - b.x, e.y - b.y) < e.radius + b.radius) {
             b.active = false;
-            spawnExplosion(e.x, e.y);
+
+            // Boss tanks take multi-hit damage
+            e.hp--;
+            e.flashTimer = 8; // Hit flash!
+            if (e.hp > 0) break; // Boss survives!
+
+            spawnExplosion(e.x, e.y, e.type === 'boss');
+            
+            // Close blast damage from Kamikaze tanks
+            if (e.type === 'orange' && player.invincible <= 0 && Math.hypot(player.x - e.x, player.y - e.y) < 75) {
+              playerHit();
+            }
+
+            // Roll 30% chance to drop powerup! (Boss always drops one)
+            const dropChance = e.type === 'boss' ? 1.0 : 0.3;
+            if (Math.random() < dropChance) {
+              const types = ['rapid', 'shield', 'coin', 'trishot', 'emp'];
+              const randType = types[Math.floor(Math.random() * types.length)];
+              powerups.push(new PowerUp(e.x, e.y, randType));
+            }
+
+            // If locked target is destroyed, reset to next
+            if (enemies[j] === enemies[lockedTargetIndex]) {
+              lockedTargetIndex = 0;
+            }
+
             enemies.splice(j, 1);
-            score += 100 * level;
+            score += (e.type === 'boss' ? 500 : 100) * level;
             scoreDisplay.innerText = `SCORE: ${score}`;
             checkLevelClear();
             break;
@@ -870,10 +1183,96 @@ export function initTanks(container) {
       tracks[i].life -= 0.002;
       if (tracks[i].life <= 0) tracks.splice(i, 1);
     }
+
+    // Update Player Powerup Timers
+    if (player.rapidTimer > 0) player.rapidTimer--;
+    if (player.shieldTimer > 0) player.shieldTimer--;
+    if (player.trishotTimer > 0) player.trishotTimer--;
+
+    // Apply screen shake
+    if (screenShake > 0) {
+      const s = screenShake;
+      canvas.style.transform = `translate(${(Math.random()-0.5)*s}px, ${(Math.random()-0.5)*s}px)`;
+      screenShake = Math.max(0, screenShake - 1.5);
+      if (screenShake <= 0) canvas.style.transform = 'translate(0,0)';
+    }
+
+    // Update Floating PowerUps
+    for (let i = powerups.length - 1; i >= 0; i--) {
+      let p = powerups[i];
+      p.life--;
+      if (p.life <= 0) {
+        powerups.splice(i, 1);
+        continue;
+      }
+      
+      // Collision with player
+      if (Math.hypot(player.x - p.x, player.y - p.y) < player.radius + p.radius) {
+        if (p.type === 'rapid') {
+          player.rapidTimer = 300; // 5 seconds of rapid double speed!
+          // Spawn cyan sparks
+          for (let s = 0; s < 12; s++) {
+            const part = new Particle(p.x, p.y, 'spark');
+            part.color = '#38bdf8';
+            particles.push(part);
+          }
+        } else if (p.type === 'shield') {
+          player.shieldTimer = 300; // 5 seconds of invincibility shield!
+          // Spawn purple sparks
+          for (let s = 0; s < 12; s++) {
+            const part = new Particle(p.x, p.y, 'spark');
+            part.color = '#a78bfa';
+            particles.push(part);
+          }
+        } else if (p.type === 'coin') {
+          score += 250;
+          scoreDisplay.innerText = `SCORE: ${score}`;
+          // Spawn golden sparks
+          for (let s = 0; s < 12; s++) {
+            const part = new Particle(p.x, p.y, 'spark');
+            part.color = '#fbbf24';
+            particles.push(part);
+          }
+        } else if (p.type === 'trishot') {
+          player.trishotTimer = 360; // 6 seconds of triple spread fire!
+          for (let s = 0; s < 12; s++) {
+            const part = new Particle(p.x, p.y, 'spark');
+            part.color = '#10b981';
+            particles.push(part);
+          }
+        } else if (p.type === 'emp') {
+          // EMP: freeze ALL enemies for 4 seconds!
+          for (let e of enemies) {
+            e.frozenTimer = 240;
+          }
+          // Big blue flash
+          for (let s = 0; s < 25; s++) {
+            const part = new Particle(p.x, p.y, 'spark');
+            part.color = '#06b6d4';
+            particles.push(part);
+          }
+          screenShake = 12;
+        }
+        
+        powerups.splice(i, 1);
+      }
+    }
   }
 
   function playerHit() {
+    // If shield is active, block the hit completely!
+    if (player && player.shieldTimer > 0) {
+      // Spawn beautiful shield deflection particles!
+      for (let s = 0; s < 15; s++) {
+        const part = new Particle(player.x, player.y, 'spark');
+        part.color = '#c084fc'; // neon purple sparks
+        particles.push(part);
+      }
+      return;
+    }
+
     spawnExplosion(player.x, player.y);
+    screenShake = 18; // Extra shake on player death
     lives--;
     let lifeStr = '';
     for(let i=0; i<lives; i++) lifeStr += '♥';
@@ -973,19 +1372,114 @@ export function initTanks(container) {
       player.draw(ctx);
     }
     
-    enemies.forEach(e => e.draw(ctx));
+    // Draw active powerups
+    powerups.forEach(p => p.draw(ctx));
+
+    // Draw Sniper targeting lasers
+    enemies.forEach(e => {
+      if (e.type === 'red' && e.startDelay <= 0 && !isGameOver) {
+        let hasLoS = true;
+        for (let b of blocks) {
+          if (lineIntersectsRect(e.x, e.y, player.x, player.y, b.x, b.y, b.w, b.h)) {
+            hasLoS = false;
+            break;
+          }
+        }
+        if (hasLoS) {
+          ctx.beginPath();
+          ctx.moveTo(e.x, e.y);
+          ctx.lineTo(player.x, player.y);
+          ctx.strokeStyle = 'rgba(239, 68, 68, 0.25)'; // Faint red targeting line
+          ctx.lineWidth = 1.5;
+          ctx.setLineDash([4, 4]);
+          ctx.stroke();
+          ctx.setLineDash([]);
+        }
+      }
+    });
+
+    // Draw enemies with freeze and hit-flash effects
+    enemies.forEach(e => {
+      // EMP freeze: draw icy overlay
+      if (e.frozenTimer > 0) {
+        ctx.save();
+        ctx.globalAlpha = 0.45 + Math.sin(frameCount * 0.3) * 0.15;
+        ctx.beginPath();
+        ctx.arc(e.x, e.y, e.radius + 6, 0, Math.PI * 2);
+        ctx.fillStyle = '#06b6d4';
+        ctx.fill();
+        ctx.globalAlpha = 1;
+        ctx.restore();
+      }
+      // Hit flash: draw white overlay
+      if (e.flashTimer > 0) {
+        ctx.save();
+        ctx.globalAlpha = 0.7;
+        ctx.beginPath();
+        ctx.arc(e.x, e.y, e.radius + 2, 0, Math.PI * 2);
+        ctx.fillStyle = '#ffffff';
+        ctx.fill();
+        ctx.globalAlpha = 1;
+        ctx.restore();
+      }
+      e.draw(ctx);
+
+      // HP bar for boss tanks
+      if (e.type === 'boss' && e.maxHp > 1) {
+        const barW = e.radius * 3;
+        const barH = 7;
+        const barX = e.x - barW / 2;
+        const barY = e.y - e.radius - 16;
+        const pct = e.hp / e.maxHp;
+        ctx.fillStyle = 'rgba(0,0,0,0.55)';
+        ctx.fillRect(barX - 1, barY - 1, barW + 2, barH + 2);
+        ctx.fillStyle = '#dc2626';
+        ctx.fillRect(barX, barY, barW, barH);
+        ctx.fillStyle = pct > 0.5 ? '#22c55e' : (pct > 0.25 ? '#f59e0b' : '#ef4444');
+        ctx.fillRect(barX, barY, barW * pct, barH);
+      }
+    });
     particles.forEach(p => p.draw(ctx));
     
-    // Custom Crosshair
-    ctx.beginPath();
-    ctx.arc(mouseX, mouseY, 8, 0, Math.PI * 2);
-    ctx.strokeStyle = 'rgba(255, 0, 0, 0.8)';
-    ctx.lineWidth = 2;
-    ctx.stroke();
-    ctx.beginPath();
-    ctx.arc(mouseX, mouseY, 1, 0, Math.PI * 2);
-    ctx.fillStyle = 'rgba(255, 0, 0, 0.8)';
-    ctx.fill();
+    // Premium animated targeting reticle crosshair
+    if (!isGameOver && !isMobile) {
+      const r1 = 12;
+      const r2 = 20;
+      const gap = 6;
+      const spin = frameCount * 0.04;
+      ctx.save();
+      ctx.translate(mouseX, mouseY);
+
+      // Outer spinning corner brackets
+      ctx.strokeStyle = autoTarget ? '#ef4444' : 'rgba(239,68,68,0.45)';
+      ctx.lineWidth = 2;
+      for (let q = 0; q < 4; q++) {
+        ctx.save();
+        ctx.rotate(spin + q * Math.PI / 2);
+        ctx.beginPath();
+        ctx.moveTo(gap, r1);
+        ctx.lineTo(gap, r2);
+        ctx.moveTo(r1, gap);
+        ctx.lineTo(r2, gap);
+        ctx.stroke();
+        ctx.restore();
+      }
+
+      // Center dot pulsing
+      const pulse = 1.5 + Math.sin(frameCount * 0.18) * 0.7;
+      ctx.beginPath();
+      ctx.arc(0, 0, pulse, 0, Math.PI * 2);
+      ctx.fillStyle = autoTarget ? '#ef4444' : 'rgba(239,68,68,0.6)';
+      ctx.fill();
+      ctx.restore();
+    } else if (!isGameOver) {
+      // Mobile: simpler small crosshair dot
+      ctx.beginPath();
+      ctx.arc(mouseX, mouseY, 6, 0, Math.PI * 2);
+      ctx.strokeStyle = 'rgba(255, 0, 0, 0.8)';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+    }
   }
 
   function loop() {
@@ -997,16 +1491,20 @@ export function initTanks(container) {
   }
 
   // Input bindings
-  window.addEventListener('keydown', e => {
-    if(keys.hasOwnProperty(e.key)) keys[e.key] = true;
-    if(e.code === 'Space' && !isGameOver) {
+  const handleKeyDown = (e) => {
+    if (keys.hasOwnProperty(e.key)) keys[e.key] = true;
+    if (e.code === 'Space' && !isGameOver) {
       e.preventDefault();
       dropMine(player);
     }
-  });
-  window.addEventListener('keyup', e => {
-    if(keys.hasOwnProperty(e.key)) keys[e.key] = false;
-  });
+  };
+
+  const handleKeyUp = (e) => {
+    if (keys.hasOwnProperty(e.key)) keys[e.key] = false;
+  };
+
+  window.addEventListener('keydown', handleKeyDown);
+  window.addEventListener('keyup', handleKeyUp);
   
   canvas.addEventListener('mousemove', e => {
     const rect = canvas.getBoundingClientRect();
@@ -1031,6 +1529,18 @@ export function initTanks(container) {
     }
   };
   window.addEventListener('touchstart', enableMobileUI, {passive: true});
+
+  // Cleanup observer when leaving the room
+  const observer = new MutationObserver((mutations) => {
+    if (!document.contains(container)) {
+      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('keyup', handleKeyUp);
+      window.removeEventListener('touchstart', enableMobileUI);
+      if (animationId) cancelAnimationFrame(animationId);
+      observer.disconnect();
+    }
+  });
+  observer.observe(document.body, { childList: true, subtree: true });
 
   // Tap-to-fire on the battlefield canvas absolutely
   canvas.addEventListener('touchstart', (e) => {
@@ -1118,12 +1628,37 @@ export function initTanks(container) {
     joyBase.addEventListener('touchcancel', endJoy);
   }
 
+  window.autoAimEnabled = true; // Auto-aim is universally active by default
+
   if (btnMine) {
     btnMine.addEventListener('touchstart', (e) => {
       e.preventDefault();
       e.stopPropagation();
       enableMobileUI();
       if (!isGameOver) dropMine(player);
+    }, {passive: false});
+  }
+
+  const btnShoot = document.getElementById('btn-shoot');
+  if (btnShoot) {
+    btnShoot.addEventListener('touchstart', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      enableMobileUI();
+      if (!isGameOver) {
+        // Fire at locked auto-aim target; if no target, fire along turret angle
+        let tx, ty;
+        if (enemies.length > 0 && lockedTargetIndex < enemies.length) {
+          tx = enemies[lockedTargetIndex].x;
+          ty = enemies[lockedTargetIndex].y;
+        } else {
+          tx = player.x + Math.cos(player.turretAngle) * 400;
+          ty = player.y + Math.sin(player.turretAngle) * 400;
+        }
+        shoot(player, tx, ty);
+        // Cycle to next locked target after firing!
+        if (enemies.length > 1) lockedTargetIndex = (lockedTargetIndex + 1) % enemies.length;
+      }
     }, {passive: false});
   }
 
