@@ -1,4 +1,4 @@
-import { db, auth, doc, getDoc, setDoc, onAuthStateChanged, collection, query, where, getDocs, updateProfile, updateDoc, sendEmailVerification, storage } from './firebase.js?v=11';
+import { db, auth, doc, getDoc, setDoc, onAuthStateChanged, collection, query, where, getDocs, updateProfile, updateDoc, sendEmailVerification, storage } from './firebase.js?v=12';
 
 // DOM selection
 const loadingOverlay = document.getElementById('profile-loading');

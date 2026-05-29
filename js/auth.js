@@ -1,5 +1,5 @@
-import { auth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, updateProfile, sendEmailVerification, GoogleAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult } from './firebase.js?v=11';
-import { db, doc, setDoc, getDoc, updateDoc, increment, collection, getDocs } from './firebase.js?v=11';
+import { auth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, updateProfile, sendEmailVerification, GoogleAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult } from './firebase.js?v=12';
+import { db, doc, setDoc, getDoc, updateDoc, increment, collection, getDocs, deleteDoc } from './firebase.js?v=12';
 
 const modal = document.getElementById('auth-modal');
 const btnLoginTrigger = document.getElementById('btn-login-trigger');
@@ -46,6 +46,7 @@ if (btnClose) {
   btnClose.addEventListener('click', () => {
     modal.style.display = 'none';
     resetPasswordVisibility();
+    removeOtpOverlay();
   });
 }
 
@@ -72,6 +73,240 @@ if (toggleLink) {
       if (inputInviteCode) inputInviteCode.style.display = 'none';
     }
   });
+}
+
+// ── DYNAMIC OTP OVERLAY SYSTEM ──
+const otpContainerHtml = `
+  <div id="auth-otp-container" style="text-align: center; width: 100%; display: flex; flex-direction: column; align-items: center;">
+    <p style="color: rgba(255,255,255,0.7); font-size: 0.9rem; margin-bottom: 20px; line-height: 1.4;">We sent a 6-digit verification code to <br><strong id="otp-display-email" style="color: #60A5FA;"></strong>. Please enter it below:</p>
+    
+    <div style="display: flex; gap: 8px; justify-content: center; margin-bottom: 24px;">
+      <input type="text" id="otp-1" class="auth-input" pattern="[0-9]*" inputmode="numeric" maxlength="1" style="width: 40px; height: 48px; text-align: center; font-size: 1.4rem; font-weight: 800; border-radius: 8px; margin: 0; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15); color: #fff;" />
+      <input type="text" id="otp-2" class="auth-input" pattern="[0-9]*" inputmode="numeric" maxlength="1" style="width: 40px; height: 48px; text-align: center; font-size: 1.4rem; font-weight: 800; border-radius: 8px; margin: 0; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15); color: #fff;" />
+      <input type="text" id="otp-3" class="auth-input" pattern="[0-9]*" inputmode="numeric" maxlength="1" style="width: 40px; height: 48px; text-align: center; font-size: 1.4rem; font-weight: 800; border-radius: 8px; margin: 0; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15); color: #fff;" />
+      <input type="text" id="otp-4" class="auth-input" pattern="[0-9]*" inputmode="numeric" maxlength="1" style="width: 40px; height: 48px; text-align: center; font-size: 1.4rem; font-weight: 800; border-radius: 8px; margin: 0; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15); color: #fff;" />
+      <input type="text" id="otp-5" class="auth-input" pattern="[0-9]*" inputmode="numeric" maxlength="1" style="width: 40px; height: 48px; text-align: center; font-size: 1.4rem; font-weight: 800; border-radius: 8px; margin: 0; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15); color: #fff;" />
+      <input type="text" id="otp-6" class="auth-input" pattern="[0-9]*" inputmode="numeric" maxlength="1" style="width: 40px; height: 48px; text-align: center; font-size: 1.4rem; font-weight: 800; border-radius: 8px; margin: 0; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15); color: #fff;" />
+    </div>
+
+    <button id="auth-otp-submit" class="auth-submit-btn" style="margin-bottom: 15px; width: 100%;">Verify & Create Account</button>
+    
+    <p style="font-size: 0.85rem; color: rgba(255,255,255,0.5); margin-bottom: 15px;">
+      Didn't receive the code? <a href="#" id="auth-otp-resend" style="color: #60A5FA; text-decoration: none; font-weight: bold;">Resend Code</a>
+    </p>
+    
+    <p style="font-size: 0.85rem; margin-top: 15px; margin-bottom: 0;">
+      <a href="#" id="auth-otp-cancel" style="color: rgba(255,255,255,0.6); text-decoration: none;">← Back to Sign Up</a>
+    </p>
+  </div>
+`;
+
+function removeOtpOverlay() {
+  const otpContainer = document.getElementById('auth-otp-container');
+  if (otpContainer) {
+    otpContainer.remove();
+  }
+  // Restore standard field visibilities
+  inputEmail.style.display = 'block';
+  const passwordContainer = document.querySelector('.auth-password-container');
+  if (passwordContainer) passwordContainer.style.display = 'flex';
+  btnSubmit.style.display = 'block';
+  const toggleContainer = document.querySelector('.auth-toggle-container');
+  if (toggleContainer) toggleContainer.style.display = 'block';
+  
+  if (isSignupMode) {
+    inputUsername.style.display = 'block';
+    if (inputInviteCode) inputInviteCode.style.display = 'block';
+  }
+}
+
+function showOtpOverlay(email, password, username, inviteCode) {
+  // Hide standard input fields
+  inputUsername.style.display = 'none';
+  if (inputInviteCode) inputInviteCode.style.display = 'none';
+  inputEmail.style.display = 'none';
+  const passwordContainer = document.querySelector('.auth-password-container');
+  if (passwordContainer) passwordContainer.style.display = 'none';
+  btnSubmit.style.display = 'none';
+  const toggleContainer = document.querySelector('.auth-toggle-container');
+  if (toggleContainer) toggleContainer.style.display = 'none';
+  
+  // Inject OTP HTML right inside .auth-card
+  const authCard = document.querySelector('.auth-card');
+  const existingOtp = document.getElementById('auth-otp-container');
+  if (existingOtp) existingOtp.remove();
+  
+  const div = document.createElement('div');
+  div.innerHTML = otpContainerHtml;
+  authCard.insertBefore(div.firstElementChild, toggleContainer);
+  
+  // Update Title and Display Email
+  title.innerText = 'Verify Email';
+  document.getElementById('otp-display-email').innerText = email;
+  
+  // Setup inputs auto-focus navigation
+  const inputs = [
+    document.getElementById('otp-1'),
+    document.getElementById('otp-2'),
+    document.getElementById('otp-3'),
+    document.getElementById('otp-4'),
+    document.getElementById('otp-5'),
+    document.getElementById('otp-6')
+  ];
+  
+  inputs.forEach((input, index) => {
+    input.addEventListener('input', () => {
+      input.value = input.value.replace(/[^0-9]/g, '');
+      if (input.value.length === 1 && index < 5) {
+        inputs[index + 1].focus();
+      }
+    });
+    
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Backspace' && input.value.length === 0 && index > 0) {
+        inputs[index - 1].focus();
+      }
+    });
+    
+    input.addEventListener('paste', (e) => {
+      const data = e.clipboardData.getData('text').trim();
+      if (/^\d{6}$/.test(data)) {
+        for (let i = 0; i < 6; i++) {
+          inputs[i].value = data[i];
+        }
+        inputs[5].focus();
+        e.preventDefault();
+      }
+    });
+  });
+  
+  // Wire up OTP Buttons
+  document.getElementById('auth-otp-cancel').addEventListener('click', (e) => {
+    e.preventDefault();
+    removeOtpOverlay();
+    title.innerText = 'Create Account';
+  });
+  
+  document.getElementById('auth-otp-resend').addEventListener('click', async (e) => {
+    e.preventDefault();
+    const btnResend = document.getElementById('auth-otp-resend');
+    btnResend.innerText = 'Sending...';
+    btnResend.style.pointerEvents = 'none';
+    
+    try {
+      const freshOtp = Math.floor(100000 + Math.random() * 900000).toString();
+      await setDoc(doc(db, "temp_signups", email), {
+        email,
+        username,
+        password,
+        otp: freshOtp,
+        createdAt: new Date(),
+        expiresAt: new Date(Date.now() + 10 * 60 * 1000)
+      });
+      
+      await fetch('/api/send-otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, otp: freshOtp, username })
+      });
+      
+      errorMsg.style.color = '#34D399';
+      errorMsg.style.background = 'rgba(52, 211, 153, 0.1)';
+      errorMsg.style.border = '1px solid rgba(52, 211, 153, 0.2)';
+      errorMsg.innerText = '🎉 Verification code resent! Check your inbox.';
+      errorMsg.style.display = 'block';
+    } catch (err) {
+      console.error(err);
+      errorMsg.style.color = '#EF4444';
+      errorMsg.style.background = 'rgba(239, 68, 68, 0.1)';
+      errorMsg.style.border = '1px solid rgba(239, 68, 68, 0.2)';
+      errorMsg.innerText = 'Failed to resend code: ' + err.message;
+      errorMsg.style.display = 'block';
+    } finally {
+      setTimeout(() => {
+        btnResend.innerText = 'Resend Code';
+        btnResend.style.pointerEvents = 'auto';
+      }, 5000);
+    }
+  });
+  
+  document.getElementById('auth-otp-submit').addEventListener('click', async () => {
+    const enteredOtp = inputs.map(i => i.value).join('');
+    if (enteredOtp.length < 6) {
+      errorMsg.innerText = 'Please enter all 6 digits of the code.';
+      errorMsg.style.color = '#EF4444';
+      errorMsg.style.background = 'rgba(239, 68, 68, 0.1)';
+      errorMsg.style.border = '1px solid rgba(239, 68, 68, 0.2)';
+      errorMsg.style.display = 'block';
+      return;
+    }
+    
+    const btnOtpSubmit = document.getElementById('auth-otp-submit');
+    btnOtpSubmit.innerText = 'Verifying Account...';
+    btnOtpSubmit.disabled = true;
+    errorMsg.style.display = 'none';
+    
+    try {
+      // Validate OTP from Firestore temp_signups
+      const tempRef = doc(db, "temp_signups", email);
+      const tempSnap = await getDoc(tempRef);
+      
+      if (!tempSnap.exists()) {
+        throw new Error('Verification session expired. Please go back and sign up again.');
+      }
+      
+      const tempData = tempSnap.data();
+      const now = new Date();
+      const expiresAt = tempData.expiresAt.toDate();
+      
+      if (tempData.otp !== enteredOtp || now > expiresAt) {
+        throw new Error('Invalid or expired verification code. Please check your email or click Resend.');
+      }
+      
+      // OTP is valid! Finalize sign up in Firebase
+      console.log("[Playhaus Debug] OTP Verified! Creating Firebase Auth User...");
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user;
+      await updateProfile(user, { displayName: username });
+      
+      // Create user profile in Firestore
+      await setDoc(doc(db, "users", user.uid), {
+        uid: user.uid,
+        username: username,
+        email: email,
+        totalPoints: 0,
+        gamesPlayed: 0,
+        joinDate: new Date(),
+        badges: ["new"]
+      });
+      
+      // Clean up the temp signup document from Firestore
+      await deleteDoc(tempRef);
+      
+      // Clear overlay and modal
+      removeOtpOverlay();
+      modal.style.display = 'none';
+      inputEmail.value = '';
+      inputPassword.value = '';
+      inputUsername.value = '';
+      resetPasswordVisibility();
+      
+      console.log("[Playhaus Debug] Sign up completed successfully!");
+    } catch (err) {
+      console.error(err);
+      errorMsg.style.color = '#EF4444';
+      errorMsg.style.background = 'rgba(239, 68, 68, 0.1)';
+      errorMsg.style.border = '1px solid rgba(239, 68, 68, 0.2)';
+      errorMsg.innerText = err.message.replace('Firebase: ', '');
+      errorMsg.style.display = 'block';
+    } finally {
+      btnOtpSubmit.innerText = 'Verify & Create Account';
+      btnOtpSubmit.disabled = false;
+    }
+  });
+  
+  // Set focus on first box
+  inputs[0].focus();
 }
 
 // Handle Submit
@@ -105,7 +340,6 @@ if (btnSubmit) {
           inviteValid = true;
           
           // Optionally update Firestore in a completely non-blocking, silent try/catch
-          // so that database timeouts or security rule failures NEVER block sign up.
           try {
             const inviteRef = doc(db, "beta_keys", "PHBETA");
             updateDoc(inviteRef, {
@@ -120,10 +354,6 @@ if (btnSubmit) {
           const inviteCollection = collection(db, "beta_keys");
           const querySnap = await getDocs(inviteCollection);
           console.log("[Playhaus Debug] Query completed! Documents count returned:", querySnap.size);
-          
-          querySnap.forEach((doc) => {
-            console.log("[Playhaus Debug] Document ID in Firestore: '" + doc.id + "' | Data:", doc.data());
-          });
           
           let foundInviteDoc = null;
           let inviteData = null;
@@ -200,63 +430,39 @@ if (btnSubmit) {
           throw new Error("Invalid Beta Invite Code! Check your spelling or contact the Playhaus crew for access.");
         }
         
-        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-        const user = userCredential.user;
-        await updateProfile(user, { displayName: username });
+        // ── GENERATE AND SEND OTP CODE ──
+        console.log("[Playhaus Debug] Generating OTP Code...");
+        const otp = Math.floor(100000 + Math.random() * 900000).toString();
         
-        // Create user profile in Firestore
-        await setDoc(doc(db, "users", user.uid), {
-          uid: user.uid,
-          username: username,
-          email: email,
-          totalPoints: 0,
-          gamesPlayed: 0,
-          joinDate: new Date(),
-          badges: ["new"] // Give them a starter badge!
+        // Save OTP and Temporary Registration Details to Firestore
+        await setDoc(doc(db, "temp_signups", email), {
+          email,
+          username,
+          password,
+          otp,
+          createdAt: new Date(),
+          expiresAt: new Date(Date.now() + 10 * 60 * 1000) // 10 minutes
         });
-
-        // ── EMAIL VERIFICATION FLOW ──
-        // Send verification email to the user
-        await sendEmailVerification(user);
         
-        // Immediately sign out the user so they cannot access the lobby until they verify their email
-        await signOut(auth);
-
-        // Reset input fields
-        inputEmail.value = '';
-        inputPassword.value = '';
-        inputUsername.value = '';
-        if (inputInviteCode) inputInviteCode.value = '';
-        resetPasswordVisibility();
-
-        // Automatically toggle the UI card back to Login Mode
-        isSignupMode = false;
-        title.innerText = 'Log In';
-        btnSubmit.innerText = 'Log In';
-        toggleText.innerText = 'Don\'t have an account?';
-        toggleLink.innerText = 'Sign Up';
-        inputUsername.style.display = 'none';
-        if (inputInviteCode) inputInviteCode.style.display = 'none';
-
-        // Display a premium success notification inside the modal
-        errorMsg.style.color = '#34D399';
-        errorMsg.style.background = 'rgba(52, 211, 153, 0.1)';
-        errorMsg.style.border = '1px solid rgba(52, 211, 153, 0.2)';
-        errorMsg.innerText = "🎉 Verification Email Sent! Please check your inbox (and spam folder) and verify your email, then log in below.";
-        errorMsg.style.display = 'block';
+        // Fetch to send-otp serverless function
+        console.log("[Playhaus Debug] Dispatching OTP email via serverless function...");
+        const response = await fetch('/api/send-otp', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, otp, username })
+        });
+        
+        if (!response.ok) {
+          const errData = await response.json();
+          throw new Error(errData.error || 'Failed to dispatch verification email. Please try again.');
+        }
+        
+        // Trigger Dynamic UI Transition
+        showOtpOverlay(email, password, username, inviteCode);
         return;
       } else {
         const userCredential = await signInWithEmailAndPassword(auth, email, password);
         const user = userCredential.user;
-        
-        // Reload user to ensure we have the absolute latest emailVerified state
-        await user.reload();
-        
-        // Enforce email verification check
-        if (!user.emailVerified) {
-          await signOut(auth);
-          throw new Error("📧 Email not verified! Please check your inbox (and spam folder) and click the verification link before logging in.");
-        }
         
         // Check if they have a profile, if not (e.g. created before this update), backfill it
         const userDoc = await getDoc(doc(db, "users", user.uid));
@@ -278,6 +484,29 @@ if (btnSubmit) {
       inputPassword.value = '';
       inputUsername.value = '';
       resetPasswordVisibility();
+      
+      // Prevent browser auto-fill from leaking into the search bar
+      setTimeout(() => {
+        const searchInput = document.getElementById('search-input');
+        if (searchInput && searchInput.value === username) {
+          searchInput.value = '';
+          searchInput.dispatchEvent(new Event('input'));
+        }
+      }, 500);
+      
+    } catch (error) {
+      console.error(error);
+      errorMsg.style.color = '#EF4444'; // Reset to red error style
+      errorMsg.style.background = 'rgba(239, 68, 68, 0.1)';
+      errorMsg.style.border = '1px solid rgba(239, 68, 68, 0.2)';
+      errorMsg.innerText = error.message.replace('Firebase: ', '');
+      errorMsg.style.display = 'block';
+    } finally {
+      btnSubmit.innerText = isSignupMode ? 'Sign Up' : 'Log In';
+      btnSubmit.disabled = false;
+    }
+  });
+}
       
       // Prevent browser auto-fill from leaking into the search bar
       setTimeout(() => {
