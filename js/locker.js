@@ -1080,29 +1080,29 @@ function initPrizePile() {
 
     // Determine layered vertical positioning to form a full physical pile heap
     let posY = 0;
-    let minX = 72;
-    let maxX = 385;
+    let minX = 70;
+    let maxX = 405;
     
     if (i < 24) {
-      // Layer 1 (Base Floor): sitting on the floor
+      // Layer 1 (Base Floor): spread wide sitting on the floor
       posY = Math.floor(Math.random() * 6);
-      minX = 72;
-      maxX = 385;
+      minX = 70;
+      maxX = 405;
     } else if (i < 44) {
-      // Layer 2 (Middle Heap): stacked middle gifts
-      posY = Math.floor(Math.random() * 8 + 18);
-      minX = 85;
-      maxX = 370;
+      // Layer 2 (Middle Heap): stacked middle gifts spread wide
+      posY = Math.floor(Math.random() * 8 + 14);
+      minX = 75;
+      maxX = 400;
     } else if (i < 58) {
       // Layer 3 (High Peak): stacked higher peak pile
-      posY = Math.floor(Math.random() * 8 + 36);
-      minX = 110;
-      maxX = 345;
+      posY = Math.floor(Math.random() * 8 + 26);
+      minX = 85;
+      maxX = 390;
     } else {
       // Layer 4 (Top Summit): top summit peak pile
-      posY = Math.floor(Math.random() * 10 + 54);
-      minX = 140;
-      maxX = 315;
+      posY = Math.floor(Math.random() * 8 + 36);
+      minX = 100;
+      maxX = 375;
     }
 
     const posX = Math.floor(Math.random() * (maxX - minX) + minX);
@@ -1347,10 +1347,16 @@ function updateClawPhysics() {
     clawAssembly.style.transform = `translateX(-50%) rotate(${clawSway}deg)`;
   }
 
-  // Laser sight opacity
+  // Laser sight and target spot positioning/opacity
   const clawLaser = document.getElementById('claw-laser');
   if (clawLaser) {
     clawLaser.style.opacity = isClawRunning ? '0' : '0.85';
+  }
+  
+  const laserTargetSpot = document.getElementById('laser-target-spot');
+  if (laserTargetSpot) {
+    laserTargetSpot.style.left = `${clawX}%`;
+    laserTargetSpot.style.opacity = isClawRunning ? '0' : '0.85';
   }
 
   requestAnimationFrame(updateClawPhysics);
@@ -1420,6 +1426,58 @@ if (joystickBase) {
   }, { passive: false });
   
   joystickBase.addEventListener('touchend', stopMovingClaw);
+}
+
+// ── Interactive Sparks Burst when Claw Clamps Cargo ─────────────────────────
+function triggerGrabSparks() {
+  const chamber = document.getElementById('claw-chamber');
+  if (!chamber) return;
+  
+  // Find current visual position of the claw hand
+  const clawHandEl = document.getElementById('claw-hand');
+  if (!clawHandEl) return;
+  
+  const rect = clawHandEl.getBoundingClientRect();
+  const chamberRect = chamber.getBoundingClientRect();
+  
+  // Calculate relative coordinate offsets inside the chamber
+  const posX = rect.left - chamberRect.left + rect.width / 2;
+  const posY = rect.top - chamberRect.top + rect.height / 2 + 10;
+  
+  // Spawn 15 electrical grab sparks!
+  for (let i = 0; i < 15; i++) {
+    const s = document.createElement('div');
+    s.style.cssText = `
+      position: absolute;
+      left: ${posX}px;
+      top: ${posY}px;
+      width: 4px;
+      height: 4px;
+      background: #38bdf8;
+      box-shadow: 0 0 6px #38bdf8;
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 101;
+      opacity: 1;
+      transition: all 0.5s cubic-bezier(0.1, 0.8, 0.25, 1);
+    `;
+    chamber.appendChild(s);
+    
+    // Animate sparks outward exploding from claw fingers!
+    const angle = Math.random() * Math.PI * 2;
+    const distance = Math.random() * 45 + 15;
+    const tx = Math.cos(angle) * distance;
+    const ty = Math.sin(angle) * distance;
+    
+    requestAnimationFrame(() => {
+      s.style.transform = `translate(${tx}px, ${ty}px) scale(0.1)`;
+      s.style.opacity = '0';
+    });
+    
+    setTimeout(() => {
+      s.remove();
+    }, 550);
+  }
 }
 
 // ── Interactive Claw Drop Sequence ──────────────────────────────────────────
@@ -1523,6 +1581,7 @@ async function performClawDrop() {
     clawHand.classList.add('is-closed');
   }
   ClawAudio.playClang();
+  triggerGrabSparks();
 
   let prizeBoxNode = null;
   if (closestBox && closestBox.element) {
