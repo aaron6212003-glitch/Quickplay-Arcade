@@ -507,29 +507,6 @@ if (btnSubmit) {
     }
   });
 }
-      
-      // Prevent browser auto-fill from leaking into the search bar
-      setTimeout(() => {
-        const searchInput = document.getElementById('search-input');
-        if (searchInput && searchInput.value === username) {
-          searchInput.value = '';
-          searchInput.dispatchEvent(new Event('input'));
-        }
-      }, 500);
-      
-    } catch (error) {
-      console.error(error);
-      errorMsg.style.color = '#EF4444'; // Reset to red error style
-      errorMsg.style.background = 'rgba(239, 68, 68, 0.1)';
-      errorMsg.style.border = '1px solid rgba(239, 68, 68, 0.2)';
-      errorMsg.innerText = error.message.replace('Firebase: ', '');
-      errorMsg.style.display = 'block';
-    } finally {
-      btnSubmit.innerText = isSignupMode ? 'Sign Up' : 'Log In';
-      btnSubmit.disabled = false;
-    }
-  });
-}
 
 // Helper to handle new/first-time social sign-ups with the Beta Invite Code prompt
 async function handleFirstTimeUser(user) {
