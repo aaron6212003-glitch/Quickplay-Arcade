@@ -1,4 +1,4 @@
-const CACHE_NAME = 'playhaus-cache-v10';
+const CACHE_NAME = 'playhaus-cache-v11';
 const ASSETS_TO_CACHE = [
   '/',
   '/index.html',
@@ -58,7 +58,7 @@ self.addEventListener('activate', (event) => {
   );
 });
 
-// Fetch Interceptor: Cache First with Network Fallback
+// Fetch Interceptor: Network First with Cache Fallback
 self.addEventListener('fetch', (event) => {
   // Only handle GET requests and local scope fetches
   if (event.request.method !== 'GET' || !event.request.url.startsWith(self.location.origin)) {
@@ -66,32 +66,27 @@ self.addEventListener('fetch', (event) => {
   }
 
   event.respondWith(
-    caches.match(event.request)
-      .then((cachedResponse) => {
-        if (cachedResponse) {
-          // Return cached response
-          return cachedResponse;
+    fetch(event.request)
+      .then((response) => {
+        // If we get a valid response from the network, cache it and return it
+        if (response && response.status === 200 && response.type === 'basic') {
+          // Dynamically cache new assets (except firebase/firestore operations)
+          if (!event.request.url.includes('/_/auth') && !event.request.url.includes('firestore')) {
+            const responseToCache = response.clone();
+            caches.open(CACHE_NAME).then((cache) => {
+              cache.put(event.request, responseToCache);
+            });
+          }
         }
-
-        // Otherwise fetch from network
-        return fetch(event.request)
-          .then((response) => {
-            // Check if response is valid
-            if (!response || response.status !== 200 || response.type !== 'basic') {
-              return response;
+        return response;
+      })
+      .catch(() => {
+        // If network fails (offline), try the cache
+        return caches.match(event.request)
+          .then((cachedResponse) => {
+            if (cachedResponse) {
+              return cachedResponse;
             }
-
-            // Dynamically cache new assets (except firebase/firestore operations)
-            if (!event.request.url.includes('/_/auth') && !event.request.url.includes('firestore')) {
-              const responseToCache = response.clone();
-              caches.open(CACHE_NAME).then((cache) => {
-                cache.put(event.request, responseToCache);
-              });
-            }
-
-            return response;
-          })
-          .catch(() => {
             // Fallback for document navigation in case of completely offline
             if (event.request.mode === 'navigate') {
               return caches.match('/index.html');
