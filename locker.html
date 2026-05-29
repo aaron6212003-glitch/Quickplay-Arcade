@@ -707,29 +707,78 @@
       z-index: 3;
     }
 
-    /* Colorful rarity prize box cubes */
+    /* Colorful rarity prize box cubes styled as cute gift boxes */
     .prize-box {
       width: 23px; height: 23px;
-      border-radius: 6px;
-      border: 1.5px solid rgba(255,255,255,0.25);
-      box-shadow: 
-        0 4px 6px rgba(0,0,0,0.5), 
-        inset 0 1.5px 0 rgba(255,255,255,0.2);
+      border-radius: 5px;
       position: relative;
+      box-shadow: 
+        0 4px 6px rgba(0,0,0,0.55), 
+        inset 0 1.5px 0 rgba(255,255,255,0.25);
       animation: boxGlow 2.5s infinite alternate ease-in-out;
       transform-origin: bottom center;
+      z-index: 3;
     }
+    
+    /* Horizontal Ribbon Crossing */
+    .prize-box::before {
+      content: '';
+      position: absolute;
+      top: 50%; left: 0; right: 0;
+      height: 4px;
+      background: var(--ribbon-color, #ff4b72);
+      transform: translateY(-50%);
+      z-index: 1;
+      box-shadow: 0 0.5px 1px rgba(0,0,0,0.2);
+    }
+
+    /* Vertical Ribbon Crossing */
+    .prize-box::after {
+      content: '';
+      position: absolute;
+      left: 50%; top: 0; bottom: 0;
+      width: 4px;
+      background: var(--ribbon-color, #ff4b72);
+      transform: translateX(-50%);
+      z-index: 1;
+      box-shadow: 0.5px 0 1px rgba(0,0,0,0.2);
+    }
+
+    /* Cute Gift Ribbon Bow on top! */
+    .prize-box-bow {
+      position: absolute;
+      top: -4px; left: 50%;
+      width: 6px; height: 4px;
+      background: var(--ribbon-color, #ff4b72);
+      border-radius: 2px;
+      transform: translateX(-50%);
+      z-index: 2;
+    }
+    
+    .prize-box-bow::before,
+    .prize-box-bow::after {
+      content: '';
+      position: absolute;
+      top: -2px;
+      width: 5px; height: 5px;
+      border: 1.5px solid var(--ribbon-color, #ff4b72);
+      border-radius: 50%;
+      background: transparent;
+    }
+    
+    .prize-box-bow::before { left: -4px; transform: rotate(-30deg); }
+    .prize-box-bow::after { right: -4px; transform: rotate(30deg); }
     
     @keyframes boxGlow {
       0% { filter: brightness(0.85) saturate(0.95); transform: scale(1) translateY(0); }
       100% { filter: brightness(1.15) saturate(1.1); transform: scale(1.03) translateY(-1px); }
     }
 
-    .prize-box--common { background: linear-gradient(135deg, #7b889b, #3b4252); }
-    .prize-box--uncommon { background: linear-gradient(135deg, #10b981, #065f46); }
-    .prize-box--rare { background: linear-gradient(135deg, #38bdf8, #0369a1); }
-    .prize-box--epic { background: linear-gradient(135deg, #a78bfa, #6d28d9); }
-    .prize-box--legendary { background: linear-gradient(135deg, #fbbf24, #b45309); }
+    .prize-box--common { background: linear-gradient(135deg, #7b889b, #3b4252); --ribbon-color: #f43f5e; }
+    .prize-box--uncommon { background: linear-gradient(135deg, #10b981, #065f46); --ribbon-color: #fbbf24; }
+    .prize-box--rare { background: linear-gradient(135deg, #38bdf8, #0369a1); --ribbon-color: #ffffff; }
+    .prize-box--epic { background: linear-gradient(135deg, #a78bfa, #6d28d9); --ribbon-color: #fbbf24; }
+    .prize-box--legendary { background: linear-gradient(135deg, #fbbf24, #b45309); --ribbon-color: #e11d48; }
 
     /* 3D Visual Funnel Prize Chute */
     .prize-chute {
@@ -1258,21 +1307,21 @@
             <!-- Claw Assembly (Sways dynamically!) -->
             <div class="claw-assembly" id="claw-assembly" style="left: 50%;">
               <!-- Steel Twisted Cable String -->
-              <div class="claw-string" id="claw-string" style="height: 40px;"></div>
+              <div class="claw-string" id="claw-string" style="height: 40px;">
+                <!-- 3-Pronged Mechanical Claw (Child of string so it follows height perfectly!) -->
+                <div class="claw-hand" id="claw-hand">
+                  <div class="claw-shifter"></div>
+                  <div class="claw-body"></div>
+                  <div class="claw-prongs">
+                    <div class="claw-prong claw-prong-left"></div>
+                    <div class="claw-prong claw-prong-right"></div>
+                    <div class="claw-prong claw-prong-center"></div>
+                  </div>
+                </div>
+              </div>
               
               <!-- Glowing laser targeting line -->
               <div class="claw-laser" id="claw-laser"></div>
-              
-              <!-- 3-Pronged Mechanical Claw -->
-              <div class="claw-hand" id="claw-hand">
-                <div class="claw-shifter"></div>
-                <div class="claw-body"></div>
-                <div class="claw-prongs">
-                  <div class="claw-prong claw-prong-left"></div>
-                  <div class="claw-prong claw-prong-right"></div>
-                  <div class="claw-prong claw-prong-center"></div>
-                </div>
-              </div>
             </div>
 
             <!-- 3D Visual Funnel Chute Drop Box -->

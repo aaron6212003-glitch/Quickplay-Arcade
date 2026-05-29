@@ -971,6 +971,7 @@ let isClawRunning = false;
 let spawnedPrizes = [];
 
 // Initialize colorful mystery prize box stack
+// Initialize colorful mystery prize box stack styled as cute gifts in a dense pile
 function initPrizePile() {
   if (!prizePile) return;
   prizePile.innerHTML = '';
@@ -979,8 +980,9 @@ function initPrizePile() {
   const rarities = ['common', 'uncommon', 'rare', 'epic', 'legendary'];
   const rarityOdds = [45, 25, 17, 10, 3]; // percentage weights
 
-  // Spawn 22 mystery box visual items inside glass chamber
-  for (let i = 0; i < 22; i++) {
+  // Spawn 45 mystery gift visual items inside glass chamber layered into a heap
+  const numGifts = 45;
+  for (let i = 0; i < numGifts; i++) {
     // Determine random visual color base
     const roll = Math.random() * 100;
     let boxRarity = 'common';
@@ -996,14 +998,35 @@ function initPrizePile() {
     const box = document.createElement('div');
     box.className = `prize-box prize-box--${boxRarity}`;
     
-    // Spread them out horizontally (from 75px to 380px)
-    const minX = 75;
-    const maxX = 380;
-    const posX = Math.floor(Math.random() * (maxX - minX) + minX);
+    // Add the decorative ribbon bow loop knot on top!
+    const bow = document.createElement('div');
+    bow.className = 'prize-box-bow';
+    box.appendChild(bow);
+
+    // Determine layered vertical positioning to form a full physical pile heap
+    let posY = 0;
+    let minX = 72;
+    let maxX = 385;
     
-    // Random slight pile stacking offsets
-    const rot = Math.floor(Math.random() * 40 - 20); // -20deg to 20deg
-    const posY = Math.floor(Math.random() * 6);
+    if (i < 18) {
+      // Layer 1 (Base Floor): sitting on the floor
+      posY = Math.floor(Math.random() * 5);
+      minX = 72;
+      maxX = 385;
+    } else if (i < 33) {
+      // Layer 2 (Middle Heap): slightly narrower spread, sitting stacked on bottom gifts
+      posY = Math.floor(Math.random() * 6 + 18);
+      minX = 90;
+      maxX = 365;
+    } else {
+      // Layer 3 (Top Peak): centered peak pile
+      posY = Math.floor(Math.random() * 6 + 36);
+      minX = 120;
+      maxX = 335;
+    }
+
+    const posX = Math.floor(Math.random() * (maxX - minX) + minX);
+    const rot = Math.floor(Math.random() * 50 - 25); // -25deg to 25deg
     
     box.style.cssText = `
       position: absolute;
@@ -1013,7 +1036,7 @@ function initPrizePile() {
     `;
     
     prizePile.appendChild(box);
-    spawnedPrizes.push({ element: box, x: posX, rarity: boxRarity });
+    spawnedPrizes.push({ element: box, x: posX, y: posY, rarity: boxRarity });
   }
 }
 
@@ -1357,21 +1380,32 @@ async function performClawDrop() {
   // Wait 1.4 seconds for claw string extension to complete
   await new Promise(res => setTimeout(res, 1400));
 
-  // 3. Find closest visual prize box box horizontally
+  // 3. Find top-most visual prize box box horizontally close to claw
   const chamberRect = document.getElementById('claw-chamber').getBoundingClientRect();
   const clawTargetX = (clawPositionPercent / 100) * chamberRect.width;
   
   let closestBox = null;
-  let minDiff = Infinity;
   
-  spawnedPrizes.forEach(b => {
-    // Chamber coordinates are relative to chamber width
-    const diff = Math.abs(b.x - clawTargetX);
-    if (diff < minDiff) {
-      minDiff = diff;
-      closestBox = b;
-    }
-  });
+  // Find all boxes within a reasonable horizontal proximity (e.g. 26px)
+  const nearbyBoxes = spawnedPrizes.filter(b => Math.abs(b.x - clawTargetX) < 26);
+  
+  if (nearbyBoxes.length > 0) {
+    // Grab the top-most (highest Y coordinate) box in proximity!
+    nearbyBoxes.sort((a, b) => b.y - a.y);
+    closestBox = nearbyBoxes[0];
+  } else {
+    // Fallback to absolute closest horizontal box if none are directly under
+    let absoluteClosest = null;
+    let absoluteMinDiff = Infinity;
+    spawnedPrizes.forEach(b => {
+      const diff = Math.abs(b.x - clawTargetX);
+      if (diff < absoluteMinDiff) {
+        absoluteMinDiff = diff;
+        absoluteClosest = b;
+      }
+    });
+    closestBox = absoluteClosest;
+  }
 
   // Determine rolled prize matching the grabbed box's rarity
   const grabbedRarity = closestBox ? closestBox.rarity : 'common';
