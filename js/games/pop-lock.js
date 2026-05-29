@@ -1,3 +1,6 @@
+import { auth } from '../firebase.js';
+import { generateScoreSignature } from '../security.js';
+
 export function init(container) {
   // Clear any existing contents
   container.innerHTML = '';
@@ -250,11 +253,13 @@ export function init(container) {
       spawnExplosion(targetX, targetY, particleColor);
       
       playSound('pop');
+      if (window.triggerHaptic) window.triggerHaptic('light');
 
       if (remainingPops <= 0) {
         // LEVEL CLEARED
         isLevelCleared = true;
         playSound('unlock');
+        if (window.triggerHaptic) window.triggerHaptic('medium');
         shackleYOffset = 0; // Trigger lock shackle animation
       } else {
         // Reverse direction and spawn next lock target
@@ -272,10 +277,15 @@ export function init(container) {
       isGameOver = true;
       screenShake = 12;
       playSound('fail');
+      if (window.triggerHaptic) window.triggerHaptic('heavy');
       
       // Save highscore
       if (window.saveScore) {
-        window.saveScore('Pop Lock', score);
+        const user = auth.currentUser;
+        const uid = user ? user.uid : "guest";
+        const timestamp = Date.now();
+        const signature = generateScoreSignature(uid, 'Pop Lock', score, timestamp);
+        window.saveScore('Pop Lock', score, signature, timestamp);
       }
     }
   }

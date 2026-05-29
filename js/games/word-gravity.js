@@ -1,3 +1,6 @@
+import { auth } from '../firebase.js';
+import { generateScoreSignature } from '../security.js';
+
 export function init(container) {
   container.innerHTML = `
     <style>
@@ -289,6 +292,7 @@ export function init(container) {
     
     if (word.length < 3) {
       showToast('Too short!', '#EF4444');
+      if (window.triggerHaptic) window.triggerHaptic('medium');
       window.wgClear();
       return;
     }
@@ -305,6 +309,7 @@ export function init(container) {
 
     if (!isValid) {
       showToast('Invalid Word', '#EF4444');
+      if (window.triggerHaptic) window.triggerHaptic('medium');
       window.wgClear();
       return;
     }
@@ -330,6 +335,7 @@ export function init(container) {
     }
     
     showToast('NICE!', '#10B981');
+    if (window.triggerHaptic) window.triggerHaptic('light');
 
     // 2. Remove tiles from grid and DOM
     selectedIds.forEach(id => {
@@ -347,6 +353,7 @@ export function init(container) {
 
   function endGame() {
     isGameOver = true;
+    if (window.triggerHaptic) window.triggerHaptic('heavy');
     clearInterval(spawnInterval);
     clearInterval(gravityInterval);
     clearInterval(difficultyInterval);
@@ -359,7 +366,11 @@ export function init(container) {
     
     // Save to global leaderboard!
     if (window.saveScore && score > 0) {
-      window.saveScore('Word Gravity', score);
+      const user = auth.currentUser;
+      const uid = user ? user.uid : "guest";
+      const timestamp = Date.now();
+      const signature = generateScoreSignature(uid, 'Word Gravity', score, timestamp);
+      window.saveScore('Word Gravity', score, signature, timestamp);
     }
     
     document.getElementById('wg-final-score-display').innerText = score;

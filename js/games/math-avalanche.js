@@ -1,3 +1,6 @@
+import { auth } from '../firebase.js';
+import { generateScoreSignature } from '../security.js';
+
 export function init(container) {
   container.innerHTML = `
     <style>
@@ -377,6 +380,7 @@ export function init(container) {
       }
       
       showToast('PERFECT!', '#10B981');
+      if (window.triggerHaptic) window.triggerHaptic('light');
 
       // Remove tiles
       selectedIds.forEach(id => {
@@ -392,12 +396,14 @@ export function init(container) {
       
     } else {
       showToast(`That equals ${result}!\nTarget is ${currentTarget}.`, '#EF4444');
+      if (window.triggerHaptic) window.triggerHaptic('medium');
       window.maClear();
     }
   };
 
   function endGame() {
     isGameOver = true;
+    if (window.triggerHaptic) window.triggerHaptic('heavy');
     clearInterval(spawnInterval);
     clearInterval(gravityInterval);
     clearInterval(difficultyInterval);
@@ -410,7 +416,11 @@ export function init(container) {
 
     // Save to global leaderboard!
     if (window.saveScore && score > 0) {
-      window.saveScore('Math Avalanche', score);
+      const user = auth.currentUser;
+      const uid = user ? user.uid : "guest";
+      const timestamp = Date.now();
+      const signature = generateScoreSignature(uid, 'Math Avalanche', score, timestamp);
+      window.saveScore('Math Avalanche', score, signature, timestamp);
     }
     
     document.getElementById('ma-final-score-display').innerText = score;

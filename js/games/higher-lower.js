@@ -1,3 +1,6 @@
+import { auth } from '../firebase.js';
+import { generateScoreSignature } from '../security.js';
+
 export function init(container) {
   container.innerHTML = `
     <style>
@@ -652,11 +655,16 @@ export function init(container) {
     
     // Shake screen
     hlWrapper.classList.add('hl-shake');
+    if (window.triggerHaptic) window.triggerHaptic('heavy');
     setTimeout(() => hlWrapper.classList.remove('hl-shake'), 450);
 
     // Save score
     if (window.saveScore && score > 0) {
-      window.saveScore('Higher or Lower', score);
+      const user = auth.currentUser;
+      const uid = user ? user.uid : "guest";
+      const timestamp = Date.now();
+      const signature = generateScoreSignature(uid, 'Higher or Lower', score, timestamp);
+      window.saveScore('Higher or Lower', score, signature, timestamp);
     }
     
     setTimeout(() => {
@@ -761,6 +769,7 @@ export function init(container) {
 
     if (isCorrect) {
       score++;
+      if (window.triggerHaptic) window.triggerHaptic('light');
       elScore.innerText = score;
       if (score > highScore) {
         highScore = score;
@@ -794,10 +803,15 @@ export function init(container) {
     } else {
       // Game Over: Shake screen and save score
       hlWrapper.classList.add('hl-shake');
+      if (window.triggerHaptic) window.triggerHaptic('heavy');
       setTimeout(() => hlWrapper.classList.remove('hl-shake'), 450);
 
       if (window.saveScore && score > 0) {
-        window.saveScore('Higher or Lower', score);
+        const user = auth.currentUser;
+        const uid = user ? user.uid : "guest";
+        const timestamp = Date.now();
+        const signature = generateScoreSignature(uid, 'Higher or Lower', score, timestamp);
+        window.saveScore('Higher or Lower', score, signature, timestamp);
       }
       
       setTimeout(() => {

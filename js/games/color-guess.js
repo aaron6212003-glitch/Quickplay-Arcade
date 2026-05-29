@@ -1,3 +1,6 @@
+import { auth } from '../firebase.js';
+import { generateScoreSignature } from '../security.js';
+
 export function init(container) {
   container.innerHTML = `
     <style>
@@ -321,7 +324,11 @@ export function init(container) {
       }
       
       if (window.saveScore && totalScore > 0) {
-        window.saveScore('Color Guess', totalScore);
+        const user = auth.currentUser;
+        const uid = user ? user.uid : "guest";
+        const timestamp = Date.now();
+        const signature = generateScoreSignature(uid, 'Color Guess', totalScore, timestamp);
+        window.saveScore('Color Guess', totalScore, signature, timestamp);
       }
       
       document.getElementById('cg-final-score').innerText = totalScore;

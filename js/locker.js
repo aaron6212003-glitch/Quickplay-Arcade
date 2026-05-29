@@ -1,5 +1,6 @@
 import { db, auth, doc, getDoc, setDoc, updateDoc, sendEmailVerification } from './firebase.js';
 import { onAuthStateChanged } from './firebase.js';
+import { triggerHaptic } from './haptics.js';
 
 // --- COSMETICS DEFINITION SYSTEM ---
 const COSMETICS = [
@@ -115,63 +116,57 @@ const COSMETICS = [
   { id: "theme:theme-prism", type: "theme", name: "Prismatic Hologram", val: "theme-prism", rarity: "legendary" },
   { id: "theme:theme-inferno", type: "theme", name: "Infernal Embers", val: "theme-inferno", rarity: "legendary" },
 
-  // --- TITLES (Slogan tags) ---
-  // Common
+  // --- TITLES (Witty Clash Royale-style slogan tags) ---
+  // Common — Self-deprecating, relatable, new player energy
   { id: "title:THE ROOKIE", type: "title", name: "THE ROOKIE", val: "THE ROOKIE", rarity: "common" },
+  { id: "title:JUST VIBING", type: "title", name: "JUST VIBING", val: "JUST VIBING", rarity: "common" },
+  { id: "title:ACCIDENTALLY GOOD", type: "title", name: "ACCIDENTALLY GOOD", val: "ACCIDENTALLY GOOD", rarity: "common" },
+  { id: "title:PARTICIPATION TROPHY", type: "title", name: "PARTICIPATION TROPHY", val: "PARTICIPATION TROPHY", rarity: "common" },
   { id: "title:BUTTON MASHER", type: "title", name: "BUTTON MASHER", val: "BUTTON MASHER", rarity: "common" },
-  { id: "title:CASUAL PLAYER", type: "title", name: "CASUAL PLAYER", val: "CASUAL PLAYER", rarity: "common" },
-  { id: "title:NOOB BUSTER", type: "title", name: "NOOB BUSTER", val: "NOOB BUSTER", rarity: "common" },
-  { id: "title:KEYBOARD WARRIOR", type: "title", name: "KEYBOARD WARRIOR", val: "KEYBOARD WARRIOR", rarity: "common" },
-  { id: "title:CHIPPOPOTAMUS", type: "title", name: "CHIPPOPOTAMUS", val: "CHIPPOPOTAMUS", rarity: "common" },
-  // Uncommon
-  { id: "title:DAILY GRINDER", type: "title", name: "DAILY GRINDER", val: "DAILY GRINDER", rarity: "uncommon" },
-  { id: "title:WORD WIZARD", type: "title", name: "WORD WIZARD", val: "WORD WIZARD", rarity: "uncommon" },
-  { id: "title:REACTION CHAMP", type: "title", name: "REACTION CHAMP", val: "REACTION CHAMP", rarity: "uncommon" },
-  { id: "title:COIN HUNTER", type: "title", name: "COIN HUNTER", val: "COIN HUNTER", rarity: "uncommon" },
-  { id: "title:XP HUNTER", type: "title", name: "XP HUNTER", val: "XP HUNTER", rarity: "uncommon" },
-  { id: "title:COMBO BREEDER", type: "title", name: "COMBO BREEDER", val: "COMBO BREEDER", rarity: "uncommon" },
-  // Rare
-  { id: "title:TANKS COMMANDER", type: "title", name: "TANKS COMMANDER", val: "TANKS COMMANDER", rarity: "rare" },
-  { id: "title:COLOR CONNOISSEUR", type: "title", name: "COLOR CONNOISSEUR", val: "COLOR CONNOISSEUR", rarity: "rare" },
-  { id: "title:SPEEDRUNNER", type: "title", name: "SPEEDRUNNER", val: "SPEEDRUNNER", rarity: "rare" },
+  { id: "title:TRUST THE PROCESS", type: "title", name: "TRUST THE PROCESS", val: "TRUST THE PROCESS", rarity: "common" },
+  { id: "title:AFK LEGEND", type: "title", name: "AFK LEGEND", val: "AFK LEGEND", rarity: "common" },
+  { id: "title:MORAL SUPPORT", type: "title", name: "MORAL SUPPORT", val: "MORAL SUPPORT", rarity: "common" },
+  // Uncommon — Cocky beginner energy, starting to talk trash
+  { id: "title:CERTIFIED MENACE", type: "title", name: "CERTIFIED MENACE", val: "CERTIFIED MENACE", rarity: "uncommon" },
+  { id: "title:BUILT DIFFERENT", type: "title", name: "BUILT DIFFERENT", val: "BUILT DIFFERENT", rarity: "uncommon" },
+  { id: "title:NO CHILL", type: "title", name: "NO CHILL", val: "NO CHILL", rarity: "uncommon" },
+  { id: "title:LOWKEY CRACKED", type: "title", name: "LOWKEY CRACKED", val: "LOWKEY CRACKED", rarity: "uncommon" },
+  { id: "title:SLEEP IS OVERRATED", type: "title", name: "SLEEP IS OVERRATED", val: "SLEEP IS OVERRATED", rarity: "uncommon" },
+  { id: "title:COIN GOBLIN", type: "title", name: "COIN GOBLIN", val: "COIN GOBLIN", rarity: "uncommon" },
+  { id: "title:CHAOS AGENT", type: "title", name: "CHAOS AGENT", val: "CHAOS AGENT", rarity: "uncommon" },
+  { id: "title:UNRANKED THREAT", type: "title", name: "UNRANKED THREAT", val: "UNRANKED THREAT", rarity: "uncommon" },
+  // Rare — Real flex, witty and confident
+  { id: "title:RENT FREE IN YOUR HEAD", type: "title", name: "RENT FREE IN YOUR HEAD", val: "RENT FREE IN YOUR HEAD", rarity: "rare" },
+  { id: "title:MAIN CHARACTER", type: "title", name: "MAIN CHARACTER", val: "MAIN CHARACTER", rarity: "rare" },
+  { id: "title:RAGE QUIT INDUCER", type: "title", name: "RAGE QUIT INDUCER", val: "RAGE QUIT INDUCER", rarity: "rare" },
+  { id: "title:EMOTIONAL DAMAGE", type: "title", name: "EMOTIONAL DAMAGE", val: "EMOTIONAL DAMAGE", rarity: "rare" },
   { id: "title:PIXEL PERFECT", type: "title", name: "PIXEL PERFECT", val: "PIXEL PERFECT", rarity: "rare" },
-  { id: "title:ABYSSAL GUARDIAN", type: "title", name: "ABYSSAL GUARDIAN", val: "ABYSSAL GUARDIAN", rarity: "rare" },
-  { id: "title:RETRO RAIDER", type: "title", name: "RETRO RAIDER", val: "RETRO RAIDER", rarity: "rare" },
-  { id: "title:GRID RUNNER", type: "title", name: "GRID RUNNER", val: "GRID RUNNER", rarity: "rare" },
-  // Epic
-  { id: "title:LOGOS MAESTRO", type: "title", name: "LOGOS MAESTRO", val: "LOGOS MAESTRO", rarity: "epic" },
-  { id: "title:ARCADE GLITCHER", type: "title", name: "ARCADE GLITCHER", val: "ARCADE GLITCHER", rarity: "epic" },
-  { id: "title:VOID WALKER", type: "title", name: "VOID WALKER", val: "VOID WALKER", rarity: "epic" },
-  { id: "title:CODEBREAKER", type: "title", name: "CODEBREAKER", val: "CODEBREAKER", rarity: "epic" },
-  { id: "title:LAVA SURFER", type: "title", name: "LAVA SURFER", val: "LAVA SURFER", rarity: "epic" },
-  { id: "title:HYPERDRIVE PILOT", type: "title", name: "HYPERDRIVE PILOT", val: "HYPERDRIVE PILOT", rarity: "epic" },
-  { id: "title:QUANTUM GLITCHER", type: "title", name: "QUANTUM GLITCHER", val: "QUANTUM GLITCHER", rarity: "epic" },
-  { id: "title:SYNTHWAVE RIDER", type: "title", name: "SYNTHWAVE RIDER", val: "SYNTHWAVE RIDER", rarity: "epic" },
-  { id: "title:GLITCH MONARCH", type: "title", name: "GLITCH MONARCH", val: "GLITCH MONARCH", rarity: "epic" },
-  // Legendary
-  { id: "title:PLAYHAUS CHAMPION", type: "title", name: "PLAYHAUS CHAMPION", val: "PLAYHAUS CHAMPION", rarity: "legendary" },
-  { id: "title:COSMIC DEITY", type: "title", name: "COSMIC DEITY", val: "COSMIC DEITY", rarity: "legendary" },
-  { id: "title:UNBEATABLE", type: "title", name: "UNBEATABLE", val: "UNBEATABLE", rarity: "legendary" },
-  { id: "title:HIGH SCORE LEGEND", type: "title", name: "HIGH SCORE LEGEND", val: "HIGH SCORE LEGEND", rarity: "legendary" },
-  { id: "title:GOLDEN BOY", type: "title", name: "GOLDEN BOY", val: "GOLDEN BOY", rarity: "legendary" },
-  { id: "title:MIDAS TOUCH", type: "title", name: "MIDAS TOUCH", val: "MIDAS TOUCH", rarity: "legendary" },
-  { id: "title:DIAMOND HANDS", type: "title", name: "DIAMOND HANDS", val: "DIAMOND HANDS", rarity: "legendary" },
+  { id: "title:SPEED DEMON", type: "title", name: "SPEED DEMON", val: "SPEED DEMON", rarity: "rare" },
+  { id: "title:NOT EVEN TRYING", type: "title", name: "NOT EVEN TRYING", val: "NOT EVEN TRYING", rarity: "rare" },
+  { id: "title:WIFI WARRIOR", type: "title", name: "WIFI WARRIOR", val: "WIFI WARRIOR", rarity: "rare" },
+  { id: "title:EAT SLEEP GAME REPEAT", type: "title", name: "EAT SLEEP GAME REPEAT", val: "EAT SLEEP GAME REPEAT", rarity: "rare" },
+  // Epic — Intimidating, legendary trash talk energy
+  { id: "title:YOUR NIGHTMARE", type: "title", name: "YOUR NIGHTMARE", val: "YOUR NIGHTMARE", rarity: "epic" },
+  { id: "title:NERF ME PLS", type: "title", name: "NERF ME PLS", val: "NERF ME PLS", rarity: "epic" },
+  { id: "title:ACTUAL PSYCHOPATH", type: "title", name: "ACTUAL PSYCHOPATH", val: "ACTUAL PSYCHOPATH", rarity: "epic" },
+  { id: "title:WALKS AMONG MORTALS", type: "title", name: "WALKS AMONG MORTALS", val: "WALKS AMONG MORTALS", rarity: "epic" },
+  { id: "title:DELETE YOUR ACCOUNT", type: "title", name: "DELETE YOUR ACCOUNT", val: "DELETE YOUR ACCOUNT", rarity: "epic" },
+  { id: "title:LIVES IN THE MATRIX", type: "title", name: "LIVES IN THE MATRIX", val: "LIVES IN THE MATRIX", rarity: "epic" },
+  { id: "title:GGEZ NO RE", type: "title", name: "GGEZ NO RE", val: "GGEZ NO RE", rarity: "epic" },
+  { id: "title:UNFAIRLY TALENTED", type: "title", name: "UNFAIRLY TALENTED", val: "UNFAIRLY TALENTED", rarity: "epic" },
+  { id: "title:THE FINAL BOSS", type: "title", name: "THE FINAL BOSS", val: "THE FINAL BOSS", rarity: "epic" },
+  // Legendary — Absolute peak, absurd flex, makes people jealous
+  { id: "title:TOUCHED GRASS ONCE", type: "title", name: "TOUCHED GRASS ONCE", val: "TOUCHED GRASS ONCE, DIDN'T LIKE IT", rarity: "legendary" },
+  { id: "title:SKILL ISSUE", type: "title", name: "SKILL ISSUE", val: "SKILL ISSUE? NEVER HEARD OF HER", rarity: "legendary" },
   { id: "title:THE CHOSEN ONE", type: "title", name: "THE CHOSEN ONE", val: "THE CHOSEN ONE", rarity: "legendary" },
+  { id: "title:PLAYHAUS GOAT", type: "title", name: "PLAYHAUS GOAT", val: "PLAYHAUS G.O.A.T.", rarity: "legendary" },
+  { id: "title:THEY NERFED THE WRONG GUY", type: "title", name: "THEY NERFED THE WRONG GUY", val: "THEY NERFED THE WRONG GUY", rarity: "legendary" },
+  { id: "title:GOLDEN GOD", type: "title", name: "GOLDEN GOD", val: "GOLDEN GOD", rarity: "legendary" },
+  { id: "title:BORN TO GAME", type: "title", name: "BORN TO GAME", val: "BORN TO GAME, FORCED TO TOUCH GRASS", rarity: "legendary" },
+  { id: "title:PERMANENTLY BANNED IRL", type: "title", name: "PERMANENTLY BANNED IRL", val: "PERMANENTLY BANNED IRL", rarity: "legendary" },
   { id: "title:INFINITY GAMER", type: "title", name: "INFINITY GAMER", val: "INFINITY GAMER", rarity: "legendary" },
 
-  // --- TRAILS (Cursor / Card trailing effects) ---
-  // Common
-  { id: "trail:trail-none", type: "trail", name: "No Trail", val: "trail-none", emoji: "❌", rarity: "common" },
-  // Uncommon
-  { id: "trail:trail-bubbles", type: "trail", name: "Aquatic Bubbles", val: "trail-bubbles", emoji: "🫧", rarity: "uncommon" },
-  // Rare
-  { id: "trail:trail-sparks", type: "trail", name: "Amber Sparks", val: "trail-sparks", emoji: "✨", rarity: "rare" },
-  { id: "trail:trail-hearts", type: "trail", name: "Lovely Hearts", val: "trail-hearts", emoji: "💖", rarity: "rare" },
-  // Epic
-  { id: "trail:trail-stars", type: "trail", name: "Starlight Trail", val: "trail-stars", emoji: "⭐", rarity: "epic" },
-  // Legendary
-  { id: "trail:trail-fire", type: "trail", name: "Inferno Trail", val: "trail-fire", emoji: "🔥", rarity: "legendary" },
-  { id: "trail:trail-rainbow", type: "trail", name: "Rainbow Trail", val: "trail-rainbow", emoji: "🌈", rarity: "legendary" },
+
 
   // --- EFFECTS (Card Animations) ---
   // Common
@@ -365,7 +360,7 @@ function updatePreviewCard(data, user) {
   const activeBorder = activeCosmetics.border || "border-common";
   const activeTheme = activeCosmetics.theme || "theme-common";
   const activeTitle = activeCosmetics.title || "THE ROOKIE";
-  const activeTrail = activeCosmetics.trail || "trail-none";
+
   const activeCardAnim = activeCosmetics.card_anim || "anim-none";
   const activeFrame = activeCosmetics.frame || "frame-none";
 
@@ -397,8 +392,7 @@ function updatePreviewCard(data, user) {
   if (previewCard) {
     previewCard.className = `gamer-card ${activeTheme} ${activeCardAnim} ${activeFrame}`;
     
-    // Set up cursor-trailing interactive particles
-    setupCardTrail(previewCard, activeTrail);
+
   }
 
   // Tag Titles Color
@@ -410,87 +404,7 @@ function updatePreviewCard(data, user) {
   }
 }
 
-// ── Interactive Cursor Trailing Emojis Generator ───────────────────────────────
-function setupCardTrail(cardEl, trailType) {
-  if (!cardEl) return;
-  
-  // Clean up any old listeners to prevent duplication
-  if (cardEl._trailCleanup) {
-    cardEl._trailCleanup();
-  }
-  
-  if (!trailType || trailType === 'trail-none') {
-    cardEl._trailCleanup = null;
-    return;
-  }
 
-  const emojiMap = {
-    'trail-bubbles': '🫧',
-    'trail-sparks': '✨',
-    'trail-hearts': '💖',
-    'trail-stars': '⭐',
-    'trail-fire': '🔥',
-    'trail-rainbow': '🌈'
-  };
-
-  const emoji = emojiMap[trailType] || '✨';
-  let lastParticleTime = 0;
-
-  const handleMove = (e) => {
-    // Throttling to prevent spamming too many particles
-    const now = Date.now();
-    if (now - lastParticleTime < 40) return;
-    lastParticleTime = now;
-
-    const rect = cardEl.getBoundingClientRect();
-    let clientX = e.clientX;
-    let clientY = e.clientY;
-
-    if (e.touches && e.touches.length > 0) {
-      clientX = e.touches[0].clientX;
-      clientY = e.touches[0].clientY;
-    }
-
-    const x = clientX - rect.left;
-    const y = clientY - rect.top;
-
-    if (x === undefined || y === undefined || x < 0 || y < 0 || x > rect.width || y > rect.height) return;
-
-    const p = document.createElement('div');
-    p.innerText = emoji;
-    p.style.cssText = `
-      position: absolute;
-      left: ${x}px;
-      top: ${y}px;
-      transform: translate(-50%, -50%) scale(1);
-      pointer-events: none;
-      font-size: 1.1rem;
-      z-index: 100;
-      opacity: 1;
-      transition: all 0.7s cubic-bezier(0.1, 0.8, 0.3, 1);
-    `;
-    
-    cardEl.appendChild(p);
-    
-    // Animate particle floating upwards
-    requestAnimationFrame(() => {
-      p.style.transform = `translate(-50%, -100%) scale(0.3) rotate(${Math.random() * 90 - 45}deg)`;
-      p.style.opacity = '0';
-    });
-
-    setTimeout(() => {
-      p.remove();
-    }, 750);
-  };
-
-  cardEl.addEventListener('mousemove', handleMove);
-  cardEl.addEventListener('touchmove', handleMove, { passive: true });
-
-  cardEl._trailCleanup = () => {
-    cardEl.removeEventListener('mousemove', handleMove);
-    cardEl.removeEventListener('touchmove', handleMove);
-  };
-}
 
 // --- POPULATE CURRENCIES TO UI ---
 function updateCurrencyDisplay(data) {
@@ -564,11 +478,11 @@ onAuthStateChanged(auth, async (user) => {
         // Base starter pack
         data.ownedCosmetics = [
           "avatar:👾", "border:border-common", "theme:theme-common", "title:THE ROOKIE",
-          "trail:trail-none", "card_anim:anim-none", "frame:frame-none"
+          "card_anim:anim-none", "frame:frame-none"
         ];
         needsMerge = true;
       } else {
-        const starters = ["trail:trail-none", "card_anim:anim-none", "frame:frame-none"];
+        const starters = ["card_anim:anim-none", "frame:frame-none"];
         starters.forEach(item => {
           if (!data.ownedCosmetics.includes(item)) {
             data.ownedCosmetics.push(item);
@@ -582,13 +496,13 @@ onAuthStateChanged(auth, async (user) => {
           border: "border-common",
           theme: "theme-common",
           title: "THE ROOKIE",
-          trail: "trail-none",
+
           card_anim: "anim-none",
           frame: "frame-none"
         };
         needsMerge = true;
       } else {
-        if (!data.activeCosmetics.trail) { data.activeCosmetics.trail = "trail-none"; needsMerge = true; }
+
         if (!data.activeCosmetics.card_anim) { data.activeCosmetics.card_anim = "anim-none"; needsMerge = true; }
         if (!data.activeCosmetics.frame) { data.activeCosmetics.frame = "frame-none"; needsMerge = true; }
       }
@@ -718,8 +632,7 @@ function renderLockerGrid() {
       isEquipped = (active.theme === item.val);
     } else if (currentLockerCategory === 'title') {
       isEquipped = (active.title === item.val);
-    } else if (currentLockerCategory === 'trail') {
-      isEquipped = (active.trail === item.val);
+
     } else if (currentLockerCategory === 'card_anim') {
       isEquipped = (active.card_anim === item.val);
     } else if (currentLockerCategory === 'frame') {
@@ -770,13 +683,7 @@ function renderLockerGrid() {
         <div class="inventory-rarity-lbl" style="color: ${RARITY_COLORS[item.rarity]};">${item.rarity}</div>
         ${lockTag}
       `;
-    } else if (item.type === 'trail') {
-      el.innerHTML = `
-        <div class="inventory-icon" style="font-size: 1.8rem; height: 52px; display: flex; align-items: center; justify-content: center;">${item.emoji || '💫'}</div>
-        <div class="inventory-name" title="${item.name}">${item.name}</div>
-        <div class="inventory-rarity-lbl" style="color: ${RARITY_COLORS[item.rarity]};">${item.rarity}</div>
-        ${lockTag}
-      `;
+
     } else if (item.type === 'card_anim') {
       el.innerHTML = `
         <div class="inventory-icon" style="font-size: 1.8rem; height: 52px; display: flex; align-items: center; justify-content: center;">${item.emoji || '✨'}</div>
@@ -811,48 +718,43 @@ async function equipItem(item) {
   const user = auth.currentUser;
   if (!user || !userDocData) return;
 
+  // 1. UPDATE LOCAL CACHE & UI IMMEDIATELY (INSTANT OPTIMISTIC UI)
+  const updatedActive = { ...(userDocData.activeCosmetics || {}) };
+
+  if (item.type === 'avatar') {
+    updatedActive.avatar = item.val;
+    userDocData.avatar = item.val;
+  } else if (item.type === 'border') {
+    updatedActive.border = item.val;
+  } else if (item.type === 'theme') {
+    updatedActive.theme = item.val;
+  } else if (item.type === 'title') {
+    updatedActive.title = item.val;
+
+  } else if (item.type === 'card_anim') {
+    updatedActive.card_anim = item.val;
+  } else if (item.type === 'frame') {
+    updatedActive.frame = item.val;
+  }
+
+  userDocData.activeCosmetics = updatedActive;
+
+  // Render instantly!
+  updatePreviewCard(userDocData, user);
+  renderLockerGrid();
+  showToast(`Equipped "${item.name}"!`, "success");
+
+  // 2. RUN FIRESTORE WRITE IN BACKGROUND
   try {
     const userRef = doc(db, "users", user.uid);
-    const updatedActive = { ...userDocData.activeCosmetics };
-
-    if (item.type === 'avatar') {
-      updatedActive.avatar = item.val;
-    } else if (item.type === 'border') {
-      updatedActive.border = item.val;
-    } else if (item.type === 'theme') {
-      updatedActive.theme = item.val;
-    } else if (item.type === 'title') {
-      updatedActive.title = item.val;
-    } else if (item.type === 'trail') {
-      updatedActive.trail = item.val;
-    } else if (item.type === 'card_anim') {
-      updatedActive.card_anim = item.val;
-    } else if (item.type === 'frame') {
-      updatedActive.frame = item.val;
-    }
-
     const docUpdates = { activeCosmetics: updatedActive };
-
-    // Maintain compatibility with top-level avatar field
     if (item.type === 'avatar') {
       docUpdates.avatar = item.val;
     }
-
     await setDoc(userRef, docUpdates, { merge: true });
-
-    // Update local cache
-    userDocData.activeCosmetics = updatedActive;
-    if (item.type === 'avatar') {
-      userDocData.avatar = item.val;
-    }
-
-    showToast(`Equipped "${item.name}"!`, "success");
-    updatePreviewCard(userDocData, user);
-    renderLockerGrid();
-
   } catch (err) {
-    console.error("Error equipping item:", err);
-    showToast("Failed to equip item. Try again.", "error");
+    console.error("Error saving equipped item in Firestore:", err);
+    showToast("Server sync failed, but equipped locally.", "warning");
   }
 }
 
@@ -913,13 +815,13 @@ function drawRandomCosmetic() {
   const rand = Math.random() * 100;
   let rarity = "common";
   
-  if (rand < 45) {
+  if (rand < 55) {
     rarity = "common";
-  } else if (rand < 70) {
+  } else if (rand < 80) {
     rarity = "uncommon";
-  } else if (rand < 87) {
+  } else if (rand < 93) {
     rarity = "rare";
-  } else if (rand < 97) {
+  } else if (rand < 98.5) {
     rarity = "epic";
   } else {
     rarity = "legendary";
@@ -1053,10 +955,10 @@ function initPrizePile() {
   spawnedPrizes = [];
 
   const rarities = ['common', 'uncommon', 'rare', 'epic', 'legendary'];
-  const rarityOdds = [45, 25, 17, 10, 3]; // percentage weights
+  const rarityOdds = [55, 25, 13, 5.5, 1.5]; // Authentic challenging gacha: 1.5% Legendary!
 
-  // Spawn 65 mystery gift visual items inside glass chamber layered into an organic 4-layer stacked heap
-  const numGifts = 65;
+  // Spawn 100 mystery gift visual items inside glass chamber layered into an organic 4-layer stacked heap
+  const numGifts = 100;
   for (let i = 0; i < numGifts; i++) {
     // Determine random visual color base
     const roll = Math.random() * 100;
@@ -1083,17 +985,17 @@ function initPrizePile() {
     let minX = 70;
     let maxX = 405;
     
-    if (i < 24) {
+    if (i < 40) {
       // Layer 1 (Base Floor): spread wide sitting on the floor
       posY = Math.floor(Math.random() * 6);
       minX = 70;
       maxX = 405;
-    } else if (i < 44) {
+    } else if (i < 70) {
       // Layer 2 (Middle Heap): stacked middle gifts spread wide
       posY = Math.floor(Math.random() * 8 + 14);
       minX = 75;
       maxX = 400;
-    } else if (i < 58) {
+    } else if (i < 90) {
       // Layer 3 (High Peak): stacked higher peak pile
       posY = Math.floor(Math.random() * 8 + 26);
       minX = 85;
@@ -1306,8 +1208,10 @@ function updateClawPhysics() {
     // If automated claw run, handle horizontal gantry travel slides via physics engine!
     if (clawXTarget !== null) {
       const diff = clawXTarget - clawX;
-      if (Math.abs(diff) > 0.5) {
-        clawVx = Math.sign(diff) * 1.6; // slide speed
+      if (Math.abs(diff) > 0.1) {
+        // Smooth distance-based velocity ramping! Eases in and eases out seamlessly!
+        const targetVx = Math.sign(diff) * Math.min(2.4, Math.abs(diff) * 0.16);
+        clawVx += (targetVx - clawVx) * 0.22; // smooth gantry acceleration & deceleration
         ClawAudio.startMotor();
       } else {
         clawX = clawXTarget;
@@ -1480,6 +1384,20 @@ function triggerGrabSparks() {
   }
 }
 
+// Dynamic helper to wait until claw arrives at target
+async function waitForClawArrival() {
+  return new Promise((resolve) => {
+    function check() {
+      if (clawXTarget === null) {
+        resolve();
+      } else {
+        requestAnimationFrame(check);
+      }
+    }
+    check();
+  });
+}
+
 // ── Interactive Claw Drop Sequence ──────────────────────────────────────────
 async function performClawDrop() {
   if (isClawRunning) return;
@@ -1526,20 +1444,40 @@ async function performClawDrop() {
   ClawAudio.playDropSound();
   updateClawLED('moving'); // State LED -> Moving yellow flash
 
-  // 2. Extend Claw String Downward (Phase 1)
+  // 2. Open Claw Fingers at the Top (Phase 1a)
   if (clawHand) {
     clawHand.classList.remove('is-closed');
     clawHand.classList.add('is-open');
   }
+  ClawAudio.playClang();
+  triggerHaptic('light');
+  
+  // Wait 400ms for prongs to flare open at the top
+  await new Promise(res => setTimeout(res, 400));
+
+  // 3. Extend Claw String Downward (Phase 1b)
   if (clawString) {
+    clawString.style.transition = 'height 1.1s cubic-bezier(0.25, 0.46, 0.45, 0.94)'; // Gravity descent curve
     clawString.style.height = '210px';
   }
   if (clawHand) {
+    clawHand.style.transition = 'transform 1.1s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
     clawHand.style.transform = 'translate(-50%, 100%) scale(1.05)';
   }
 
-  // Wait 1.4 seconds for claw string extension to complete
-  await new Promise(res => setTimeout(res, 1400));
+  // Wait 1.1 seconds for claw string extension to complete
+  await new Promise(res => setTimeout(res, 1100));
+  triggerHaptic('light');
+
+  // Slacken bounce on pile contact!
+  if (clawString) {
+    clawString.style.transition = 'height 0.12s ease-out';
+    clawString.style.height = '218px';
+    await new Promise(res => setTimeout(res, 120));
+    clawString.style.transition = 'height 0.15s ease-in-out';
+    clawString.style.height = '210px';
+    await new Promise(res => setTimeout(res, 150));
+  }
 
   // 3. Find top-most visual prize box box horizontally close to claw
   const chamberRect = document.getElementById('claw-chamber').getBoundingClientRect();
@@ -1581,7 +1519,14 @@ async function performClawDrop() {
     clawHand.classList.add('is-closed');
   }
   ClawAudio.playClang();
+  triggerHaptic('medium');
   triggerGrabSparks();
+
+  // Recoil compression bounce on grab clamping!
+  if (clawString) {
+    clawString.style.transition = 'height 0.12s ease-out';
+    clawString.style.height = '198px';
+  }
 
   let prizeBoxNode = null;
   if (closestBox && closestBox.element) {
@@ -1596,31 +1541,36 @@ async function performClawDrop() {
       position: absolute;
       bottom: -15px;
       left: 50%;
-      transform: translateX(-50%) scale(0.85);
       border-radius: 4px;
       z-index: 100;
     `;
     clawHand.appendChild(prizeBoxNode);
   }
 
-  // Wait 0.6 seconds for grab animation
-  await new Promise(res => setTimeout(res, 600));
+  // Wait 120ms for upward compression bounce, then stretch string taut
+  await new Promise(res => setTimeout(res, 120));
+  if (clawString) {
+    clawString.style.transition = 'height 0.15s ease-in-out';
+    clawString.style.height = '210px';
+  }
+  // Wait remaining 480ms of the 600ms grab window
+  await new Promise(res => setTimeout(res, 480));
 
   // 5. Retract Gantry String (Phase 3)
   updateClawLED('grabbing'); // Keep red solid as it ascends with cargo
   if (clawString) {
+    // Retract with a heavy spring-rebound overshoot curve!
+    clawString.style.transition = 'height 1.2s cubic-bezier(0.34, 1.56, 0.64, 1)';
     clawString.style.height = '40px';
   }
 
-  // Wait 1.4 seconds for string retraction
-  await new Promise(res => setTimeout(res, 1400));
+  // Wait 1.2 seconds for spring retraction and settling oscillation
+  await new Promise(res => setTimeout(res, 1200));
 
   // 6. Slide Claw Assembly to Left Drop Chute (Phase 4)
   // Use our continuous physics engine to travel left to the center of the chute (16%)
   clawXTarget = 16; 
-
-  // Wait 1.2 seconds for assembly slide to complete
-  await new Promise(res => setTimeout(res, 1200));
+  await waitForClawArrival();
 
   // 7. Open Claw / Drop Prize Box down chute (Phase 5)
   updateClawLED('moving'); // Back to yellow flash as cargo drops
@@ -1630,23 +1580,56 @@ async function performClawDrop() {
   ClawAudio.playClang();
 
   if (prizeBoxNode) {
-    // Drop animation downwards
-    prizeBoxNode.style.transition = 'all 0.6s cubic-bezier(0.55, 0.085, 0.68, 0.53)';
-    prizeBoxNode.style.bottom = '-110px';
+    // 1. Get absolute positions relative to the entire chamber container
+    const chamber = document.getElementById('claw-chamber');
+    const boxRect = prizeBoxNode.getBoundingClientRect();
+    const chamberRect = chamber.getBoundingClientRect();
+    const relLeft = boxRect.left - chamberRect.left;
+    const relTop = boxRect.top - chamberRect.top;
+
+    // 2. Transfer element from claw hand to chamber container so it can drop all the way down
+    prizeBoxNode.style.transition = 'none';
+    prizeBoxNode.style.animation = 'none';
+    prizeBoxNode.style.left = `${relLeft}px`;
+    prizeBoxNode.style.top = `${relTop}px`;
+    prizeBoxNode.style.bottom = 'auto';
+    prizeBoxNode.style.transform = 'scale(0.8)';
+    chamber.appendChild(prizeBoxNode);
+
+    // 3. Force reflow
+    prizeBoxNode.offsetHeight;
+
+    // 4. Premium gravity fall acceleration transition completely off-screen below the bottom!
+    prizeBoxNode.style.transition = 'all 0.85s cubic-bezier(0.55, 0.055, 0.675, 0.19)';
+    prizeBoxNode.style.top = `${chamberRect.height + 40}px`;
     prizeBoxNode.style.opacity = '0';
     
     const chuteOutlet = document.getElementById('chute-outlet');
     if (chuteOutlet) {
       setTimeout(() => {
         chuteOutlet.innerText = "🎁";
-        chuteOutlet.style.transform = 'scale(1.2)';
-        setTimeout(() => chuteOutlet.style.transform = 'scale(1)', 200);
-      }, 400);
+        chuteOutlet.style.transform = 'scale(1.25)';
+        triggerHaptic('light');
+        setTimeout(() => chuteOutlet.style.transform = 'scale(1)', 220);
+      }, 450);
     }
   }
 
-  // Wait 0.8 seconds for falling drop to finish
-  await new Promise(res => setTimeout(res, 800));
+  // Release recoil upward jump!
+  if (clawString) {
+    clawString.style.transition = 'height 0.1s ease-out';
+    clawString.style.height = '24px'; // jump up
+    setTimeout(() => {
+      clawString.style.transition = 'height 0.8s cubic-bezier(0.34, 1.56, 0.64, 1)'; // spring settle back to top
+      clawString.style.height = '40px';
+    }, 100);
+  }
+
+  // Trigger sudden horizontal sway impulse on mass release!
+  clawSwayV += (Math.random() > 0.5 ? 1 : -1) * 9.5;
+
+  // Wait 0.85 seconds for gravity falling drop to finish
+  await new Promise(res => setTimeout(res, 850));
 
   // 8. Open Prize Win Reveal Modal Popup (Phase 6)
   if (clawRevealModal) {
@@ -1655,7 +1638,15 @@ async function performClawDrop() {
 
     // Populate modal tags
     if (modalRevealIcon) {
-      modalRevealIcon.innerText = rolledItem.type === 'avatar' ? rolledItem.val : (rolledItem.emoji || '🎁');
+      if (rolledItem.type === 'avatar') {
+        modalRevealIcon.innerHTML = `<span style="font-size: 4rem; display: block; animation: floatHolo 3s infinite ease-in-out;">${rolledItem.val}</span>`;
+      } else {
+        modalRevealIcon.innerHTML = `
+          <div class="modal-present rarity-${rolledItem.rarity}">
+            <div class="modal-present-bow"></div>
+          </div>
+        `;
+      }
     }
     
     const modalGlow = document.getElementById('modal-reveal-glow');
@@ -1695,6 +1686,7 @@ async function performClawDrop() {
           });
         }
         ClawAudio.playWinSound();
+        triggerHaptic(rolledItem.rarity === 'legendary' ? 'heavy' : rolledItem.rarity === 'epic' || rolledItem.rarity === 'rare' ? 'medium' : 'light');
         showToast(`NEW UNLOCK! You grabbed a ${rolledItem.rarity.toUpperCase()} "${rolledItem.name}"!`, "success");
       } else {
         // Recycle Duplicate to Gems
@@ -1717,6 +1709,7 @@ async function performClawDrop() {
         }
         
         ClawAudio.playClick();
+        triggerHaptic('light');
         showToast(`Duplicate! Converted to +${scrapCompensation} Gems.`, "warning");
       }
 
@@ -1744,12 +1737,10 @@ async function performClawDrop() {
 
   // Slide back to center 50% using our continuous physics engine!
   clawXTarget = 50;
+  await waitForClawArrival();
 
   // Regenerate boxes pile
   initPrizePile();
-
-  // Wait for claw center transition
-  await new Promise(res => setTimeout(res, 800));
 
   // Unlock controls & reset LED back to ready green pulse
   isClawRunning = false;

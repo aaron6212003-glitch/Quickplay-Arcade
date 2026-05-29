@@ -1,3 +1,6 @@
+import { auth } from '../firebase.js';
+import { generateScoreSignature } from '../security.js';
+
 export function init(container) {
   container.innerHTML = `
     <style>
@@ -284,12 +287,14 @@ export function init(container) {
         currentLetter--;
         grid[currentAttempt][currentLetter] = '';
         updateTile(currentAttempt, currentLetter);
+        if (window.triggerHaptic) window.triggerHaptic('light');
       }
     } else if (/^[A-Z]$/.test(key)) {
       if (currentLetter < 5) {
         grid[currentAttempt][currentLetter] = key;
         updateTile(currentAttempt, currentLetter);
         currentLetter++;
+        if (window.triggerHaptic) window.triggerHaptic('light');
       }
     }
   }
@@ -307,6 +312,7 @@ export function init(container) {
   async function submitGuess() {
     if (currentLetter < 5) {
       showToast('Not enough letters');
+      if (window.triggerHaptic) window.triggerHaptic('medium');
       return;
     }
 
@@ -318,6 +324,7 @@ export function init(container) {
         const res = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${guess}`);
         if (res.status === 404) {
           showToast('Not in word list');
+          if (window.triggerHaptic) window.triggerHaptic('medium');
           // Add shake animation
           const row = document.getElementById(`row-${currentAttempt}`);
           row.style.animation = 'wr-shake 0.4s';
@@ -415,11 +422,17 @@ export function init(container) {
       
       // Show points on title overlay
       document.getElementById('wr-title').innerHTML = `YOU WON! 🎉<br/><span style="font-size:1.5rem; color:#A78BFA; font-weight:800;">+${score.toLocaleString()} PTS</span>`;
+      if (window.triggerHaptic) window.triggerHaptic('heavy');
       
       if (window.saveScore && score > 0) {
-        window.saveScore('Word Rush', score);
+        const user = auth.currentUser;
+        const uid = user ? user.uid : "guest";
+        const timestamp = Date.now();
+        const signature = generateScoreSignature(uid, 'Word Rush', score, timestamp);
+        window.saveScore('Word Rush', score, signature, timestamp);
       }
     } else {
+      if (window.triggerHaptic) window.triggerHaptic('heavy');
       if (timeout) {
         document.getElementById('wr-title').innerText = "TIME'S UP! ⏰";
       } else {

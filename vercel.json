@@ -1,3 +1,9 @@
 {
-  "name": "quickplay-arcade"
+  "name": "quickplay-arcade",
+  "rewrites": [
+    {
+      "source": "/__/auth/:path*",
+      "destination": "https://quick-play-arcade.firebaseapp.com/__/auth/:path*"
+    }
+  ]
 }

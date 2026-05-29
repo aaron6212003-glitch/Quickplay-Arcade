@@ -105,32 +105,6 @@ export const GAMES = [
     earn: "🪙 25 coins per lock popped · ⭐ XP bonus for each consecutive perfect level clear",
     rules: "<div style='display:flex; gap:12px;'><span style='font-size:1.3rem;'>🎯</span><span>Tap/click the screen when the rotating dot overlaps the yellow target.</span></div><div style='display:flex; gap:12px;'><span style='font-size:1.3rem;'>🔄</span><span>Each successful pop reverses the direction of rotation.</span></div><div style='display:flex; gap:12px;'><span style='font-size:1.3rem;'>🔓</span><span>Clear all target dots consecutively to advance to the next level.</span></div><div style='display:flex; gap:12px;'><span style='font-size:1.3rem;'>💀</span><span>One missed tap or wrong timing, and it's game over!</span></div>"
   },
-  {
-    id: "cyber-bot",
-    title: "Cyber Bot",
-    description: "A robot challenges you to a series of quick reflex mini-games. Beat them all to win!",
-    category: "arcade",
-    difficulty: "Medium",
-    playTime: "2 min",
-    emoji: "🤖",
-    gradient: ["#0EA5E9","#6366F1"],
-    badges: ["new"],
-    featured: true,
-    earn: "🪙 50 coins per mini-game beaten · ⭐ XP based on total mini-games won",
-    rules: "<div style='display:flex; gap:12px;'><span style='font-size:1.3rem;'>🤖</span><span>The robot will challenge you to quick reflex mini-games.</span></div><div style='display:flex; gap:12px;'><span style='font-size:1.3rem;'>👆</span><span>Follow the on-screen prompts — tap, hold, swipe!</span></div><div style='display:flex; gap:12px;'><span style='font-size:1.3rem;'>⚡</span><span>Beat all challenges to defeat the robot!</span></div>"
-  },
-  {
-    id: "neon-plinko",
-    title: "Neon Plinko",
-    description: "Drop glowing balls from the top and watch them bounce into multiplier slots. Upgrade your cannon for bigger scores!",
-    category: "arcade",
-    difficulty: "Easy",
-    playTime: "3 min",
-    emoji: "🌟",
-    gradient: ["#F59E0B","#EF4444"],
-    badges: ["new"],
-    featured: true,
-    earn: "🪙 1 coin per 100 score · ⭐ XP based on multiplier slots hit",
-    rules: "<div style='display:flex; gap:12px;'><span style='font-size:1.3rem;'>🎯</span><span>Click anywhere on the top to drop a ball.</span></div><div style='display:flex; gap:12px;'><span style='font-size:1.3rem;'>⬆️</span><span>Buy upgrades with your winnings to drop more balls faster.</span></div><div style='display:flex; gap:12px;'><span style='font-size:1.3rem;'>💰</span><span>Hit high-multiplier slots to score big!</span></div>"
-  }
+
+
 ];

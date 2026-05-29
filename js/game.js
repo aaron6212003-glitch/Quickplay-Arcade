@@ -125,7 +125,7 @@ if (game) {
   const comingSoon = document.getElementById('coming-soon');
   const preScreen = document.getElementById('game-pre-screen');
   
-  const activeGames = ['color-guess', 'higher-lower', 'word-rush', 'word-gravity', 'math-avalanche', 'tanks', 'cyber-bot', 'neon-plinko', 'pop-lock'];
+  const activeGames = ['color-guess', 'higher-lower', 'word-rush', 'word-gravity', 'math-avalanche', 'tanks', 'pop-lock'];
   
   if (activeGames.includes(gameId)) {
     comingSoon.style.display = 'none';
@@ -341,8 +341,6 @@ if (game) {
             'word-rush': './games/word-rush.js',
             'word-gravity': './games/word-gravity.js',
             'math-avalanche': './games/math-avalanche.js',
-            'cyber-bot': './games/cyber-bot.js',
-            'neon-plinko': './games/neon-plinko.js',
             'pop-lock': './games/pop-lock.js'
           };
 

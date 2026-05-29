@@ -1,5 +1,8 @@
 import { GAMES, CATEGORIES } from '../data/games.js';
 import { getDailyGame } from './daily.js';
+import { triggerHaptic } from './haptics.js';
+
+window.triggerHaptic = triggerHaptic;
 
 // ── DOM refs ────────────────────────────────────────────────────────────────
 const categoryScroll = document.getElementById('category-scroll');

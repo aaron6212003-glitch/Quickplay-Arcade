@@ -1,3 +1,6 @@
+import { auth } from '../firebase.js';
+import { generateScoreSignature } from '../security.js';
+
 export function initTanks(container) {
   // Setup Canvas (Taller and responsive arcade ratio)
   const canvas = document.createElement('canvas');
@@ -824,6 +827,7 @@ export function initTanks(container) {
       angle = Math.atan2(ty - tank.y, tx - tank.x);
       // Snap turret to the clicked angle instantly so the barrel matches the shot!
       tank.turretAngle = angle;
+      if (window.triggerHaptic) window.triggerHaptic('light');
     }
     
     const speed = tank.isPlayer ? 6 : (tank.type === 'red' ? 9 : (tank.type === 'boss' ? 5 : 4));
@@ -1107,6 +1111,7 @@ export function initTanks(container) {
             // Boss tanks take multi-hit damage
             e.hp--;
             e.flashTimer = 8; // Hit flash!
+            if (window.triggerHaptic) window.triggerHaptic(e.type === 'boss' ? 'medium' : 'light');
             if (e.hp > 0) break; // Boss survives!
 
             spawnExplosion(e.x, e.y, e.type === 'boss');
@@ -1285,6 +1290,7 @@ export function initTanks(container) {
 
     spawnExplosion(player.x, player.y);
     screenShake = 18; // Extra shake on player death
+    if (window.triggerHaptic) window.triggerHaptic('medium');
     lives--;
     let lifeStr = '';
     for(let i=0; i<lives; i++) lifeStr += '♥';
@@ -1294,6 +1300,7 @@ export function initTanks(container) {
     
     if (lives <= 0) {
       isGameOver = true;
+      if (window.triggerHaptic) window.triggerHaptic('heavy');
       // Show Game Over UI
       setTimeout(endGame, 1000);
     } else {
@@ -1724,7 +1731,11 @@ export function initTanks(container) {
     });
     
     if (window.saveScore) {
-      window.saveScore("Toy Tanks", score);
+      const user = auth.currentUser;
+      const uid = user ? user.uid : "guest";
+      const timestamp = Date.now();
+      const signature = generateScoreSignature(uid, 'Toy Tanks', score, timestamp);
+      window.saveScore("Toy Tanks", score, signature, timestamp);
     }
   }
 
