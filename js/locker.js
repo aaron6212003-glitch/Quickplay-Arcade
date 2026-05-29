@@ -940,28 +940,104 @@ function drawRandomCosmeticOfRarity(rarity) {
   return pool[idx];
 }
 
-// ── Interactive Confetti Particle Explosion for Legendary Unlocks ──────────
-function triggerConfetti() {
+// ── Status LED State Management ──────────────────────────────────────────────
+function updateClawLED(state) {
+  const clawLed = document.getElementById('claw-led');
+  if (!clawLed) return;
+  clawLed.classList.remove('led-ready', 'led-moving', 'led-grabbing');
+  if (state === 'ready') {
+    clawLed.classList.add('led-ready');
+  } else if (state === 'moving') {
+    clawLed.classList.add('led-moving');
+  } else if (state === 'grabbing') {
+    clawLed.classList.add('led-grabbing');
+  }
+}
+
+// ── Interactive Confetti Particle Explosion for All Unlocks ──────────
+function triggerConfetti(rarity = 'common') {
   const container = document.getElementById('claw-reveal-modal');
   if (!container) return;
-  const colors = ['#F59E0B', '#10B981', '#38BDF8', '#A78BFA', '#EF4444', '#EC4899'];
   
-  for (let i = 0; i < 45; i++) {
+  let colors = ['#94A3B8', '#CBD5E1', '#E2E8F0']; // Default common
+  let particleCount = 20;
+  let useStars = false;
+
+  if (rarity === 'uncommon') {
+    colors = ['#10B981', '#34D399', '#059669', '#6EE7B7'];
+    particleCount = 25;
+  } else if (rarity === 'rare') {
+    colors = ['#38BDF8', '#60A5FA', '#0EA5E9', '#93C5FD'];
+    particleCount = 35;
+  } else if (rarity === 'epic') {
+    colors = ['#A78BFA', '#C084FC', '#8B5CF6', '#DDD6FE'];
+    particleCount = 45;
+  } else if (rarity === 'legendary') {
+    colors = ['#F59E0B', '#FBBF24', '#EF4444', '#EC4899', '#38BDF8'];
+    particleCount = 60;
+    useStars = true;
+  }
+  
+  // Dynamic explosive particle burst
+  for (let i = 0; i < particleCount; i++) {
     const p = document.createElement('div');
     p.className = 'confetti-piece';
-    p.style.left = `${Math.random() * 80 + 10}%`;
-    p.style.top = '10%';
+    p.style.left = '50%';
+    p.style.top = '40%'; // Burst from the center of the reveal card!
     p.style.background = colors[Math.floor(Math.random() * colors.length)];
-    p.style.animationDelay = `${Math.random() * 0.3}s`;
-    p.style.width = `${Math.random() * 6 + 6}px`;
-    p.style.height = `${Math.random() * 6 + 6}px`;
+    p.style.animationDelay = `${Math.random() * 0.15}s`;
+    
+    const size = Math.random() * 6 + 6; // 6px to 12px
+    p.style.width = `${size}px`;
+    p.style.height = `${size}px`;
+    p.style.borderRadius = Math.random() > 0.4 ? '50%' : '3px';
     p.style.zIndex = '99999';
+    
+    // Calculate random explosive trajectory vectors!
+    const angle = Math.random() * Math.PI * 2;
+    const distance = Math.random() * 160 + 50;
+    const tx = Math.cos(angle) * distance;
+    const ty = Math.sin(angle) * distance - 20; // slight upward drift
+    
+    p.style.setProperty('--tx', `${tx}px`);
+    p.style.setProperty('--ty', `${ty}px`);
     
     container.appendChild(p);
     
     setTimeout(() => {
       p.remove();
     }, 1400);
+  }
+
+  // Generate spinning stars for legendary unboxings
+  if (useStars) {
+    for (let i = 0; i < 20; i++) {
+      const star = document.createElement('div');
+      star.className = 'confetti-piece';
+      star.innerText = '⭐';
+      star.style.left = '50%';
+      star.style.top = '40%';
+      star.style.background = 'transparent';
+      star.style.fontSize = `${Math.random() * 1.4 + 0.8}rem`;
+      star.style.display = 'flex';
+      star.style.alignItems = 'center';
+      star.style.justifyContent = 'center';
+      star.style.animationDelay = `${Math.random() * 0.25}s`;
+      star.style.zIndex = '99999';
+      
+      const angle = Math.random() * Math.PI * 2;
+      const distance = Math.random() * 140 + 40;
+      const tx = Math.cos(angle) * distance;
+      const ty = Math.sin(angle) * distance - 80; // Float upwards heavily!
+      
+      star.style.setProperty('--tx', `${tx}px`);
+      star.style.setProperty('--ty', `${ty}px`);
+      
+      container.appendChild(star);
+      setTimeout(() => {
+        star.remove();
+      }, 1400);
+    }
   }
 }
 
@@ -1265,6 +1341,7 @@ function startMovingClaw(direction) {
   if (isClawRunning) return;
   activeMoveDirection = direction;
   ClawAudio.playClick();
+  updateClawLED('moving');
   
   if (joystickBase) {
     joystickBase.classList.remove('tilt-left', 'tilt-right');
@@ -1274,6 +1351,7 @@ function startMovingClaw(direction) {
 
 function stopMovingClaw() {
   activeMoveDirection = null;
+  updateClawLED('ready');
   if (joystickBase) {
     joystickBase.classList.remove('tilt-left', 'tilt-right');
   }
@@ -1360,11 +1438,13 @@ async function performClawDrop() {
     if (btnClawDrop) btnClawDrop.disabled = false;
     if (btnJoystickLeft) btnJoystickLeft.disabled = false;
     if (btnJoystickRight) btnJoystickRight.disabled = false;
+    updateClawLED('ready');
     return;
   }
 
   showToast("🕹️ Claw dropping! Good luck!", "success");
   ClawAudio.playDropSound();
+  updateClawLED('moving'); // State LED -> Moving yellow flash
 
   // 2. Extend Claw String Downward (Phase 1)
   if (clawHand) {
@@ -1414,6 +1494,7 @@ async function performClawDrop() {
   const isDuplicate = owned.includes(rolledItem.id) || rolledItem.rarity === 'common';
 
   // 4. Claw Grab / Close Fingers around box (Phase 2)
+  updateClawLED('grabbing'); // State LED -> Grabbing solid red
   if (clawHand) {
     clawHand.classList.remove('is-open');
     clawHand.classList.add('is-closed');
@@ -1444,6 +1525,7 @@ async function performClawDrop() {
   await new Promise(res => setTimeout(res, 600));
 
   // 5. Retract Gantry String (Phase 3)
+  updateClawLED('grabbing'); // Keep red solid as it ascends with cargo
   if (clawString) {
     clawString.style.height = '40px';
   }
@@ -1461,6 +1543,7 @@ async function performClawDrop() {
   await new Promise(res => setTimeout(res, 1200));
 
   // 7. Open Claw / Drop Prize Box down chute (Phase 5)
+  updateClawLED('moving'); // Back to yellow flash as cargo drops
   if (clawHand) {
     clawHand.classList.remove('is-closed');
   }
@@ -1487,10 +1570,19 @@ async function performClawDrop() {
 
   // 8. Open Prize Win Reveal Modal Popup (Phase 6)
   if (clawRevealModal) {
+    // Inject rarity custom CSS color variable for card glow
+    clawRevealModal.style.setProperty('--loot-rarity-color', RARITY_COLORS[rolledItem.rarity]);
+
     // Populate modal tags
     if (modalRevealIcon) {
       modalRevealIcon.innerText = rolledItem.type === 'avatar' ? rolledItem.val : (rolledItem.emoji || '🎁');
     }
+    
+    const modalGlow = document.getElementById('modal-reveal-glow');
+    if (modalGlow) {
+      modalGlow.style.background = `radial-gradient(circle, ${RARITY_COLORS[rolledItem.rarity]} 0%, transparent 68%)`;
+    }
+
     if (modalRevealBadge) {
       modalRevealBadge.innerText = `${rolledItem.rarity.toUpperCase()} UNLOCK`;
       modalRevealBadge.style.borderColor = RARITY_COLORS[rolledItem.rarity];
@@ -1549,10 +1641,8 @@ async function performClawDrop() {
       // Open visual modal
       clawRevealModal.classList.add('active');
       
-      // Fire confetti if Legendary!
-      if (rolledItem.rarity === 'legendary') {
-        triggerConfetti();
-      }
+      // Fire explosive unboxing particles matching rolled rarity!
+      triggerConfetti(rolledItem.rarity);
 
       // Re-render inventory grid
       renderLockerGrid();
@@ -1585,8 +1675,9 @@ async function performClawDrop() {
     clawAssembly.style.transition = 'left 0.15s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
   }
 
-  // Unlock controls
+  // Unlock controls & reset LED back to ready green pulse
   isClawRunning = false;
+  updateClawLED('ready');
   if (btnClawDrop) btnClawDrop.disabled = false;
   if (btnJoystickLeft) btnJoystickLeft.disabled = false;
   if (btnJoystickRight) btnJoystickRight.disabled = false;
