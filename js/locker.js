@@ -907,28 +907,6 @@ async function purchaseItemWithScrap(item) {
   }
 }
 
-// ── Confetti Particle Explosion for Legendary pulls ──────────────────────────
-function triggerConfetti() {
-  const container = document.getElementById('reveal-viewport') || document.body;
-  const colors = ['#F59E0B', '#10B981', '#38BDF8', '#A78BFA', '#EF4444', '#EC4899'];
-  
-  for (let i = 0; i < 45; i++) {
-    const p = document.createElement('div');
-    p.className = 'confetti-piece';
-    p.style.left = `${Math.random() * 80 + 10}%`;
-    p.style.background = colors[Math.floor(Math.random() * colors.length)];
-    p.style.animationDelay = `${Math.random() * 0.3}s`;
-    p.style.width = `${Math.random() * 6 + 6}px`;
-    p.style.height = `${Math.random() * 6 + 6}px`;
-    p.style.zIndex = '999';
-    
-    container.appendChild(p);
-    
-    setTimeout(() => {
-      p.remove();
-    }, 1400);
-  }
-}
 
 // Draw based on exact percentage probabilities shown on rates card
 function drawRandomCosmetic() {
