@@ -1017,36 +1017,240 @@ function initPrizePile() {
   }
 }
 
-// ── Claw Smooth Sliding Controller Loops ────────────────────────────────────
-let moveInterval = null;
+// ── Web Audio API Arcade Synthesizer ─────────────────────────────────────────
+class ClawAudioController {
+  constructor() {
+    this.ctx = null;
+    this.motorOsc = null;
+    this.motorGain = null;
+  }
+
+  init() {
+    if (this.ctx) return;
+    const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+    if (AudioContextClass) {
+      this.ctx = new AudioContextClass();
+    }
+  }
+
+  resume() {
+    this.init();
+    if (this.ctx && this.ctx.state === 'suspended') {
+      this.ctx.resume();
+    }
+  }
+
+  playClick() {
+    this.resume();
+    if (!this.ctx) return;
+    
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+    
+    osc.type = 'triangle';
+    osc.frequency.setValueAtTime(600, this.ctx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(100, this.ctx.currentTime + 0.08);
+    
+    gain.gain.setValueAtTime(0.08, this.ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.08);
+    
+    osc.connect(gain);
+    gain.connect(this.ctx.destination);
+    
+    osc.start();
+    osc.stop(this.ctx.currentTime + 0.08);
+  }
+
+  startMotor() {
+    this.resume();
+    if (!this.ctx || this.motorOsc) return;
+
+    this.motorOsc = this.ctx.createOscillator();
+    this.motorGain = this.ctx.createGain();
+
+    this.motorOsc.type = 'sawtooth';
+    this.motorOsc.frequency.setValueAtTime(75, this.ctx.currentTime);
+    
+    const filter = this.ctx.createBiquadFilter();
+    filter.type = 'lowpass';
+    filter.frequency.setValueAtTime(120, this.ctx.currentTime);
+
+    this.motorGain.gain.setValueAtTime(0, this.ctx.currentTime);
+    this.motorGain.gain.linearRampToValueAtTime(0.04, this.ctx.currentTime + 0.1);
+
+    this.motorOsc.connect(filter);
+    filter.connect(this.motorGain);
+    this.motorGain.connect(this.ctx.destination);
+
+    this.motorOsc.start();
+  }
+
+  stopMotor() {
+    if (!this.motorOsc) return;
+    const osc = this.motorOsc;
+    const gain = this.motorGain;
+    this.motorOsc = null;
+    this.motorGain = null;
+
+    if (this.ctx) {
+      gain.gain.setValueAtTime(gain.gain.value, this.ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.15);
+      setTimeout(() => {
+        try { osc.stop(); } catch (e) {}
+      }, 200);
+    }
+  }
+
+  playDropSound() {
+    this.resume();
+    if (!this.ctx) return;
+
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+
+    osc.type = 'triangle';
+    osc.frequency.setValueAtTime(120, this.ctx.currentTime);
+    osc.frequency.linearRampToValueAtTime(320, this.ctx.currentTime + 1.2);
+
+    gain.gain.setValueAtTime(0.06, this.ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 1.25);
+
+    osc.connect(gain);
+    gain.connect(this.ctx.destination);
+
+    osc.start();
+    osc.stop(this.ctx.currentTime + 1.25);
+  }
+
+  playClang() {
+    this.resume();
+    if (!this.ctx) return;
+
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(880, this.ctx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(220, this.ctx.currentTime + 0.15);
+
+    gain.gain.setValueAtTime(0.12, this.ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.2);
+
+    osc.connect(gain);
+    gain.connect(this.ctx.destination);
+
+    osc.start();
+    osc.stop(this.ctx.currentTime + 0.2);
+  }
+
+  playWinSound() {
+    this.resume();
+    if (!this.ctx) return;
+
+    const notes = [261.63, 329.63, 392.00, 523.25, 659.25, 783.99, 1046.50];
+    const startTime = this.ctx.currentTime;
+    
+    notes.forEach((freq, idx) => {
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      
+      osc.type = 'square';
+      osc.frequency.setValueAtTime(freq, startTime + idx * 0.09);
+      
+      gain.gain.setValueAtTime(0, startTime + idx * 0.09);
+      gain.gain.linearRampToValueAtTime(0.04, startTime + idx * 0.09 + 0.01);
+      gain.gain.exponentialRampToValueAtTime(0.001, startTime + idx * 0.09 + 0.18);
+      
+      osc.connect(gain);
+      gain.connect(this.ctx.destination);
+      
+      osc.start(startTime + idx * 0.09);
+      osc.stop(startTime + idx * 0.09 + 0.18);
+    });
+  }
+}
+const ClawAudio = new ClawAudioController();
+
+// Enable audio on first touch
+document.body.addEventListener('click', () => ClawAudio.resume(), { once: true });
+document.body.addEventListener('touchstart', () => ClawAudio.resume(), { once: true });
+
+// ── Interactive Claw Machine Physics State ──────────────────────────────────
+let clawX = 50;          // percent
+let clawVx = 0;          // velocity
+let clawSway = 0;        // sway angle
+let clawSwayV = 0;       // sway angular velocity
+let activeMoveDirection = null; // 'left', 'right', or null
+
+// Physics tick loop
+function updateClawPhysics() {
+  if (!isClawRunning) {
+    if (activeMoveDirection === 'left') {
+      clawVx = Math.max(-1.8, clawVx - 0.12);
+      ClawAudio.startMotor();
+    } else if (activeMoveDirection === 'right') {
+      clawVx = Math.min(1.8, clawVx + 0.12);
+      ClawAudio.startMotor();
+    } else {
+      clawVx *= 0.88;
+      if (Math.abs(clawVx) < 0.05) {
+        clawVx = 0;
+        ClawAudio.stopMotor();
+      }
+    }
+  } else {
+    clawVx = 0;
+    ClawAudio.stopMotor();
+  }
+
+  // Update horizontal position
+  clawX = Math.max(16, Math.min(94, clawX + clawVx * 0.45));
+  clawPositionPercent = clawX;
+  
+  if (clawX <= 16 || clawX >= 94) {
+    clawVx = 0;
+  }
+
+  // Sway spring-damper physics
+  const torque = -clawVx * 2.5; 
+  const springForce = -clawSway * 0.14; 
+  const damping = -clawSwayV * 0.08; 
+  
+  clawSwayV += torque + springForce + damping;
+  clawSwayV *= 0.94; 
+  clawSway += clawSwayV * 0.55;
+
+  // Apply transforms
+  if (clawAssembly) {
+    clawAssembly.style.left = `${clawX}%`;
+    clawAssembly.style.transform = `translateX(-50%) rotate(${clawSway}deg)`;
+  }
+
+  // Laser sight opacity
+  const clawLaser = document.getElementById('claw-laser');
+  if (clawLaser) {
+    clawLaser.style.opacity = isClawRunning ? '0' : '0.85';
+  }
+
+  requestAnimationFrame(updateClawPhysics);
+}
+
+// Start physics loop on load
+requestAnimationFrame(updateClawPhysics);
 
 function startMovingClaw(direction) {
   if (isClawRunning) return;
+  activeMoveDirection = direction;
+  ClawAudio.playClick();
   
-  // Tilt joystick visual
   if (joystickBase) {
     joystickBase.classList.remove('tilt-left', 'tilt-right');
     joystickBase.classList.add(direction === 'left' ? 'tilt-left' : 'tilt-right');
   }
-
-  moveInterval = setInterval(() => {
-    if (direction === 'left') {
-      clawPositionPercent = Math.max(16, clawPositionPercent - 1.5); // min left (above chute is 10%)
-    } else {
-      clawPositionPercent = Math.min(94, clawPositionPercent + 1.5); // max right
-    }
-    
-    if (clawAssembly) {
-      clawAssembly.style.left = `${clawPositionPercent}%`;
-    }
-  }, 16);
 }
 
 function stopMovingClaw() {
-  if (moveInterval) {
-    clearInterval(moveInterval);
-    moveInterval = null;
-  }
+  activeMoveDirection = null;
   if (joystickBase) {
     joystickBase.classList.remove('tilt-left', 'tilt-right');
   }
@@ -1137,8 +1341,12 @@ async function performClawDrop() {
   }
 
   showToast("🕹️ Claw dropping! Good luck!", "success");
+  ClawAudio.playDropSound();
 
   // 2. Extend Claw String Downward (Phase 1)
+  if (clawHand) {
+    clawHand.classList.add('is-open');
+  }
   if (clawString) {
     clawString.style.height = '210px';
   }
@@ -1173,8 +1381,10 @@ async function performClawDrop() {
 
   // 4. Claw Grab / Close Fingers around box (Phase 2)
   if (clawHand) {
+    clawHand.classList.remove('is-open');
     clawHand.classList.add('is-closed');
   }
+  ClawAudio.playClang();
 
   let prizeBoxNode = null;
   if (closestBox && closestBox.element) {
@@ -1220,6 +1430,7 @@ async function performClawDrop() {
   if (clawHand) {
     clawHand.classList.remove('is-closed');
   }
+  ClawAudio.playClang();
 
   if (prizeBoxNode) {
     // Drop animation downwards
@@ -1227,7 +1438,7 @@ async function performClawDrop() {
     prizeBoxNode.style.bottom = '-110px';
     prizeBoxNode.style.opacity = '0';
     
-    const chuteOutlet = document.getElementById('prize-chute');
+    const chuteOutlet = document.getElementById('chute-outlet');
     if (chuteOutlet) {
       setTimeout(() => {
         chuteOutlet.innerText = "🎁";
@@ -1276,6 +1487,7 @@ async function performClawDrop() {
             clawRevealModal.classList.remove('active');
           });
         }
+        ClawAudio.playWinSound();
         showToast(`NEW UNLOCK! You grabbed a ${rolledItem.rarity.toUpperCase()} "${rolledItem.name}"!`, "success");
       } else {
         // Recycle Duplicate to Gems
@@ -1295,7 +1507,8 @@ async function performClawDrop() {
           modalRevealBadge.style.color = '#10B981';
           modalRevealBadge.style.borderColor = '#10B981';
         }
-
+        
+        ClawAudio.playClick();
         showToast(`Duplicate! Converted to +${scrapCompensation} Gems.`, "warning");
       }
 
@@ -1324,6 +1537,8 @@ async function performClawDrop() {
     clawAssembly.style.transition = 'left 0.8s ease-in-out';
     clawAssembly.style.left = '50%';
     clawPositionPercent = 50;
+    clawX = 50;
+    clawVx = 0;
   }
 
   // Regenerate boxes pile
@@ -1342,6 +1557,7 @@ async function performClawDrop() {
   if (btnJoystickLeft) btnJoystickLeft.disabled = false;
   if (btnJoystickRight) btnJoystickRight.disabled = false;
 }
+
 
 // Bind Grab Prize click handler
 if (btnClawDrop) {
