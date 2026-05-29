@@ -1046,7 +1046,6 @@ let clawPositionPercent = 50; // Starting claw center percent
 let isClawRunning = false;
 let spawnedPrizes = [];
 
-// Initialize colorful mystery prize box stack
 // Initialize colorful mystery prize box stack styled as cute gifts in a dense pile
 function initPrizePile() {
   if (!prizePile) return;
@@ -1056,8 +1055,8 @@ function initPrizePile() {
   const rarities = ['common', 'uncommon', 'rare', 'epic', 'legendary'];
   const rarityOdds = [45, 25, 17, 10, 3]; // percentage weights
 
-  // Spawn 45 mystery gift visual items inside glass chamber layered into a heap
-  const numGifts = 45;
+  // Spawn 65 mystery gift visual items inside glass chamber layered into an organic 4-layer stacked heap
+  const numGifts = 65;
   for (let i = 0; i < numGifts; i++) {
     // Determine random visual color base
     const roll = Math.random() * 100;
@@ -1084,25 +1083,30 @@ function initPrizePile() {
     let minX = 72;
     let maxX = 385;
     
-    if (i < 18) {
+    if (i < 24) {
       // Layer 1 (Base Floor): sitting on the floor
-      posY = Math.floor(Math.random() * 5);
+      posY = Math.floor(Math.random() * 6);
       minX = 72;
       maxX = 385;
-    } else if (i < 33) {
-      // Layer 2 (Middle Heap): slightly narrower spread, sitting stacked on bottom gifts
-      posY = Math.floor(Math.random() * 6 + 18);
-      minX = 90;
-      maxX = 365;
+    } else if (i < 44) {
+      // Layer 2 (Middle Heap): stacked middle gifts
+      posY = Math.floor(Math.random() * 8 + 18);
+      minX = 85;
+      maxX = 370;
+    } else if (i < 58) {
+      // Layer 3 (High Peak): stacked higher peak pile
+      posY = Math.floor(Math.random() * 8 + 36);
+      minX = 110;
+      maxX = 345;
     } else {
-      // Layer 3 (Top Peak): centered peak pile
-      posY = Math.floor(Math.random() * 6 + 36);
-      minX = 120;
-      maxX = 335;
+      // Layer 4 (Top Summit): top summit peak pile
+      posY = Math.floor(Math.random() * 10 + 54);
+      minX = 140;
+      maxX = 315;
     }
 
     const posX = Math.floor(Math.random() * (maxX - minX) + minX);
-    const rot = Math.floor(Math.random() * 50 - 25); // -25deg to 25deg
+    const rot = Math.floor(Math.random() * 70 - 35); // -35deg to 35deg
     
     box.style.cssText = `
       position: absolute;
@@ -1280,6 +1284,7 @@ let clawVx = 0;          // velocity
 let clawSway = 0;        // sway angle
 let clawSwayV = 0;       // sway angular velocity
 let activeMoveDirection = null; // 'left', 'right', or null
+let clawXTarget = null;  // automated slide target percentage
 
 // Physics tick loop
 function updateClawPhysics() {
@@ -1298,8 +1303,25 @@ function updateClawPhysics() {
       }
     }
   } else {
-    clawVx = 0;
-    ClawAudio.stopMotor();
+    // If automated claw run, handle horizontal gantry travel slides via physics engine!
+    if (clawXTarget !== null) {
+      const diff = clawXTarget - clawX;
+      if (Math.abs(diff) > 0.5) {
+        clawVx = Math.sign(diff) * 1.6; // slide speed
+        ClawAudio.startMotor();
+      } else {
+        clawX = clawXTarget;
+        clawVx = 0;
+        clawXTarget = null;
+        ClawAudio.stopMotor();
+      }
+    } else {
+      clawVx *= 0.88;
+      if (Math.abs(clawVx) < 0.05) {
+        clawVx = 0;
+        ClawAudio.stopMotor();
+      }
+    }
   }
 
   // Update horizontal position
@@ -1448,6 +1470,7 @@ async function performClawDrop() {
 
   // 2. Extend Claw String Downward (Phase 1)
   if (clawHand) {
+    clawHand.classList.remove('is-closed');
     clawHand.classList.add('is-open');
   }
   if (clawString) {
@@ -1534,10 +1557,8 @@ async function performClawDrop() {
   await new Promise(res => setTimeout(res, 1400));
 
   // 6. Slide Claw Assembly to Left Drop Chute (Phase 4)
-  if (clawAssembly) {
-    clawAssembly.style.transition = 'left 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
-    clawAssembly.style.left = '8%';
-  }
+  // Use our continuous physics engine to travel left to the center of the chute (16%)
+  clawXTarget = 16; 
 
   // Wait 1.2 seconds for assembly slide to complete
   await new Promise(res => setTimeout(res, 1200));
@@ -1603,12 +1624,13 @@ async function performClawDrop() {
         await updateDoc(userRef, { ownedCosmetics: updatedOwned });
         userDocData.ownedCosmetics = updatedOwned;
 
-        // Custom Equip Button Hook
-        if (btnModalEquip) {
-          btnModalEquip.style.display = 'block';
-          btnModalEquip.replaceWith(btnModalEquip.cloneNode(true)); // remove old listeners
-          const newEquipBtn = document.getElementById('btn-modal-equip');
-          newEquipBtn.addEventListener('click', () => {
+        // Custom Equip Button Hook - Fetch fresh to prevent memory leaks or disconnected handles
+        const equipBtn = document.getElementById('btn-modal-equip');
+        if (equipBtn) {
+          equipBtn.style.display = 'block';
+          const freshEquipBtn = equipBtn.cloneNode(true);
+          equipBtn.replaceWith(freshEquipBtn);
+          freshEquipBtn.addEventListener('click', () => {
             equipItem(rolledItem);
             clawRevealModal.classList.remove('active');
           });
@@ -1624,8 +1646,9 @@ async function performClawDrop() {
         
         updateCurrencyDisplay(userDocData);
 
-        if (btnModalEquip) {
-          btnModalEquip.style.display = 'none'; // hide equip button for recycled duplicates
+        const equipBtn = document.getElementById('btn-modal-equip');
+        if (equipBtn) {
+          equipBtn.style.display = 'none'; // hide equip button for recycled duplicates
         }
         
         if (modalRevealBadge) {
@@ -1656,24 +1679,18 @@ async function performClawDrop() {
   // 9. Reset Claw Position (Phase 7)
   if (prizeBoxNode) prizeBoxNode.remove();
   
-  if (clawAssembly) {
-    // Slide back to center 50%
-    clawAssembly.style.transition = 'left 0.8s ease-in-out';
-    clawAssembly.style.left = '50%';
-    clawPositionPercent = 50;
-    clawX = 50;
-    clawVx = 0;
+  if (clawHand) {
+    clawHand.classList.remove('is-open', 'is-closed');
   }
+
+  // Slide back to center 50% using our continuous physics engine!
+  clawXTarget = 50;
 
   // Regenerate boxes pile
   initPrizePile();
 
   // Wait for claw center transition
   await new Promise(res => setTimeout(res, 800));
-
-  if (clawAssembly) {
-    clawAssembly.style.transition = 'left 0.15s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
-  }
 
   // Unlock controls & reset LED back to ready green pulse
   isClawRunning = false;
