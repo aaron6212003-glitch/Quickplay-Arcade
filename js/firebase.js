@@ -4,15 +4,10 @@ import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWith
 import { getFirestore, collection, addDoc, getDocs, query, orderBy, limit, doc, setDoc, getDoc, updateDoc, increment, where } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
 
-// Determine the appropriate authDomain dynamically to enable a same-origin Vercel proxy.
-// Fallback to standard domain when running on localhost to support local dev server auth.
-const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-const dynamicAuthDomain = isLocal ? "quick-play-arcade.firebaseapp.com" : window.location.hostname;
-
 // Your web app's Firebase configuration
 const firebaseConfig = {
   apiKey: "AIzaSyCPWREUZ3iag9SFvyOywXcwLw1CD9XCFhU",
-  authDomain: dynamicAuthDomain,
+  authDomain: "quick-play-arcade.firebaseapp.com",
   projectId: "quick-play-arcade",
   storageBucket: "quick-play-arcade.firebasestorage.app",
   messagingSenderId: "359630822608",

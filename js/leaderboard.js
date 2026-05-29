@@ -1,4 +1,4 @@
-import { db, auth, collection, addDoc, getDocs, query, orderBy, limit, doc, getDoc, updateDoc, increment, where } from './firebase.js';
+import { db, auth, collection, addDoc, getDocs, query, orderBy, limit, doc, getDoc, updateDoc, increment, where } from './firebase.js?v=11';
 import { getDailyGame, getYesterdayDateString } from './daily.js';
 import { verifyScoreSignature } from './security.js';
 

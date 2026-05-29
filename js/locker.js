@@ -1,5 +1,5 @@
-import { db, auth, doc, getDoc, setDoc, updateDoc, sendEmailVerification } from './firebase.js';
-import { onAuthStateChanged } from './firebase.js';
+import { db, auth, doc, getDoc, setDoc, updateDoc, sendEmailVerification } from './firebase.js?v=11';
+import { onAuthStateChanged } from './firebase.js?v=11';
 import { triggerHaptic } from './haptics.js';
 
 // --- COSMETICS DEFINITION SYSTEM ---

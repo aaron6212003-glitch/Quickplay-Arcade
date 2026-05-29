@@ -1,5 +1,5 @@
-import { auth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, updateProfile, sendEmailVerification, GoogleAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult } from './firebase.js';
-import { db, doc, setDoc, getDoc, updateDoc, increment, collection, getDocs } from './firebase.js';
+import { auth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, updateProfile, sendEmailVerification, GoogleAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult } from './firebase.js?v=11';
+import { db, doc, setDoc, getDoc, updateDoc, increment, collection, getDocs } from './firebase.js?v=11';
 
 const modal = document.getElementById('auth-modal');
 const btnLoginTrigger = document.getElementById('btn-login-trigger');

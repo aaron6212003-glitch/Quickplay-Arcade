@@ -1,5 +1,5 @@
 import { GAMES } from '../data/games.js';
-import { auth, db, onAuthStateChanged, doc, getDoc, setDoc, increment } from './firebase.js';
+import { auth, db, onAuthStateChanged, doc, getDoc, setDoc, increment } from './firebase.js?v=11';
 
 // ── Get game id from URL ─────────────────────────────────────────────────────
 const params = new URLSearchParams(window.location.search);
