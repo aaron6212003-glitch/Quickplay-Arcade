@@ -44,37 +44,20 @@ export function init(container) {
         box-shadow: 0 4px 15px rgba(0,0,0,0.3);
       }
 
-      /* Premium Top Question & Button Panel */
-      .hl-question-panel {
-        background: rgba(15, 23, 42, 0.65);
-        backdrop-filter: blur(12px);
-        -webkit-backdrop-filter: blur(12px);
-        border: 1px solid rgba(255, 255, 255, 0.08);
-        border-radius: 16px;
-        padding: 14px 16px;
-        margin: 58px 12px 10px 12px; /* Margins to accommodate score banner and spacing */
-        text-align: center;
+      /* Premium Minimalist Category Banner */
+      .hl-category-banner {
+        position: absolute;
+        top: 58px; left: 50%; transform: translateX(-50%);
         z-index: 10;
-        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
-      }
-      .hl-question-text {
-        font-size: clamp(0.95rem, 3.5vw, 1.25rem);
-        font-weight: 700;
-        color: #fff;
-        line-height: 1.35;
-        margin-bottom: 10px;
-        padding: 0 5px;
-      }
-      .hl-question-btn-row {
-        display: flex;
-        justify-content: center;
-        gap: 12px;
-        width: 100%;
-        transition: opacity 0.2s ease;
-      }
-      .hl-question-btn-row.disabled {
+        background: rgba(15, 23, 42, 0.8);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        padding: 6px 20px; border-radius: 50px; border: 1px solid rgba(255,255,255,0.08);
+        font-weight: 800; font-size: 0.85rem; color: #38BDF8;
+        text-transform: uppercase; letter-spacing: 2px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.3);
         pointer-events: none;
-        opacity: 0.45;
+        white-space: nowrap;
       }
       
       .hl-card {
@@ -104,13 +87,13 @@ export function init(container) {
       }
       
       /* Slide Swapping Animations */
-      .hl-card-top.slide-out {
-        transform: translateY(-100%);
+      .hl-card-bottom.slide-out-down {
+        transform: translateY(100%);
         opacity: 0;
       }
-      .hl-card-bottom.slide-up-merge {
-        transform: translateY(calc(-100% - 1px));
-        border-radius: 20px 20px 0 0;
+      .hl-card-top.slide-down-merge {
+        transform: translateY(calc(100% + 1px));
+        border-radius: 0 0 20px 20px;
       }
       
       .hl-vs-circle {
@@ -142,15 +125,22 @@ export function init(container) {
         text-transform: uppercase; letter-spacing: 2px; margin-bottom: 12px;
         color: #38BDF8;
         text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        display: none; /* Subtitle hidden inside top card, replaced by top banner */
       }
-      .hl-card-bottom .hl-subtitle {
-        color: #38BDF8;
-        font-style: normal;
-        font-size: 0.85rem;
+      .hl-question {
+        font-size: clamp(0.95rem, 3.2vw, 1.15rem);
+        font-weight: 700;
+        color: rgba(255, 255, 255, 0.45);
+        margin-top: 12px;
+        text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+      }
+      .hl-unit-label {
+        font-size: clamp(0.75rem, 2.5vw, 0.85rem);
         font-weight: 800;
+        color: rgba(56, 189, 248, 0.6);
+        text-transform: uppercase;
         letter-spacing: 2px;
-        margin-bottom: 12px;
-        text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        margin-top: 6px;
       }
       
       .hl-value-container { min-height: 60px; display: flex; align-items: center; justify-content: center; }
@@ -176,6 +166,18 @@ export function init(container) {
         50% { opacity: 1; transform: scale(1.05); }
       }
       
+      .hl-btn-row {
+        display: flex;
+        justify-content: center;
+        gap: 12px;
+        width: 100%;
+        max-width: 320px;
+        transition: opacity 0.2s ease;
+      }
+      .hl-btn-row.disabled {
+        pointer-events: none;
+        opacity: 0.45;
+      }
       .hl-btn {
         background: transparent; color: white; border: 2px solid rgba(255,255,255,0.25);
         padding: 10px 24px; border-radius: 50px; font-size: 1.05rem; font-weight: 800;
@@ -272,11 +274,11 @@ export function init(container) {
       }
       .anim-pop { animation: hlPopIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.2); }
       
-      @keyframes hlSlideUp {
-        0% { transform: translateY(30px); opacity: 0; }
+      @keyframes hlSlideDown {
+        0% { transform: translateY(-30px); opacity: 0; }
         100% { transform: translateY(0); opacity: 1; }
       }
-      .anim-slide-up { animation: hlSlideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+      .anim-slide-down { animation: hlSlideDown 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
       
       @keyframes hlShake {
         0%, 100% { transform: translateX(0); }
@@ -301,33 +303,32 @@ export function init(container) {
         <div class="hl-score-pill">Best: <span id="hl-high-score">0</span></div>
       </div>
 
-      <!-- Premium Top Question & Button Panel -->
-      <div class="hl-question-panel" id="hl-question-panel">
-        <div class="hl-question-text" id="hl-question-text">
-          Loading question...
-        </div>
-        <div class="hl-question-btn-row" id="hl-question-btn-row">
-          <button class="hl-btn hl-btn-higher" onclick="guess('higher')">Higher ⬆️</button>
-          <button class="hl-btn hl-btn-lower" onclick="guess('lower')">Lower ⬇️</button>
-        </div>
+      <!-- Sleek Category Banner at top -->
+      <div class="hl-category-banner" id="hl-category-banner">
+        Monthly Searches
       </div>
       
-      <div class="hl-card hl-card-top" id="card-top">
-        <div class="hl-subtitle" id="top-subtitle">Loading...</div>
-        <div class="hl-name" id="top-name">Minecraft</div>
-        <div class="hl-value-container">
-          <div class="hl-value anim-pop" id="top-value">30,000,000</div>
+      <div class="hl-card hl-card-top" id="card-top" style="padding-top: 60px;"> <!-- padding to clear category banner -->
+        <div class="hl-subtitle" id="top-subtitle" style="display:none;">Loading...</div>
+        <div class="hl-name" id="top-name">Bitcoin</div>
+        
+        <div class="hl-value-container" id="top-value-container" style="flex-direction: column; width: 100%; align-items: center;">
+          <div class="hl-btn-row" id="hl-btn-row">
+            <button class="hl-btn hl-btn-higher" onclick="guess('higher')">Higher ⬆️</button>
+            <button class="hl-btn hl-btn-lower" onclick="guess('lower')">Lower ⬇️</button>
+          </div>
         </div>
+
+        <div class="hl-question" id="hl-question">than Minecraft</div>
       </div>
       
       <div class="hl-vs-circle">VS</div>
       
       <div class="hl-card hl-card-bottom" id="card-bottom">
-        <div class="hl-name" id="bottom-name">Bitcoin</div>
-        <div class="hl-subtitle" id="bottom-subtitle">Loading...</div>
-        
-        <div class="hl-value-container" id="bottom-value-container">
-          <div class="hl-value-mystery">?</div>
+        <div class="hl-name" id="bottom-name">Minecraft</div>
+        <div class="hl-value-container" style="flex-direction: column;">
+          <div class="hl-value anim-pop" id="bottom-value">30,000,000</div>
+          <div class="hl-unit-label" id="bottom-unit-label">monthly searches</div>
         </div>
       </div>
 
@@ -519,13 +520,13 @@ export function init(container) {
   const elScore = container.querySelector('#hl-score');
   const elHighScore = container.querySelector('#hl-high-score');
   const elTopName = container.querySelector('#top-name');
-  const elTopSubtitle = container.querySelector('#top-subtitle');
-  const elTopValue = container.querySelector('#top-value');
+  const elTopContainer = container.querySelector('#top-value-container');
   const elBottomName = container.querySelector('#bottom-name');
-  const elBottomSubtitle = container.querySelector('#bottom-subtitle');
-  const elBottomContainer = container.querySelector('#bottom-value-container');
-  const elQuestionText = container.querySelector('#hl-question-text');
-  const elBtnRow = container.querySelector('#hl-question-btn-row');
+  const elBottomValue = container.querySelector('#bottom-value');
+  const elBottomUnitLabel = container.querySelector('#bottom-unit-label');
+  const elCategoryBanner = container.querySelector('#hl-category-banner');
+  const elQuestion = container.querySelector('#hl-question');
+  const elBtnRow = container.querySelector('#hl-btn-row');
   const elGameOver = container.querySelector('#game-over-overlay');
   const elFinalScore = container.querySelector('#final-score-display');
   const cardTop = container.querySelector('#card-top');
@@ -635,7 +636,10 @@ export function init(container) {
     if (isTransitioning) return;
     isTransitioning = true;
     
-    // Show TIME'S UP overlay element in the bottom card
+    // Hide question during timeout reveal
+    elQuestion.style.display = 'none';
+
+    // Show TIME'S UP overlay element in the top card
     const valDiv = document.createElement('div');
     valDiv.className = 'hl-value anim-pop';
     valDiv.innerText = "TIME'S UP! ⏰";
@@ -643,8 +647,8 @@ export function init(container) {
     valDiv.style.textShadow = '0 0 25px rgba(239, 68, 68, 0.6)';
     valDiv.style.fontSize = '2.5rem';
     
-    elBottomContainer.innerHTML = '';
-    elBottomContainer.appendChild(valDiv);
+    elTopContainer.innerHTML = '';
+    elTopContainer.appendChild(valDiv);
     
     // Shake screen
     hlWrapper.classList.add('hl-shake');
@@ -682,44 +686,52 @@ export function init(container) {
     startTimer();
   }
 
-  function getQuestionText(category, item1, item2) {
+  function getUnitText(category) {
     if (category === "Monthly Google Searches") {
-      return `Does <strong style="color: #38BDF8;">${item2}</strong> have higher or lower Monthly Searches than <strong style="color: #10B981;">${item1}</strong>?`;
+      return "monthly searches";
     } else if (category === "Net Worth") {
-      return `Is <strong style="color: #38BDF8;">${item2}</strong>'s Net Worth higher or lower than <strong style="color: #10B981;">${item1}</strong>'s?`;
+      return "net worth";
     } else if (category === "Box Office Gross") {
-      return `Is <strong style="color: #38BDF8;">${item2}</strong>'s Box Office Gross higher or lower than <strong style="color: #10B981;">${item1}</strong>'s?`;
+      return "box office gross";
     } else if (category === "Instagram Followers") {
-      return `Does <strong style="color: #38BDF8;">${item2}</strong> have more or fewer Instagram Followers than <strong style="color: #10B981;">${item1}</strong>?`;
+      return "Instagram followers";
     }
-    return `Is <strong style="color: #38BDF8;">${item2}</strong> higher or lower than <strong style="color: #10B981;">${item1}</strong>?`;
+    return "";
+  }
+
+  function getQuestionText(item1Name) {
+    return `than <strong style="color: #10B981;">${item1Name}</strong>`;
   }
 
   function renderCards() {
-    // Generate comparison question text and inject it
-    elQuestionText.innerHTML = getQuestionText(currentCategoryName, currentCard.name, nextCard.name);
+    elCategoryBanner.innerText = currentCategoryName;
     elBtnRow.classList.remove('disabled');
 
-    elTopSubtitle.innerText = currentCategoryName;
-    elTopName.innerText = currentCard.name;
-    elTopValue.innerText = formatNumber(currentCard.val);
+    // Bottom card is the known card
+    elBottomName.innerText = currentCard.name;
+    elBottomValue.innerText = formatNumber(currentCard.val);
+    elBottomUnitLabel.innerText = getUnitText(currentCategoryName);
     
-    elBottomName.innerText = nextCard.name;
-    elBottomSubtitle.innerText = currentCategoryName;
+    // Top card is the mystery/guess card
+    elTopName.innerText = nextCard.name;
+    elQuestion.style.display = 'block';
+    elQuestion.innerHTML = getQuestionText(currentCard.name);
     
-    // Reset bottom container back to mystery placeholder
-    elBottomContainer.innerHTML = '<div class="hl-value-mystery">?</div>';
+    // Restore buttons row to top container
+    elTopContainer.innerHTML = '';
+    elTopContainer.appendChild(elBtnRow);
     
-    cardBottom.classList.remove('anim-slide-up');
-    void cardBottom.offsetWidth; // trigger reflow
-    cardBottom.classList.add('anim-slide-up');
+    // Slide in top card from the top
+    cardTop.classList.remove('anim-slide-down');
+    void cardTop.offsetWidth; // trigger reflow
+    cardTop.classList.add('anim-slide-down');
   }
 
   window.guess = function(choice) {
     if (isTransitioning) return;
     isTransitioning = true;
     stopTimer(); // Freeze timer immediately
-    elBtnRow.classList.add('disabled'); // Disable top buttons visually and physically during reveal
+    elBtnRow.classList.add('disabled'); // Disable buttons row visually
 
     // Reveal value
     const isHigher = nextCard.val >= currentCard.val;
@@ -729,7 +741,7 @@ export function init(container) {
     if (choice === 'higher' && isHigher) isCorrect = true;
     if (choice === 'lower' && isLower) isCorrect = true;
 
-    // Show the revealed number
+    // Show the revealed number in the top container
     const valDiv = document.createElement('div');
     valDiv.className = 'hl-value anim-pop';
     valDiv.innerText = formatNumber(nextCard.val);
@@ -741,8 +753,11 @@ export function init(container) {
       valDiv.style.textShadow = '0 0 25px rgba(16, 185, 129, 0.6)';
     }
     
-    elBottomContainer.innerHTML = '';
-    elBottomContainer.appendChild(valDiv);
+    // Hide question during value reveal to keep the layout clean!
+    elQuestion.style.display = 'none';
+
+    elTopContainer.innerHTML = '';
+    elTopContainer.appendChild(valDiv);
 
     if (isCorrect) {
       score++;
@@ -755,17 +770,17 @@ export function init(container) {
       
       // Slide transitions
       setTimeout(() => {
-        cardTop.classList.add('slide-out');
-        cardBottom.classList.add('slide-up-merge');
+        cardBottom.classList.add('slide-out-down');
+        cardTop.classList.add('slide-down-merge');
         vsCircle.style.opacity = '0';
-        vsCircle.style.transform = 'translate(-50%, -50%) scale(0) rotate(180deg)';
+        vsCircle.style.transform = 'translate(-50%, -50%) scale(0) rotate(-180deg)';
         
         setTimeout(() => {
           currentCard = nextCard;
           nextCard = getRandomCard(currentCard.name);
           
-          cardTop.classList.remove('slide-out');
-          cardBottom.classList.remove('slide-up-merge');
+          cardBottom.classList.remove('slide-out-down');
+          cardTop.classList.remove('slide-down-merge');
           
           vsCircle.style.opacity = '1';
           vsCircle.style.transform = 'translate(-50%, -50%) scale(1) rotate(0deg)';

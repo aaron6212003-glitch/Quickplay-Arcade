@@ -30,44 +30,56 @@ export function initTanks(container) {
   wrapper.style.maxHeight = '100vh';
   wrapper.style.justifyContent = 'center';
   
-  // Score display
-  const scoreDisplay = document.createElement('div');
-  scoreDisplay.style.position = 'absolute';
-  scoreDisplay.style.top = '10px';
-  scoreDisplay.style.left = '20px';
-  scoreDisplay.style.fontSize = '24px';
-  scoreDisplay.style.fontWeight = '900';
-  scoreDisplay.style.color = '#78350f';
-  scoreDisplay.style.fontFamily = 'monospace';
-  scoreDisplay.innerText = 'SCORE: 0';
-  
-  // Lives display
-  const livesDisplay = document.createElement('div');
-  livesDisplay.style.position = 'absolute';
-  livesDisplay.style.top = '10px';
-  livesDisplay.style.right = '20px';
-  livesDisplay.style.fontSize = '24px';
-  livesDisplay.style.fontWeight = '900';
-  livesDisplay.style.color = '#dc2626';
-  livesDisplay.style.fontFamily = 'monospace';
-  livesDisplay.innerText = '♥♥•';
- 
-  // Level display (Centered at the top to clear room for bottom panel)
-  const levelDisplay = document.createElement('div');
-  levelDisplay.style.position = 'absolute';
-  levelDisplay.style.top = '10px';
-  levelDisplay.style.left = '50%';
-  levelDisplay.style.transform = 'translateX(-50%)';
-  levelDisplay.style.fontSize = '22px';
-  levelDisplay.style.fontWeight = '900';
-  levelDisplay.style.color = '#78350f';
-  levelDisplay.style.fontFamily = 'monospace';
-  levelDisplay.innerText = 'LEVEL 1';
- 
+  // ── Unified HUD bar (score + level + lives in one clean pill)
+  const hudBar = document.createElement('div');
+  hudBar.style.cssText = [
+    'position:absolute',
+    'top:8px',
+    'left:50%',
+    'transform:translateX(-50%)',
+    'display:flex',
+    'align-items:center',
+    'gap:0',
+    'background:rgba(0,0,0,0.42)',
+    'backdrop-filter:blur(4px)',
+    'border-radius:50px',
+    'border:1.5px solid rgba(255,255,255,0.12)',
+    'font-family:Outfit,monospace',
+    'font-weight:800',
+    'font-size:13px',
+    'overflow:hidden',
+    'white-space:nowrap',
+    'pointer-events:none',
+    'z-index:10'
+  ].join(';');
+
+  const hudLives = document.createElement('div');
+  hudLives.id = 'hud-lives';
+  hudLives.style.cssText = 'padding:5px 12px; color:#f87171; border-right:1px solid rgba(255,255,255,0.1);';
+  hudLives.innerText = '♥ ♥ ♥';
+
+  const hudLevel = document.createElement('div');
+  hudLevel.id = 'hud-level';
+  hudLevel.style.cssText = 'padding:5px 14px; color:#fcd34d; border-right:1px solid rgba(255,255,255,0.1); letter-spacing:0.5px;';
+  hudLevel.innerText = 'LVL 1';
+
+  const hudScore = document.createElement('div');
+  hudScore.id = 'hud-score';
+  hudScore.style.cssText = 'padding:5px 12px; color:#fff;';
+  hudScore.innerText = '0 pts';
+
+  hudBar.appendChild(hudLives);
+  hudBar.appendChild(hudLevel);
+  hudBar.appendChild(hudScore);
+
+  // Keep legacy references for code that updates them
+  const scoreDisplay = hudScore;
+  const livesDisplay = hudLives;
+  const levelDisplay = hudLevel;
+
   wrapper.appendChild(canvas);
-  wrapper.appendChild(scoreDisplay);
-  wrapper.appendChild(livesDisplay);
-  wrapper.appendChild(levelDisplay);
+  wrapper.appendChild(hudBar);
+
  
   // Mobile Controls Overlay (Dedicated panel below the canvas, blending into the wooden frame!)
   const mobileControls = document.createElement('div');
@@ -1119,7 +1131,7 @@ export function initTanks(container) {
 
             enemies.splice(j, 1);
             score += (e.type === 'boss' ? 500 : 100) * level;
-            scoreDisplay.innerText = `SCORE: ${score}`;
+            hudScore.innerText = `${score} pts`;
             checkLevelClear();
             break;
           }
@@ -1165,7 +1177,7 @@ export function initTanks(container) {
             spawnExplosion(e.x, e.y);
             enemies.splice(j, 1);
             score += 50 * level;
-            scoreDisplay.innerText = `SCORE: ${score}`;
+            hudScore.innerText = `${score} pts`;
             checkLevelClear();
           }
         }
@@ -1226,7 +1238,7 @@ export function initTanks(container) {
           }
         } else if (p.type === 'coin') {
           score += 250;
-          scoreDisplay.innerText = `SCORE: ${score}`;
+          hudScore.innerText = `${score} pts`;
           // Spawn golden sparks
           for (let s = 0; s < 12; s++) {
             const part = new Particle(p.x, p.y, 'spark');
@@ -1276,7 +1288,9 @@ export function initTanks(container) {
     lives--;
     let lifeStr = '';
     for(let i=0; i<lives; i++) lifeStr += '♥';
-    livesDisplay.innerText = lifeStr;
+    for(let i=lives; i<3; i++) lifeStr += '○';
+    hudLives.innerText = lifeStr.split('').join(' ');
+    hudLives.style.color = lives <= 1 ? '#ef4444' : lives === 2 ? '#fb923c' : '#f87171';
     
     if (lives <= 0) {
       isGameOver = true;
@@ -1294,7 +1308,7 @@ export function initTanks(container) {
   function checkLevelClear() {
     if (enemies.length === 0) {
       level++;
-      levelDisplay.innerText = `LEVEL ${level}`;
+      hudLevel.innerText = `LVL ${level}`;
       setTimeout(generateLevel, 1500);
     }
   }
@@ -1694,9 +1708,12 @@ export function initTanks(container) {
       score = 0;
       level = 1;
       lives = 3;
-      scoreDisplay.innerText = 'SCORE: 0';
-      livesDisplay.innerText = '♥♥♥';
-      levelDisplay.innerText = 'LEVEL 1';
+      hudLives.innerText = '♥ ♥ ♥';
+      hudLives.style.color = '#f87171';
+      score = 0;
+      hudScore.innerText = '0 pts';
+      level = 1;
+      hudLevel.innerText = 'LVL 1';
       isGameOver = false;
       generateLevel();
       loop();

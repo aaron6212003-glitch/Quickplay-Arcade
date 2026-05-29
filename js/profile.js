@@ -214,6 +214,9 @@ onAuthStateChanged(auth, async (user) => {
       const activeTitle = activeCosmetics.title || "THE ROOKIE";
       const activeBorder = activeCosmetics.border || "border-common";
       const activeTheme = activeCosmetics.theme || "theme-common";
+      const activeTrail = activeCosmetics.trail || "trail-none";
+      const activeCardAnim = activeCosmetics.card_anim || "anim-none";
+      const activeFrame = activeCosmetics.frame || "frame-none";
       
       if (cardUsername) cardUsername.innerText = username;
       if (cardTagline) cardTagline.innerText = `"${tagline}"`;
@@ -252,10 +255,13 @@ onAuthStateChanged(auth, async (user) => {
         avatarRing.className = `avatar-ring ${activeBorder}`;
       }
       
-      // Update gamer card theme
+      // Update gamer card theme, card animations, and frames
       const gamerCard = document.querySelector('.gamer-card');
       if (gamerCard) {
-        gamerCard.className = `gamer-card ${activeTheme}`;
+        gamerCard.className = `gamer-card ${activeTheme} ${activeCardAnim} ${activeFrame}`;
+        
+        // Also support cursor trail on hover/touch inside profile card!
+        setupCardTrail(gamerCard, activeTrail);
       }
       
       // Setup edit profile button text depending on profile setup state
@@ -722,3 +728,95 @@ if (document.readyState === 'loading') {
 } else {
   initAvatarUpload();
 }
+
+// ── Hamburger Menu Toggle ───────────────────────────────────────────────────
+const hamburger = document.getElementById('hamburger');
+const mobileMenu = document.getElementById('mobile-menu');
+if (hamburger && mobileMenu) {
+  hamburger.addEventListener('click', () => {
+    mobileMenu.classList.toggle('open');
+  });
+}
+
+// ── Interactive Cursor Trailing Emojis Generator for Profile Card ──
+function setupCardTrail(cardEl, trailType) {
+  if (!cardEl) return;
+  
+  // Clean up any old listeners to prevent duplication
+  if (cardEl._trailCleanup) {
+    cardEl._trailCleanup();
+  }
+  
+  if (!trailType || trailType === 'trail-none') {
+    cardEl._trailCleanup = null;
+    return;
+  }
+
+  const emojiMap = {
+    'trail-bubbles': '🫧',
+    'trail-sparks': '✨',
+    'trail-hearts': '💖',
+    'trail-stars': '⭐',
+    'trail-fire': '🔥',
+    'trail-rainbow': '🌈'
+  };
+
+  const emoji = emojiMap[trailType] || '✨';
+  let lastParticleTime = 0;
+
+  const handleMove = (e) => {
+    // Throttling to prevent spamming too many particles
+    const now = Date.now();
+    if (now - lastParticleTime < 40) return;
+    lastParticleTime = now;
+
+    const rect = cardEl.getBoundingClientRect();
+    let clientX = e.clientX;
+    let clientY = e.clientY;
+
+    if (e.touches && e.touches.length > 0) {
+      clientX = e.touches[0].clientX;
+      clientY = e.touches[0].clientY;
+    }
+
+    const x = clientX - rect.left;
+    const y = clientY - rect.top;
+
+    if (x === undefined || y === undefined || x < 0 || y < 0 || x > rect.width || y > rect.height) return;
+
+    const p = document.createElement('div');
+    p.innerText = emoji;
+    p.style.cssText = `
+      position: absolute;
+      left: ${x}px;
+      top: ${y}px;
+      transform: translate(-50%, -50%) scale(1);
+      pointer-events: none;
+      font-size: 1.1rem;
+      z-index: 100;
+      opacity: 1;
+      transition: all 0.7s cubic-bezier(0.1, 0.8, 0.3, 1);
+    `;
+    
+    cardEl.appendChild(p);
+    
+    // Animate particle floating upwards
+    requestAnimationFrame(() => {
+      p.style.transform = `translate(-50%, -100%) scale(0.3) rotate(${Math.random() * 90 - 45}deg)`;
+      p.style.opacity = '0';
+    });
+
+    setTimeout(() => {
+      p.remove();
+    }, 750);
+  };
+
+  cardEl.addEventListener('mousemove', handleMove);
+  cardEl.addEventListener('touchmove', handleMove, { passive: true });
+
+  cardEl._trailCleanup = () => {
+    cardEl.removeEventListener('mousemove', handleMove);
+    cardEl.removeEventListener('touchmove', handleMove);
+  };
+}
+

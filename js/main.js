@@ -13,6 +13,7 @@ const countdownEl    = document.getElementById('countdown-timer');
 
 // ── State ────────────────────────────────────────────────────────────────────
 let activeCategory = 'all';
+let searchQuery = '';
 
 // ── Render categories ────────────────────────────────────────────────────────
 function renderCategories() {
@@ -35,7 +36,11 @@ function renderCategories() {
 // ── Filter games ─────────────────────────────────────────────────────────────
 function filteredGames() {
   return GAMES.filter(g => {
-    return activeCategory === 'all' || g.category === activeCategory;
+    const matchesCategory = activeCategory === 'all' || g.category === activeCategory;
+    const matchesSearch = g.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                          g.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                          g.category.toLowerCase().includes(searchQuery.toLowerCase());
+    return matchesCategory && matchesSearch;
   });
 }
 
@@ -65,6 +70,7 @@ function gameCardHTML(game) {
           <span class="meta-tag meta-tag--${diffClass(game.difficulty)}">${game.difficulty}</span>
           <span class="meta-tag">⏱ ${game.playTime}</span>
         </div>
+        ${game.earn ? `<div class="game-card__earn">${game.earn}</div>` : ''}
       </div>
       <div class="game-card__footer">
         <a href="game.html?id=${game.id}" class="btn btn--primary btn--sm">▶ Play Game</a>
@@ -78,6 +84,15 @@ function renderGames() {
   const list = filteredGames();
   if (gameCount) gameCount.textContent = `${list.length} game${list.length !== 1 ? 's' : ''}`;
   if (gamesGrid) gamesGrid.innerHTML = list.map(gameCardHTML).join('');
+
+  const noResultsEl = document.getElementById('no-results');
+  if (noResultsEl) {
+    if (list.length === 0) {
+      noResultsEl.classList.remove('hidden');
+    } else {
+      noResultsEl.classList.add('hidden');
+    }
+  }
 }
 
 // ── Random game ──────────────────────────────────────────────────────────────
@@ -136,7 +151,7 @@ if (dailyNameEl && dailyPlayBtn && dailyEmojiEl) {
   const { game } = getDailyGame();
   if (game) {
     dailyNameEl.textContent = game.title;
-    dailyPlayBtn.href = `game.html?id=${game.id}&daily=true`;
+    dailyPlayBtn.href = `game.html?id=${game.id}`;
     dailyEmojiEl.textContent = game.emoji;
   }
 }
@@ -237,3 +252,56 @@ dots.forEach((dot, i) => {
     showSlide(i);
   });
 });
+
+// ── Search & Filter Logic ────────────────────────────────────────────────────
+const searchInput = document.getElementById('search-input');
+const searchClearBtn = document.getElementById('search-clear');
+
+if (searchInput) {
+  searchInput.addEventListener('input', (e) => {
+    searchQuery = e.target.value;
+    if (searchClearBtn) {
+      searchClearBtn.style.display = searchQuery ? 'block' : 'none';
+    }
+    renderGames();
+  });
+}
+
+if (searchClearBtn && searchInput) {
+  searchClearBtn.addEventListener('click', () => {
+    searchInput.value = '';
+    searchQuery = '';
+    searchClearBtn.style.display = 'none';
+    renderGames();
+  });
+}
+
+// ── Header How to Play Modal Triggers ────────────────────────────────────────
+const navHowToPlay = document.getElementById('nav-how-to-play');
+const navHowToPlayMobile = document.getElementById('nav-how-to-play-mobile');
+
+const openTutorial = (e) => {
+  if (e) e.preventDefault();
+  if (tutorialModal) {
+    tutorialModal.style.display = 'flex';
+    showSlide(0);
+    // Also close mobile menu drawer if open
+    mobileMenu.classList.remove('open');
+  }
+};
+
+if (navHowToPlay) navHowToPlay.addEventListener('click', openTutorial);
+if (navHowToPlayMobile) navHowToPlayMobile.addEventListener('click', openTutorial);
+
+// ── Smart Redirection Tutorial Parameter Check ──────────────────────────────
+if (window.location.search.includes('tutorial=true') && tutorialModal) {
+  tutorialModal.style.display = 'flex';
+  showSlide(0);
+  try {
+    const newUrl = window.location.protocol + "//" + window.location.host + window.location.pathname;
+    window.history.replaceState({ path: newUrl }, '', newUrl);
+  } catch (err) {
+    console.warn("Could not clean up URL parameter:", err);
+  }
+}
+

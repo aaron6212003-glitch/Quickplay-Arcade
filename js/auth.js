@@ -108,16 +108,38 @@ if (btnSubmit) {
         // Force DOM update since onAuthStateChanged fired too early
         if (authContainer) {
           authContainer.innerHTML = `
-            <div style="display:flex; flex-direction:column; align-items:flex-end;">
-              <span style="font-size:0.85rem; color:#cbd5e1; font-weight:700;">Welcome,</span>
-              <span style="font-weight:900; color:#38BDF8;">${username || user.displayName || 'Player'}</span>
-            </div>
-            <div style="display:flex; gap:8px;">
-              <a href="profile.html" class="btn btn--primary" style="padding: 6px 12px; font-size: 0.8rem;">Profile</a>
-              <button class="btn btn--outline" id="btn-logout" style="padding: 6px 12px; font-size: 0.8rem;">Log Out</button>
+            <div style="display:flex; align-items:center; gap:8px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.06); padding:4px 8px; border-radius:12px; box-shadow:inset 0 1px 1px rgba(255,255,255,0.03);">
+              <a href="profile.html" class="btn btn--primary" style="padding: 6px 12px; font-size: 0.85rem; font-weight:800; display:flex; align-items:center; gap:6px; border-radius:8px;">
+                <span>👾</span>
+                <span>${username || user.displayName || 'Profile'}</span>
+              </a>
+              <a href="locker.html" class="btn btn--outline" style="padding: 6px 12px; font-size: 0.85rem; font-weight:800; display:flex; align-items:center; gap:6px; border-radius:8px; border-color:rgba(255,255,255,0.1); background:rgba(255,255,255,0.02); color:#fff;">
+                <span>🎒</span>
+                <span>Locker</span>
+              </a>
             </div>
           `;
-          document.getElementById('btn-logout').addEventListener('click', () => { signOut(auth); });
+          
+          // Sync Mobile Drawer
+          const mobileProfile = document.getElementById('mobile-profile-link');
+          const mobileLocker = document.getElementById('mobile-locker-link');
+          const mobileLogin = document.getElementById('mobile-login-trigger');
+          const mobileLogout = document.getElementById('mobile-logout');
+          const mobileMenu = document.getElementById('mobile-menu');
+          
+          if (mobileProfile) mobileProfile.style.display = 'block';
+          if (mobileLocker) mobileLocker.style.display = 'block';
+          if (mobileLogin) mobileLogin.style.display = 'none';
+          if (mobileLogout) {
+            mobileLogout.style.display = 'block';
+            const newLogout = mobileLogout.cloneNode(true);
+            mobileLogout.parentNode.replaceChild(newLogout, mobileLogout);
+            newLogout.addEventListener('click', (e) => {
+              e.preventDefault();
+              signOut(auth);
+              mobileMenu?.classList.remove('open');
+            });
+          }
         }
       } else {
         const userCredential = await signInWithEmailAndPassword(auth, email, password);
@@ -213,22 +235,41 @@ if (btnGoogleLogin) {
 
 // Listen for Auth State
 onAuthStateChanged(auth, (user) => {
+  // Sync Mobile Drawer
+  const mobileProfile = document.getElementById('mobile-profile-link');
+  const mobileLocker = document.getElementById('mobile-locker-link');
+  const mobileLogin = document.getElementById('mobile-login-trigger');
+  const mobileLogout = document.getElementById('mobile-logout');
+  const mobileMenu = document.getElementById('mobile-menu');
+
   if (user) {
     // User is signed in
     if (authContainer) {
       authContainer.innerHTML = `
-        <div style="display:flex; flex-direction:column; align-items:flex-end;">
-          <span style="font-size:0.85rem; color:#cbd5e1; font-weight:700;">Welcome,</span>
-          <span style="font-weight:900; color:#38BDF8;">${user.displayName || 'Player'}</span>
-        </div>
-        <div style="display:flex; gap:8px;">
-          <a href="profile.html" class="btn btn--primary" style="padding: 6px 12px; font-size: 0.8rem;">Profile</a>
-          <button class="btn btn--outline" id="btn-logout" style="padding: 6px 12px; font-size: 0.8rem;">Log Out</button>
+        <div style="display:flex; align-items:center; gap:8px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.06); padding:4px 8px; border-radius:12px; box-shadow:inset 0 1px 1px rgba(255,255,255,0.03);">
+          <a href="profile.html" class="btn btn--primary" style="padding: 6px 12px; font-size: 0.85rem; font-weight:800; display:flex; align-items:center; gap:6px; border-radius:8px;">
+            <span>👾</span>
+            <span>${user.displayName || 'Profile'}</span>
+          </a>
+          <a href="locker.html" class="btn btn--outline" style="padding: 6px 12px; font-size: 0.85rem; font-weight:800; display:flex; align-items:center; gap:6px; border-radius:8px; border-color:rgba(255,255,255,0.1); background:rgba(255,255,255,0.02); color:#fff;">
+            <span>🎒</span>
+            <span>Locker</span>
+          </a>
         </div>
       `;
-      
-      document.getElementById('btn-logout').addEventListener('click', () => {
+    }
+    
+    if (mobileProfile) mobileProfile.style.display = 'block';
+    if (mobileLocker) mobileLocker.style.display = 'block';
+    if (mobileLogin) mobileLogin.style.display = 'none';
+    if (mobileLogout) {
+      mobileLogout.style.display = 'block';
+      const newLogout = mobileLogout.cloneNode(true);
+      mobileLogout.parentNode.replaceChild(newLogout, mobileLogout);
+      newLogout.addEventListener('click', (e) => {
+        e.preventDefault();
         signOut(auth);
+        mobileMenu?.classList.remove('open');
       });
     }
   } else {
@@ -241,6 +282,21 @@ onAuthStateChanged(auth, (user) => {
       document.getElementById('btn-login-trigger').addEventListener('click', () => {
         modal.style.display = 'flex';
         errorMsg.style.display = 'none';
+      });
+    }
+
+    if (mobileProfile) mobileProfile.style.display = 'none';
+    if (mobileLocker) mobileLocker.style.display = 'none';
+    if (mobileLogout) mobileLogout.style.display = 'none';
+    if (mobileLogin) {
+      mobileLogin.style.display = 'block';
+      const newLogin = mobileLogin.cloneNode(true);
+      mobileLogin.parentNode.replaceChild(newLogin, mobileLogin);
+      newLogin.addEventListener('click', (e) => {
+        e.preventDefault();
+        modal.style.display = 'flex';
+        errorMsg.style.display = 'none';
+        mobileMenu?.classList.remove('open');
       });
     }
   }
@@ -258,3 +314,23 @@ if ('serviceWorker' in navigator) {
       });
   });
 }
+
+// ── Hamburger Menu Toggle ───────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  const hamburger = document.getElementById('hamburger');
+  const mobileMenu = document.getElementById('mobile-menu');
+  if (hamburger && mobileMenu) {
+    hamburger.addEventListener('click', () => {
+      mobileMenu.classList.toggle('open');
+    });
+  }
+});
+// Fallback in case DOMContentLoaded already fired
+const hamburgerFallback = document.getElementById('hamburger');
+const mobileMenuFallback = document.getElementById('mobile-menu');
+if (hamburgerFallback && mobileMenuFallback) {
+  hamburgerFallback.addEventListener('click', () => {
+    mobileMenuFallback.classList.toggle('open');
+  });
+}
+

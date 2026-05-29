@@ -94,21 +94,41 @@
 </head>
 <body>
 
-  <div class="profile-orb profile-orb-1"></div>
-  <div class="profile-orb profile-orb-2"></div>
+  <div class="ambient-glow-wrapper" style="position: absolute; width: 100%; height: 100%; top: 0; left: 0; overflow: hidden; pointer-events: none; z-index: 0;">
+    <div class="profile-orb profile-orb-1"></div>
+    <div class="profile-orb profile-orb-2"></div>
+  </div>
 
   <!-- ===== TOP NAV ===== -->
   <header class="nav" id="top-nav" style="box-shadow: 0 4px 30px rgba(0,0,0,.4);">
     <div class="nav__inner">
       <a href="index.html" class="nav__logo">
-        <span class="nav__logo-icon">🏠</span>
+        <span class="nav__logo-icon">🕹️</span>
         <span>Play<strong>haus</strong></span>
       </a>
-      <nav class="nav__links">
-        <a href="index.html" class="nav__link">Home</a>
-        <a href="locker.html" class="nav__link">Locker</a>
-        <a href="profile.html" class="nav__link">Profile</a>
+      <nav class="nav__links" id="desktop-nav">
+        <a href="index.html" class="nav__link">Lobby</a>
+        <a href="index.html#rooms" class="nav__link">Arcade Games</a>
+        <a href="index.html#leaderboard" class="nav__link">Leaderboards</a>
+        <a href="index.html?tutorial=true" class="nav__link">How to Play</a>
       </nav>
+      <div id="auth-container" style="display: flex; gap: 10px; align-items: center;">
+        <button class="btn btn--outline" id="btn-login-trigger" style="padding: 8px 16px;">Log In</button>
+      </div>
+      <button class="nav__hamburger" id="hamburger" aria-label="Menu">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+    <!-- Mobile slide-down menu -->
+    <div class="nav__mobile-menu" id="mobile-menu">
+      <a href="index.html" class="nav__mobile-link">🏠 Lobby</a>
+      <a href="index.html#rooms" class="nav__mobile-link">🚪 Arcade Games</a>
+      <a href="index.html#leaderboard" class="nav__mobile-link">🏆 Leaderboards</a>
+      <a href="index.html?tutorial=true" class="nav__mobile-link">📖 How to Play</a>
+      <a href="profile.html" class="nav__mobile-link" id="mobile-profile-link" style="display: none;">👾 Gamer Profile</a>
+      <a href="locker.html" class="nav__mobile-link" id="mobile-locker-link" style="display: none;">🎒 Locker Room</a>
+      <a href="#" class="nav__mobile-link" id="mobile-login-trigger">🔑 Log In</a>
+      <a href="#" class="nav__mobile-link" id="mobile-logout" style="display: none; color: #EF4444; border-top: 1px solid rgba(255,255,255,0.06); margin-top: 8px; padding-top: 12px; font-weight: 800;">🚪 Log Out</a>
     </div>
   </header>
 

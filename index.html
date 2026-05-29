@@ -21,15 +21,14 @@
 <header class="nav" id="top-nav">
   <div class="nav__inner">
     <a href="index.html" class="nav__logo">
-      <span class="nav__logo-icon">🏠</span>
+      <span class="nav__logo-icon">🕹️</span>
       <span>Play<strong>haus</strong></span>
     </a>
     <nav class="nav__links" id="desktop-nav">
-      <a href="index.html" class="nav__link active">Home</a>
-      <a href="#rooms" class="nav__link">Rooms</a>
-      <a href="#daily" class="nav__link">Daily</a>
-      <a href="#leaderboard" class="nav__link">House Rankings</a>
-      <a href="#about" class="nav__link">About</a>
+      <a href="index.html" class="nav__link active">Lobby</a>
+      <a href="#rooms" class="nav__link">Arcade Games</a>
+      <a href="#leaderboard" class="nav__link">Leaderboards</a>
+      <a href="#" id="nav-how-to-play" class="nav__link">How to Play</a>
     </nav>
     <div id="auth-container" style="display: flex; gap: 10px; align-items: center;">
       <button class="btn btn--outline" id="btn-login-trigger" style="padding: 8px 16px;">Log In</button>
@@ -40,11 +39,14 @@
   </div>
   <!-- Mobile slide-down menu -->
   <div class="nav__mobile-menu" id="mobile-menu">
-    <a href="index.html" class="nav__mobile-link">🏠 Home</a>
-    <a href="#rooms" class="nav__mobile-link">🚪 Rooms</a>
-    <a href="#daily" class="nav__mobile-link">🔥 Daily</a>
-    <a href="#leaderboard" class="nav__mobile-link">🏆 House Rankings</a>
-    <a href="#about" class="nav__mobile-link">ℹ️ About</a>
+    <a href="index.html" class="nav__mobile-link">🏠 Lobby</a>
+    <a href="#rooms" class="nav__mobile-link">🚪 Arcade Games</a>
+    <a href="#leaderboard" class="nav__mobile-link">🏆 Leaderboards</a>
+    <a href="#" id="nav-how-to-play-mobile" class="nav__mobile-link">📖 How to Play</a>
+    <a href="profile.html" class="nav__mobile-link" id="mobile-profile-link" style="display: none;">👾 Gamer Profile</a>
+    <a href="locker.html" class="nav__mobile-link" id="mobile-locker-link" style="display: none;">🎒 Locker Room</a>
+    <a href="#" class="nav__mobile-link" id="mobile-login-trigger">🔑 Log In</a>
+    <a href="#" class="nav__mobile-link" id="mobile-logout" style="display: none; color: #EF4444; border-top: 1px solid rgba(255,255,255,0.06); margin-top: 8px; padding-top: 12px; font-weight: 800;">🚪 Log Out</a>
   </div>
 </header>
 
@@ -60,9 +62,8 @@
     <h1 class="hero__title">Welcome to<br /><span class="gradient-text">Playhaus</span></h1>
     <p class="hero__subtitle">Explore rooms full of quick, addictive games made for your daily break.</p>
     <div class="hero__cta-group">
-      <a href="#rooms" class="btn btn--primary btn--lg pulse-ring">▶ Enter the Haus</a>
+      <a href="#rooms" class="btn btn--primary btn--lg pulse-ring">▶ Play Arcade</a>
       <button id="btn-how-to-play" class="btn btn--outline btn--lg" style="border-color: rgba(167, 139, 250, 0.4); color: #C084FC;">📖 How to Play</button>
-      <a href="#rooms" class="btn btn--outline btn--lg">Browse Rooms</a>
     </div>
     <p class="hero__social-hook">📱 Play. Screenshot your score. Tag us on TikTok.</p>
   </div>
@@ -83,7 +84,16 @@
   </div>
 </section>
 
-<!-- SEARCH REMOVED -->
+<!-- ===== SEARCH ===== -->
+<div class="search-bar-section">
+  <div class="container" style="display:flex; justify-content:center;">
+    <div class="search-wrap" style="width: 100%; max-width: 540px;">
+      <span class="search-icon">🔍</span>
+      <input type="text" id="search-input" class="search-input" placeholder="Search for games (e.g. Higher or Lower, Toy Tanks...)" />
+      <button id="search-clear" class="search-clear" style="display: none;">✕</button>
+    </div>
+  </div>
+</div>
 
 <!-- ===== FEATURED ROOMS ===== -->
 <section class="games-section" id="rooms">
@@ -108,7 +118,7 @@
       <div class="daily-card__badge">🔥 DAILY</div>
       <div class="daily-card__left">
         <p class="daily-card__eyebrow">Daily Room</p>
-        <h2 class="daily-card__title">Today's Game: <span id="daily-game-name">Loading...</span></h2>
+        <h2 class="daily-card__title">Today's Featured Game: <span id="daily-game-name">Loading...</span></h2>
         
         <!-- Yesterday's Champion Banner -->
         <div id="yesterday-champion-banner" style="display:none; background:rgba(250,204,21,0.1); border:1px solid #eab308; color:#fef08a; padding:10px 15px; border-radius:8px; font-weight:700; margin-bottom:15px; text-align:left; align-items:center; gap:8px;">
@@ -116,12 +126,12 @@
           <span id="yesterday-champion-text">Yesterday's Champion: ...</span>
         </div>
 
-        <p class="daily-card__desc">A brand-new challenge drops every day at midnight. Compete, share your score, and climb the leaderboard.</p>
+        <p class="daily-card__desc">Play Practice Mode for unlimited warmups, or compete in up to 3 high-stakes Competitive attempts per day to lock in your spot on the Global Leaderboard!</p>
         <div class="daily-card__meta">
-          <span class="meta-pill">⏱️ New challenge every day</span>
+          <span class="meta-pill">⏱️ Play Practice or Competitive daily</span>
           <span class="meta-pill" id="daily-countdown">⏰ Resets in: <strong id="countdown-timer">--:--:--</strong></span>
         </div>
-        <a href="#" id="daily-play-btn" class="btn btn--primary btn--lg">🔥 Play Today's Challenge</a>
+        <a href="#" id="daily-play-btn" class="btn btn--primary btn--lg">🔥 Play Today's Featured Game</a>
       </div>
       <div class="daily-card__right">
         <div class="daily-emoji-display" id="daily-game-emoji">🔥</div>
@@ -139,21 +149,21 @@
           <h2 class="section-title" style="margin-bottom:0;">🏆 House Rankings</h2>
           <span class="section-subtitle">Top of the Haus</span>
         </div>
-        <select id="leaderboard-filter" style="display:none; background:#1e293b; color:#fff; border:1px solid #334155; padding:8px 16px; border-radius:8px; font-weight:700; outline:none; cursor:pointer;">
-          <option value="all">All Rooms</option>
+        <select id="leaderboard-filter" style="background:#1e293b; color:#fff; border:1px solid #334155; padding:8px 16px; border-radius:8px; font-weight:700; outline:none; cursor:pointer;">
+          <option value="Higher or Lower">Higher or Lower</option>
           <option value="Toy Tanks">Toy Tanks</option>
           <option value="Color Guess">Color Guess</option>
-          <option value="Higher or Lower">Higher or Lower</option>
           <option value="Word Rush">Word Rush</option>
           <option value="Word Gravity">Word Gravity</option>
           <option value="Math Avalanche">Math Avalanche</option>
+          <option value="Pop Lock">Pop Lock</option>
         </select>
       </div>
       
-      <!-- Premium Rankings Tabs -->
-      <div style="display:flex; gap:10px; background:#111827; padding:4px; border-radius:10px; border:1px solid #1f2937; width:fit-content;">
-        <button id="tab-daily-rankings" style="background:#1f2937; color:#38BDF8; border:none; padding:8px 16px; border-radius:8px; font-weight:800; cursor:pointer; font-size:0.9rem; transition:all 0.2s;">🔥 Today's Challenge</button>
-        <button id="tab-alltime-rankings" style="background:transparent; color:#94a3b8; border:none; padding:8px 16px; border-radius:8px; font-weight:800; cursor:pointer; font-size:0.9rem; transition:all 0.2s;">👑 All-Time Best</button>
+      <!-- Hidden Rankings Tabs (No longer needed since we have a dedicated filter dropdown per game) -->
+      <div style="display:none; gap:10px; background:#111827; padding:4px; border-radius:10px; border:1px solid #1f2937; width:fit-content;">
+        <button id="tab-daily-rankings" style="display:none;"></button>
+        <button id="tab-alltime-rankings" style="display:none;"></button>
       </div>
     </div>
     <div class="leaderboard-card">
@@ -329,37 +339,37 @@
       <div class="tutorial-icon">👾</div>
       <h3 class="tutorial-title">Welcome to Playhaus</h3>
       <p class="tutorial-text">
-        Welcome to your ultimate daily gaming escape! Playhaus is a premium arcade playground packed with quick, addictive, and double-layered original games.
+        Your ultimate daily gaming escape. Playhaus is a premium arcade playground packed with quick, addictive games — new ones added every week.
       </p>
       <div class="tutorial-badge-info">Step 1 of 5</div>
     </div>
     
-    <!-- Slide 2: Play & Level Up -->
+    <!-- Slide 2: Warmup & Compete -->
     <div class="tutorial-slide" data-index="1">
-      <div class="tutorial-icon">🏆</div>
-      <h3 class="tutorial-title">Play & Level Up</h3>
+      <div class="tutorial-icon">⚔️</div>
+      <h3 class="tutorial-title">Practice and Compete</h3>
       <p class="tutorial-text">
-        Play any arcade game to rack up high scores and earn massive <strong>XP</strong>! Leveling up locks in your status, leveling bonuses, and prestigious player badges.
+        Use <strong>Practice Mode</strong> to play unlimited games and sharpen your skills with no pressure. When you are ready, switch to <strong>Competitive Mode</strong> to use your 3 daily attempts and post your best score to the global leaderboard.
       </p>
       <div class="tutorial-badge-info">Step 2 of 5</div>
     </div>
     
-    <!-- Slide 3: Coins & Gems -->
+    <!-- Slide 3: Coins & XP -->
     <div class="tutorial-slide" data-index="2">
-      <div class="tutorial-icon">💎</div>
-      <h3 class="tutorial-title">Coins, Gems & Verification</h3>
+      <div class="tutorial-icon">🪙</div>
+      <h3 class="tutorial-title">Earning Coins and XP</h3>
       <p class="tutorial-text">
-        Earn <strong>Coins</strong> dynamically by beating game scores! Claim rare <strong>Gems</strong> by verifying your email in the Locker room (+100 Gems bonus) or using the Gems Store.
+        Play in <strong>Competitive Mode</strong> to earn <strong>Coins</strong> and <strong>XP</strong>. Every game has its own earn rate — check the game card or the pre-game screen to see exactly how many coins and XP are up for grabs.
       </p>
       <div class="tutorial-badge-info">Step 3 of 5</div>
     </div>
     
     <!-- Slide 4: Vending Machine Gacha -->
     <div class="tutorial-slide" data-index="3">
-      <div class="tutorial-icon">🕹️</div>
+      <div class="tutorial-icon">🎰</div>
       <h3 class="tutorial-title">Capsule Vending Machine</h3>
       <p class="tutorial-text">
-        Spend your Coins & Gems in the <strong>Locker Room</strong> to spin the legendary <strong>Capsule V Vending Machine</strong>! Spin to unlock rare borders, avatar rings, and slogan tags.
+        Spend your Coins in the <strong>Locker Room</strong> to spin the Capsule Vending Machine. Each pull costs 100 coins and gives you a random cosmetic — from Common to Legendary rarity. Boss-level items glow.
       </p>
       <div class="tutorial-badge-info">Step 4 of 5</div>
     </div>
@@ -369,7 +379,7 @@
       <div class="tutorial-icon">🃏</div>
       <h3 class="tutorial-title">Your Custom Gamer Card</h3>
       <p class="tutorial-text">
-        Equip your unlocked cosmetics, choose your favorite game, and <strong>upload your own custom profile picture</strong>! Your custom card displays live on global leaderboards.
+        Equip your unlocked cosmetics, pick your favorite game, and upload a custom profile picture. Your card is shown live on global leaderboards for everyone to see.
       </p>
       <div class="tutorial-badge-info">Step 5 of 5</div>
     </div>
@@ -387,8 +397,8 @@
       
       <!-- Buttons -->
       <div class="tutorial-nav">
-        <button id="tutorial-prev" class="tutorial-btn tutorial-btn--back" disabled>◀ Back</button>
-        <button id="tutorial-next" class="tutorial-btn tutorial-btn--next">Next ▶</button>
+        <button id="tutorial-prev" class="tutorial-btn tutorial-btn--back" disabled>Back</button>
+        <button id="tutorial-next" class="tutorial-btn tutorial-btn--next">Next</button>
       </div>
     </div>
   </div>

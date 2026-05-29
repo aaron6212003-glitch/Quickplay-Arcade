@@ -95,6 +95,7 @@ export function init(container) {
     <div class="wr-wrapper">
       <div class="wr-header">
         <div class="wr-score-box">Streak: <span id="wr-streak">0</span></div>
+        <div class="wr-score-box" id="wr-timer-box" style="background: rgba(167, 139, 250, 0.2); color: #A78BFA; border-color: #A78BFA; transition: all 0.3s; font-family: 'Outfit', sans-serif;">⏱️ <span id="wr-timer">90</span>s</div>
         <div class="wr-score-box" style="background: rgba(16, 185, 129, 0.2); color: #10B981; border-color: #10B981;">Best: <span id="wr-best">0</span></div>
       </div>
       
@@ -196,6 +197,51 @@ export function init(container) {
   let currentLetter = 0;
   let grid = Array(6).fill().map(() => Array(5).fill(''));
   let gameOver = false;
+
+  let timerInterval = null;
+  let timeLeft = 90;
+  const TIME_LIMIT = 90;
+
+  function startTimer() {
+    if (timerInterval) clearInterval(timerInterval);
+    timeLeft = TIME_LIMIT;
+    updateTimerDisplay();
+    
+    timerInterval = setInterval(() => {
+      if (gameOver) {
+        clearInterval(timerInterval);
+        return;
+      }
+      timeLeft--;
+      updateTimerDisplay();
+      
+      if (timeLeft <= 0) {
+        clearInterval(timerInterval);
+        endGame(false, true); // True means timeout!
+      }
+    }, 1000);
+  }
+
+  function updateTimerDisplay() {
+    const elTimer = document.getElementById('wr-timer');
+    const elTimerBox = document.getElementById('wr-timer-box');
+    if (elTimer) {
+      elTimer.innerText = timeLeft;
+      if (timeLeft <= 20) {
+        if (elTimerBox) {
+          elTimerBox.style.color = '#EF4444';
+          elTimerBox.style.borderColor = '#EF4444';
+          elTimerBox.style.background = 'rgba(239, 68, 68, 0.2)';
+        }
+      } else {
+        if (elTimerBox) {
+          elTimerBox.style.color = '#A78BFA';
+          elTimerBox.style.borderColor = '#A78BFA';
+          elTimerBox.style.background = 'rgba(167, 139, 250, 0.2)';
+        }
+      }
+    }
+  }
 
   const elBoard = document.getElementById('wr-board');
   const elStreak = document.getElementById('wr-streak');
@@ -345,9 +391,12 @@ export function init(container) {
     key.classList.add(color);
   }
 
-  function endGame(win) {
+  function endGame(win, timeout = false) {
     gameOver = true;
+    if (timerInterval) clearInterval(timerInterval);
     document.getElementById('wr-target-display').innerText = targetWord;
+    
+    let score = 0;
     
     if (win) {
       document.getElementById('wr-title').innerText = "YOU WON! 🎉";
@@ -358,11 +407,24 @@ export function init(container) {
         localStorage.setItem('wr-best', best);
       }
       localStorage.setItem('wr-streak', streak);
-      if (window.saveScore && streak > 0) {
-        window.saveScore('Word Rush', streak);
+      
+      // Calculate speed and precision score
+      const attemptBonus = (7 - (currentAttempt + 1)) * 100; // 1 try = 600, 6 tries = 100
+      const timeBonus = timeLeft * 10;
+      score = attemptBonus + timeBonus;
+      
+      // Show points on title overlay
+      document.getElementById('wr-title').innerHTML = `YOU WON! 🎉<br/><span style="font-size:1.5rem; color:#A78BFA; font-weight:800;">+${score.toLocaleString()} PTS</span>`;
+      
+      if (window.saveScore && score > 0) {
+        window.saveScore('Word Rush', score);
       }
     } else {
-      document.getElementById('wr-title').innerText = "GAME OVER 💀";
+      if (timeout) {
+        document.getElementById('wr-title').innerText = "TIME'S UP! ⏰";
+      } else {
+        document.getElementById('wr-title').innerText = "GAME OVER 💀";
+      }
       document.getElementById('wr-title').style.color = "#EF4444";
       streak = 0;
       localStorage.setItem('wr-streak', streak);
@@ -390,6 +452,8 @@ export function init(container) {
     document.querySelectorAll('.wr-key').forEach(k => {
       k.classList.remove('correct', 'present', 'absent');
     });
+
+    startTimer();
   };
 
   // Keyboard Event Listeners
@@ -413,6 +477,7 @@ export function init(container) {
   const observer = new MutationObserver((mutations) => {
     if (!document.contains(container)) {
       document.removeEventListener('keydown', handlePhysicalKey);
+      if (timerInterval) clearInterval(timerInterval);
       observer.disconnect();
     }
   });

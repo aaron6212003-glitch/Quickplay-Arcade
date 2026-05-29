@@ -15,7 +15,12 @@
     body {
       background-color: #050811;
       font-family: 'Outfit', sans-serif;
-      overflow-x: hidden;
+      overflow-x: hidden !important;
+      width: 100%;
+      max-width: 100vw;
+      overscroll-behavior: none !important;
+      overscroll-behavior-x: none !important;
+      overscroll-behavior-y: none !important;
     }
 
     /* Ambient Glowing Orbs background */
@@ -488,21 +493,40 @@
 <body>
 
 <!-- Stellar glow particles -->
-<div class="profile-orb profile-orb-1"></div>
-<div class="profile-orb profile-orb-2"></div>
+<div class="ambient-glow-wrapper" style="position: absolute; width: 100%; height: 100%; top: 0; left: 0; overflow: hidden; pointer-events: none; z-index: 0;">
+  <div class="profile-orb profile-orb-1"></div>
+  <div class="profile-orb profile-orb-2"></div>
+</div>
 
 <header class="nav" id="top-nav">
   <div class="nav__inner">
     <a href="index.html" class="nav__logo">
-      <span class="nav__logo-icon">🏠</span>
+      <span class="nav__logo-icon">🕹️</span>
       <span>Play<strong>haus</strong></span>
     </a>
     <nav class="nav__links" id="desktop-nav">
-      <a href="index.html" class="nav__link">Arcade Home</a>
+      <a href="index.html" class="nav__link">Lobby</a>
+      <a href="index.html#rooms" class="nav__link">Arcade Games</a>
+      <a href="index.html#leaderboard" class="nav__link">Leaderboards</a>
+      <a href="index.html?tutorial=true" class="nav__link">How to Play</a>
     </nav>
     <div id="auth-container" style="display: flex; gap: 10px; align-items: center;">
       <button class="btn btn--outline" id="btn-login-trigger" style="padding: 8px 16px;">Log In</button>
     </div>
+    <button class="nav__hamburger" id="hamburger" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+  <!-- Mobile slide-down menu -->
+  <div class="nav__mobile-menu" id="mobile-menu">
+    <a href="index.html" class="nav__mobile-link">🏠 Lobby</a>
+    <a href="index.html#rooms" class="nav__mobile-link">🚪 Arcade Games</a>
+    <a href="index.html#leaderboard" class="nav__mobile-link">🏆 Leaderboards</a>
+    <a href="index.html?tutorial=true" class="nav__mobile-link">📖 How to Play</a>
+    <a href="profile.html" class="nav__mobile-link active" id="mobile-profile-link" style="display: none;">👾 Gamer Profile</a>
+    <a href="locker.html" class="nav__mobile-link" id="mobile-locker-link" style="display: none;">🎒 Locker Room</a>
+    <a href="#" class="nav__mobile-link" id="mobile-login-trigger">🔑 Log In</a>
+    <a href="#" class="nav__mobile-link" id="mobile-logout" style="display: none; color: #EF4444; border-top: 1px solid rgba(255,255,255,0.06); margin-top: 8px; padding-top: 12px; font-weight: 800;">🚪 Log Out</a>
   </div>
 </header>
 
@@ -568,57 +592,6 @@
           <div class="profile-stat-val" id="stat-rank">#?</div>
           <div class="profile-stat-label">Global Rank</div>
         </div>
-      </div>
-    </div>
-
-    <!-- locked/unlocked badges -->
-    <div class="dashboard-card">
-      <h2 class="dashboard-title">🏆 Unlocked Achievements</h2>
-      <div class="achievements-grid" id="achievements-grid">
-        <!-- Badge 1: Rookie -->
-        <div class="badge-card" id="badge-rookie">
-          <div class="badge-icon">👶</div>
-          <div class="badge-name">Rookie</div>
-          <div class="badge-desc">Set up your gamer profile and bio!</div>
-        </div>
-        <!-- Badge 2: Pioneer -->
-        <div class="badge-card" id="badge-pioneer">
-          <div class="badge-icon">⭐</div>
-          <div class="badge-name">Pioneer</div>
-          <div class="badge-desc">Play a rotating daily challenge!</div>
-        </div>
-        <!-- Badge 3: Higher Power -->
-        <div class="badge-card" id="badge-higher-power">
-          <div class="badge-icon">🧠</div>
-          <div class="badge-name">Higher Power</div>
-          <div class="badge-desc">Score 10+ in Higher or Lower.</div>
-        </div>
-        <!-- Badge 4: Logos Expert -->
-        <div class="badge-card" id="badge-logos-expert">
-          <div class="badge-icon">🎨</div>
-          <div class="badge-name">Logos Expert</div>
-          <div class="badge-desc">Score 5+ in Famous Logos color deck.</div>
-        </div>
-        <!-- Badge 5: Tanks Vet -->
-        <div class="badge-card" id="badge-tanks-vet">
-          <div class="badge-icon">🛡️</div>
-          <div class="badge-name">Tanks Vet</div>
-          <div class="badge-desc">Score points in Toy Tanks battle.</div>
-        </div>
-        <!-- Badge 6: Gamer Elite -->
-        <div class="badge-card" id="badge-gamer-elite">
-          <div class="badge-icon">🔥</div>
-          <div class="badge-name">Gamer Elite</div>
-          <div class="badge-desc">Accumulate over 500 total XP points.</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Recent History Timeline -->
-    <div class="dashboard-card">
-      <h2 class="dashboard-title">🕒 Recent Score Submissions</h2>
-      <div class="timeline-container" id="timeline-container">
-        <div style="color: #64748b; font-size: 0.95rem; text-align: center; padding: 10px;">Loading timeline...</div>
       </div>
     </div>
   </section>

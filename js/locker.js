@@ -157,7 +157,47 @@ const COSMETICS = [
   { id: "title:MIDAS TOUCH", type: "title", name: "MIDAS TOUCH", val: "MIDAS TOUCH", rarity: "legendary" },
   { id: "title:DIAMOND HANDS", type: "title", name: "DIAMOND HANDS", val: "DIAMOND HANDS", rarity: "legendary" },
   { id: "title:THE CHOSEN ONE", type: "title", name: "THE CHOSEN ONE", val: "THE CHOSEN ONE", rarity: "legendary" },
-  { id: "title:INFINITY GAMER", type: "title", name: "INFINITY GAMER", val: "INFINITY GAMER", rarity: "legendary" }
+  { id: "title:INFINITY GAMER", type: "title", name: "INFINITY GAMER", val: "INFINITY GAMER", rarity: "legendary" },
+
+  // --- TRAILS (Cursor / Card trailing effects) ---
+  // Common
+  { id: "trail:trail-none", type: "trail", name: "No Trail", val: "trail-none", emoji: "❌", rarity: "common" },
+  // Uncommon
+  { id: "trail:trail-bubbles", type: "trail", name: "Aquatic Bubbles", val: "trail-bubbles", emoji: "🫧", rarity: "uncommon" },
+  // Rare
+  { id: "trail:trail-sparks", type: "trail", name: "Amber Sparks", val: "trail-sparks", emoji: "✨", rarity: "rare" },
+  { id: "trail:trail-hearts", type: "trail", name: "Lovely Hearts", val: "trail-hearts", emoji: "💖", rarity: "rare" },
+  // Epic
+  { id: "trail:trail-stars", type: "trail", name: "Starlight Trail", val: "trail-stars", emoji: "⭐", rarity: "epic" },
+  // Legendary
+  { id: "trail:trail-fire", type: "trail", name: "Inferno Trail", val: "trail-fire", emoji: "🔥", rarity: "legendary" },
+  { id: "trail:trail-rainbow", type: "trail", name: "Rainbow Trail", val: "trail-rainbow", emoji: "🌈", rarity: "legendary" },
+
+  // --- EFFECTS (Card Animations) ---
+  // Common
+  { id: "card_anim:anim-none", type: "card_anim", name: "Static Card", val: "anim-none", emoji: "❌", rarity: "common" },
+  // Uncommon
+  { id: "card_anim:anim-pulse", type: "card_anim", name: "Pulse Aura", val: "anim-pulse", emoji: "💗", rarity: "uncommon" },
+  // Rare
+  { id: "card_anim:anim-shimmer", type: "card_anim", name: "Glimmer Shimmer", val: "anim-shimmer", emoji: "✨", rarity: "rare" },
+  // Epic
+  { id: "card_anim:anim-glitch", type: "card_anim", name: "Glitch Scanlines", val: "anim-glitch", emoji: "📺", rarity: "epic" },
+  { id: "card_anim:anim-snow", type: "card_anim", name: "Blizzard Snow", val: "anim-snow", emoji: "❄️", rarity: "epic" },
+  // Legendary
+  { id: "card_anim:anim-particles", type: "card_anim", name: "Cosmic Particles", val: "anim-particles", emoji: "🌌", rarity: "legendary" },
+
+  // --- FRAMES (Gamer Card Borders) ---
+  // Common
+  { id: "frame:frame-none", type: "frame", name: "No Frame", val: "frame-none", emoji: "❌", rarity: "common" },
+  // Uncommon
+  { id: "frame:frame-wooden", type: "frame", name: "Retro Wooden", val: "frame-wooden", emoji: "🪵", rarity: "uncommon" },
+  // Rare
+  { id: "frame:frame-steel", type: "frame", name: "Brushed Steel", val: "frame-steel", emoji: "⚙️", rarity: "rare" },
+  // Epic
+  { id: "frame:frame-neon", type: "frame", name: "Neon Cyan Glow", val: "frame-neon", emoji: "🔷", rarity: "epic" },
+  // Legendary
+  { id: "frame:frame-golden", type: "frame", name: "Midas Gold Frame", val: "frame-golden", emoji: "👑", rarity: "legendary" },
+  { id: "frame:frame-rainbow", type: "frame", name: "Chroma Prism Frame", val: "frame-rainbow", emoji: "🌈", rarity: "legendary" }
 ];
 
 // Duplicate metal compensation scrap values
@@ -204,10 +244,24 @@ const tabLocker = document.getElementById('tab-locker');
 const panelVending = document.getElementById('panel-vending');
 const panelLocker = document.getElementById('panel-locker');
 
-// Vending elements
-const crankLever = document.getElementById('crank-lever');
-const revealViewport = document.getElementById('reveal-viewport');
-const machineDome = document.querySelector('.machine-dome');
+// Vending elements (Claw Machine)
+const btnClawDrop = document.getElementById('btn-claw-drop');
+const btnJoystickLeft = document.getElementById('btn-joystick-left');
+const btnJoystickRight = document.getElementById('btn-joystick-right');
+const joystickBase = document.getElementById('joystick-base');
+const clawAssembly = document.getElementById('claw-assembly');
+const clawString = document.getElementById('claw-string');
+const clawHand = document.getElementById('claw-hand');
+const prizePile = document.getElementById('prize-pile');
+
+// Reveal Modal elements
+const clawRevealModal = document.getElementById('claw-reveal-modal');
+const modalRevealIcon = document.getElementById('modal-reveal-icon');
+const modalRevealBadge = document.getElementById('modal-reveal-badge');
+const modalRevealName = document.getElementById('modal-reveal-name');
+const modalRevealType = document.getElementById('modal-reveal-type');
+const btnModalEquip = document.getElementById('btn-modal-equip');
+const btnModalContinue = document.getElementById('btn-modal-continue');
 
 // Locker Grid Elements
 const subtabButtons = document.querySelectorAll('.subtab-btn');
@@ -311,6 +365,9 @@ function updatePreviewCard(data, user) {
   const activeBorder = activeCosmetics.border || "border-common";
   const activeTheme = activeCosmetics.theme || "theme-common";
   const activeTitle = activeCosmetics.title || "THE ROOKIE";
+  const activeTrail = activeCosmetics.trail || "trail-none";
+  const activeCardAnim = activeCosmetics.card_anim || "anim-none";
+  const activeFrame = activeCosmetics.frame || "frame-none";
 
   const previewUsername = document.getElementById('preview-username');
   const previewTagline = document.getElementById('preview-tagline');
@@ -336,9 +393,12 @@ function updatePreviewCard(data, user) {
     previewAvatarRing.className = `avatar-ring ${activeBorder}`;
   }
 
-  // Gradients card backdrop
+  // Gradients, Card Animations, and Name Plate Frames card backdrop
   if (previewCard) {
-    previewCard.className = `gamer-card ${activeTheme}`;
+    previewCard.className = `gamer-card ${activeTheme} ${activeCardAnim} ${activeFrame}`;
+    
+    // Set up cursor-trailing interactive particles
+    setupCardTrail(previewCard, activeTrail);
   }
 
   // Tag Titles Color
@@ -348,6 +408,88 @@ function updatePreviewCard(data, user) {
     previewTitle.style.color = titleColor;
     previewTitle.style.borderColor = titleColor + "33"; // subtle boundary
   }
+}
+
+// ── Interactive Cursor Trailing Emojis Generator ───────────────────────────────
+function setupCardTrail(cardEl, trailType) {
+  if (!cardEl) return;
+  
+  // Clean up any old listeners to prevent duplication
+  if (cardEl._trailCleanup) {
+    cardEl._trailCleanup();
+  }
+  
+  if (!trailType || trailType === 'trail-none') {
+    cardEl._trailCleanup = null;
+    return;
+  }
+
+  const emojiMap = {
+    'trail-bubbles': '🫧',
+    'trail-sparks': '✨',
+    'trail-hearts': '💖',
+    'trail-stars': '⭐',
+    'trail-fire': '🔥',
+    'trail-rainbow': '🌈'
+  };
+
+  const emoji = emojiMap[trailType] || '✨';
+  let lastParticleTime = 0;
+
+  const handleMove = (e) => {
+    // Throttling to prevent spamming too many particles
+    const now = Date.now();
+    if (now - lastParticleTime < 40) return;
+    lastParticleTime = now;
+
+    const rect = cardEl.getBoundingClientRect();
+    let clientX = e.clientX;
+    let clientY = e.clientY;
+
+    if (e.touches && e.touches.length > 0) {
+      clientX = e.touches[0].clientX;
+      clientY = e.touches[0].clientY;
+    }
+
+    const x = clientX - rect.left;
+    const y = clientY - rect.top;
+
+    if (x === undefined || y === undefined || x < 0 || y < 0 || x > rect.width || y > rect.height) return;
+
+    const p = document.createElement('div');
+    p.innerText = emoji;
+    p.style.cssText = `
+      position: absolute;
+      left: ${x}px;
+      top: ${y}px;
+      transform: translate(-50%, -50%) scale(1);
+      pointer-events: none;
+      font-size: 1.1rem;
+      z-index: 100;
+      opacity: 1;
+      transition: all 0.7s cubic-bezier(0.1, 0.8, 0.3, 1);
+    `;
+    
+    cardEl.appendChild(p);
+    
+    // Animate particle floating upwards
+    requestAnimationFrame(() => {
+      p.style.transform = `translate(-50%, -100%) scale(0.3) rotate(${Math.random() * 90 - 45}deg)`;
+      p.style.opacity = '0';
+    });
+
+    setTimeout(() => {
+      p.remove();
+    }, 750);
+  };
+
+  cardEl.addEventListener('mousemove', handleMove);
+  cardEl.addEventListener('touchmove', handleMove, { passive: true });
+
+  cardEl._trailCleanup = () => {
+    cardEl.removeEventListener('mousemove', handleMove);
+    cardEl.removeEventListener('touchmove', handleMove);
+  };
 }
 
 // --- POPULATE CURRENCIES TO UI ---
@@ -420,17 +562,35 @@ onAuthStateChanged(auth, async (user) => {
       }
       if (data.ownedCosmetics === undefined) {
         // Base starter pack
-        data.ownedCosmetics = ["avatar:👾", "border:border-common", "theme:theme-common", "title:THE ROOKIE"];
+        data.ownedCosmetics = [
+          "avatar:👾", "border:border-common", "theme:theme-common", "title:THE ROOKIE",
+          "trail:trail-none", "card_anim:anim-none", "frame:frame-none"
+        ];
         needsMerge = true;
+      } else {
+        const starters = ["trail:trail-none", "card_anim:anim-none", "frame:frame-none"];
+        starters.forEach(item => {
+          if (!data.ownedCosmetics.includes(item)) {
+            data.ownedCosmetics.push(item);
+            needsMerge = true;
+          }
+        });
       }
       if (data.activeCosmetics === undefined) {
         data.activeCosmetics = {
           avatar: data.avatar || "👾",
           border: "border-common",
           theme: "theme-common",
-          title: "THE ROOKIE"
+          title: "THE ROOKIE",
+          trail: "trail-none",
+          card_anim: "anim-none",
+          frame: "frame-none"
         };
         needsMerge = true;
+      } else {
+        if (!data.activeCosmetics.trail) { data.activeCosmetics.trail = "trail-none"; needsMerge = true; }
+        if (!data.activeCosmetics.card_anim) { data.activeCosmetics.card_anim = "anim-none"; needsMerge = true; }
+        if (!data.activeCosmetics.frame) { data.activeCosmetics.frame = "frame-none"; needsMerge = true; }
       }
 
       if (needsMerge) {
@@ -558,6 +718,12 @@ function renderLockerGrid() {
       isEquipped = (active.theme === item.val);
     } else if (currentLockerCategory === 'title') {
       isEquipped = (active.title === item.val);
+    } else if (currentLockerCategory === 'trail') {
+      isEquipped = (active.trail === item.val);
+    } else if (currentLockerCategory === 'card_anim') {
+      isEquipped = (active.card_anim === item.val);
+    } else if (currentLockerCategory === 'frame') {
+      isEquipped = (active.frame === item.val);
     }
 
     // Create item DOM structure
@@ -604,6 +770,27 @@ function renderLockerGrid() {
         <div class="inventory-rarity-lbl" style="color: ${RARITY_COLORS[item.rarity]};">${item.rarity}</div>
         ${lockTag}
       `;
+    } else if (item.type === 'trail') {
+      el.innerHTML = `
+        <div class="inventory-icon" style="font-size: 1.8rem; height: 52px; display: flex; align-items: center; justify-content: center;">${item.emoji || '💫'}</div>
+        <div class="inventory-name" title="${item.name}">${item.name}</div>
+        <div class="inventory-rarity-lbl" style="color: ${RARITY_COLORS[item.rarity]};">${item.rarity}</div>
+        ${lockTag}
+      `;
+    } else if (item.type === 'card_anim') {
+      el.innerHTML = `
+        <div class="inventory-icon" style="font-size: 1.8rem; height: 52px; display: flex; align-items: center; justify-content: center;">${item.emoji || '✨'}</div>
+        <div class="inventory-name" title="${item.name}">${item.name}</div>
+        <div class="inventory-rarity-lbl" style="color: ${RARITY_COLORS[item.rarity]};">${item.rarity}</div>
+        ${lockTag}
+      `;
+    } else if (item.type === 'frame') {
+      el.innerHTML = `
+        <div class="inventory-icon" style="font-size: 1.8rem; height: 52px; display: flex; align-items: center; justify-content: center;">${item.emoji || '🖼️'}</div>
+        <div class="inventory-name" title="${item.name}">${item.name}</div>
+        <div class="inventory-rarity-lbl" style="color: ${RARITY_COLORS[item.rarity]};">${item.rarity}</div>
+        ${lockTag}
+      `;
     }
 
     // Click trigger for equip or purchase
@@ -636,6 +823,12 @@ async function equipItem(item) {
       updatedActive.theme = item.val;
     } else if (item.type === 'title') {
       updatedActive.title = item.val;
+    } else if (item.type === 'trail') {
+      updatedActive.trail = item.val;
+    } else if (item.type === 'card_anim') {
+      updatedActive.card_anim = item.val;
+    } else if (item.type === 'frame') {
+      updatedActive.frame = item.val;
     }
 
     const docUpdates = { activeCosmetics: updatedActive };
@@ -688,7 +881,7 @@ async function purchaseItemWithScrap(item) {
     const updatedOwned = [...(userDocData.ownedCosmetics || [])];
 
     if (!updatedOwned.includes(item.id)) {
-      updatedOwned.push(item.id);
+    updatedOwned.push(item.id);
     }
 
     const updatedScrap = currentScrap - cost;
@@ -714,157 +907,41 @@ async function purchaseItemWithScrap(item) {
   }
 }
 
-// --- GASHAPON CAPSULE PULL DRAW ENGINE ---
-if (crankLever) {
-  crankLever.addEventListener('click', async () => {
-    const user = auth.currentUser;
-    if (!user || !userDocData) {
-      showToast("Please log in to spin the capsule station!", "error");
-      return;
-    }
-
-    const currentCoins = userDocData.playCoins !== undefined ? userDocData.playCoins : 200;
-    if (currentCoins < 100) {
-      showToast("Insufficient Coins! Spins cost 100 Coins.", "error");
-      return;
-    }
-
-    // Disable crank button temporarily to prevent spamming
-    crankLever.style.pointerEvents = 'none';
-
-    // 1. Deduct 100 coins locally & Firestore
-    const userRef = doc(db, "users", user.uid);
-    const nextCoins = currentCoins - 100;
+// ── Confetti Particle Explosion for Legendary pulls ──────────────────────────
+function triggerConfetti() {
+  const container = document.getElementById('reveal-viewport') || document.body;
+  const colors = ['#F59E0B', '#10B981', '#38BDF8', '#A78BFA', '#EF4444', '#EC4899'];
+  
+  for (let i = 0; i < 45; i++) {
+    const p = document.createElement('div');
+    p.className = 'confetti-piece';
+    p.style.left = `${Math.random() * 80 + 10}%`;
+    p.style.background = colors[Math.floor(Math.random() * colors.length)];
+    p.style.animationDelay = `${Math.random() * 0.3}s`;
+    p.style.width = `${Math.random() * 6 + 6}px`;
+    p.style.height = `${Math.random() * 6 + 6}px`;
+    p.style.zIndex = '999';
     
-    try {
-      await updateDoc(userRef, {
-        playCoins: nextCoins
-      });
-      userDocData.playCoins = nextCoins;
-      updateCurrencyDisplay(userDocData);
-    } catch (deductErr) {
-      console.error("Coin deduction failed:", deductErr);
-      showToast("Transaction failed. Try again.", "error");
-      crankLever.style.pointerEvents = 'auto';
-      return;
-    }
-
-    // 2. Play crank visual rotation animation
-    crankLever.style.transition = 'transform 1.2s ease';
-    crankLever.style.transform = 'scale(0.95) rotate(720deg)';
-
-    // 3. Play dome shaking animation
-    if (machineDome) machineDome.classList.add('capsule-shake-anim');
-
-    // 4. Update viewport status to "Rolling..."
-    if (revealViewport) {
-      revealViewport.innerHTML = `
-        <div style="font-size:3.5rem; margin-bottom:15px; animation: floatDome 1.5s ease-in-out infinite;">🔮</div>
-        <h3 style="font-size:1.1rem; font-weight:900; color:#fff; margin-bottom:6px; text-transform:uppercase; letter-spacing:0.5px;">Dispensing...</h3>
-        <p style="color:#64748b; font-size:0.8rem; max-width:180px;">Rattling the capsule gears...</p>
-      `;
-      revealViewport.style.background = 'rgba(255, 255, 255, 0.02)';
-      revealViewport.style.borderColor = 'rgba(255, 255, 255, 0.08)';
-      revealViewport.style.boxShadow = 'none';
-    }
-
-    // 5. Delay to simulate gashapon drop (1.5 seconds)
-    setTimeout(async () => {
-      // Pick random item based on weights
-      const rolledItem = drawRandomCosmetic();
-      const owned = userDocData.ownedCosmetics || [];
-      const isDuplicate = owned.includes(rolledItem.id) || rolledItem.rarity === 'common';
-
-      try {
-        if (!isDuplicate) {
-          // Add to owned list
-          const updatedOwned = [...owned, rolledItem.id];
-          await updateDoc(userRef, {
-            ownedCosmetics: updatedOwned
-          });
-          userDocData.ownedCosmetics = updatedOwned;
-
-          // Render viewport reveal
-          revealViewport.innerHTML = `
-            <div style="font-size:5rem; margin-bottom:10px; animation: floatDome 3s ease-in-out infinite;">${rolledItem.type === 'avatar' ? rolledItem.val : '🎁'}</div>
-            <div style="font-size: 0.65rem; font-weight: 900; color: #fff; text-transform: uppercase; letter-spacing: 1.5px; padding: 4px 10px; border-radius: 6px; background: rgba(0,0,0,0.3); border: 1px solid ${RARITY_COLORS[rolledItem.rarity]}66; margin-bottom: 8px;">
-              ${rolledItem.rarity.toUpperCase()} UNLOCK
-            </div>
-            <h3 style="font-size:1.3rem; font-weight:900; color:#fff; margin-bottom:4px;">${rolledItem.name}</h3>
-            <p style="color:#64748b; font-size:0.8rem; text-transform:uppercase; letter-spacing:0.5px; font-weight:700;">${rolledItem.type}</p>
-            <button class="btn btn--primary" id="btn-reveal-equip" style="margin-top: 15px; padding: 6px 14px; font-size: 0.8rem; border-radius: 8px; font-weight:800;">Equip Now</button>
-          `;
-          
-          // Apply matching neon glow background
-          revealViewport.style.background = `radial-gradient(circle, ${RARITY_COLORS[rolledItem.rarity]}33 0%, rgba(15,23,42,0.9) 100%)`;
-          revealViewport.style.borderColor = RARITY_COLORS[rolledItem.rarity];
-          revealViewport.style.boxShadow = `0 10px 30px ${RARITY_COLORS[rolledItem.rarity]}26`;
-
-          // Add equip button event listener
-          const btnRevealEquip = document.getElementById('btn-reveal-equip');
-          if (btnRevealEquip) {
-            btnRevealEquip.addEventListener('click', () => {
-              equipItem(rolledItem);
-            });
-          }
-
-          showToast(`NEW UNLOCK! You pulled a ${rolledItem.rarity.toUpperCase()} "${rolledItem.name}"!`, "success");
-
-        } else {
-          // Recycle duplicate
-          const scrapCompensation = DUP_REWARDS[rolledItem.rarity] || 10;
-          const nextScrap = (userDocData.scrap || 0) + scrapCompensation;
-          await updateDoc(userRef, {
-            scrap: nextScrap
-          });
-          userDocData.scrap = nextScrap;
-          updateCurrencyDisplay(userDocData);
-
-          // Render duplicate recycled reveal
-          revealViewport.innerHTML = `
-            <div style="font-size:3.5rem; margin-bottom:10px; filter:grayscale(30%);">🔄</div>
-            <div style="font-size: 0.65rem; font-weight: 900; color: #cbd5e1; text-transform: uppercase; letter-spacing: 1.5px; padding: 4px 10px; border-radius: 6px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.06); margin-bottom: 8px;">DUPLICATE</div>
-            <h3 style="font-size:1.15rem; font-weight:900; color:#fff; margin-bottom:4px;">${rolledItem.name}</h3>
-            <p style="color:#64748b; font-size:0.8rem; margin-bottom: 12px;">Salvaged duplicate pulled!</p>
-            <div style="font-size: 0.8rem; font-weight: 900; color: #10B981; background: rgba(16,185,129,0.1); border: 1px solid rgba(16,185,129,0.3); padding: 8px 16px; border-radius: 50px; display: inline-flex; align-items: center; gap: 6px;">
-              💎 +${scrapCompensation} Gems
-            </div>
-          `;
-          revealViewport.style.background = 'rgba(15,23,42,0.6)';
-          revealViewport.style.borderColor = 'rgba(255,255,255,0.08)';
-          revealViewport.style.boxShadow = 'none';
-
-          showToast(`Duplicate! Converted "${rolledItem.name}" into +${scrapCompensation} Gems!`, "warning");
-        }
-
-        // Re-render locker inventory list
-        renderLockerGrid();
-
-      } catch (saveErr) {
-        console.error("Failed to persist spun gashapon results:", saveErr);
-        showToast("Error updating inventory items.", "error");
-      } finally {
-        // Reset animations and enable crank click again
-        if (machineDome) machineDome.classList.remove('capsule-shake-anim');
-        crankLever.style.transform = 'scale(1) rotate(0deg)';
-        crankLever.style.pointerEvents = 'auto';
-      }
-    }, 1500);
-  });
+    container.appendChild(p);
+    
+    setTimeout(() => {
+      p.remove();
+    }, 1400);
+  }
 }
 
-// Draw based on exact percentage probabilities
+// Draw based on exact percentage probabilities shown on rates card
 function drawRandomCosmetic() {
   const rand = Math.random() * 100;
   let rarity = "common";
   
-  if (rand < 50) {
+  if (rand < 45) {
     rarity = "common";
-  } else if (rand < 80) {
+  } else if (rand < 70) {
     rarity = "uncommon";
-  } else if (rand < 92) {
+  } else if (rand < 87) {
     rarity = "rare";
-  } else if (rand < 98) {
+  } else if (rand < 97) {
     rarity = "epic";
   } else {
     rarity = "legendary";
@@ -875,6 +952,445 @@ function drawRandomCosmetic() {
   
   const idx = Math.floor(Math.random() * pool.length);
   return pool[idx];
+}
+
+// Draw a random cosmetic of a specific rarity
+function drawRandomCosmeticOfRarity(rarity) {
+  const pool = COSMETICS.filter(c => c.rarity === rarity);
+  if (pool.length === 0) return COSMETICS[0];
+  const idx = Math.floor(Math.random() * pool.length);
+  return pool[idx];
+}
+
+// ── Interactive Confetti Particle Explosion for Legendary Unlocks ──────────
+function triggerConfetti() {
+  const container = document.getElementById('claw-reveal-modal');
+  if (!container) return;
+  const colors = ['#F59E0B', '#10B981', '#38BDF8', '#A78BFA', '#EF4444', '#EC4899'];
+  
+  for (let i = 0; i < 45; i++) {
+    const p = document.createElement('div');
+    p.className = 'confetti-piece';
+    p.style.left = `${Math.random() * 80 + 10}%`;
+    p.style.top = '10%';
+    p.style.background = colors[Math.floor(Math.random() * colors.length)];
+    p.style.animationDelay = `${Math.random() * 0.3}s`;
+    p.style.width = `${Math.random() * 6 + 6}px`;
+    p.style.height = `${Math.random() * 6 + 6}px`;
+    p.style.zIndex = '99999';
+    
+    container.appendChild(p);
+    
+    setTimeout(() => {
+      p.remove();
+    }, 1400);
+  }
+}
+
+// ── Interactive Claw Machine Logic State ────────────────────────────────────
+let clawPositionPercent = 50; // Starting claw center percent
+let isClawRunning = false;
+let spawnedPrizes = [];
+
+// Initialize colorful mystery prize box stack
+function initPrizePile() {
+  if (!prizePile) return;
+  prizePile.innerHTML = '';
+  spawnedPrizes = [];
+
+  const rarities = ['common', 'uncommon', 'rare', 'epic', 'legendary'];
+  const rarityOdds = [45, 25, 17, 10, 3]; // percentage weights
+
+  // Spawn 22 mystery box visual items inside glass chamber
+  for (let i = 0; i < 22; i++) {
+    // Determine random visual color base
+    const roll = Math.random() * 100;
+    let boxRarity = 'common';
+    let sum = 0;
+    for (let r = 0; r < rarities.length; r++) {
+      sum += rarityOdds[r];
+      if (roll <= sum) {
+        boxRarity = rarities[r];
+        break;
+      }
+    }
+
+    const box = document.createElement('div');
+    box.className = `prize-box prize-box--${boxRarity}`;
+    
+    // Spread them out horizontally (from 75px to 380px)
+    const minX = 75;
+    const maxX = 380;
+    const posX = Math.floor(Math.random() * (maxX - minX) + minX);
+    
+    // Random slight pile stacking offsets
+    const rot = Math.floor(Math.random() * 40 - 20); // -20deg to 20deg
+    const posY = Math.floor(Math.random() * 6);
+    
+    box.style.cssText = `
+      position: absolute;
+      left: ${posX}px;
+      bottom: ${posY}px;
+      transform: rotate(${rot}deg);
+    `;
+    
+    prizePile.appendChild(box);
+    spawnedPrizes.push({ element: box, x: posX, rarity: boxRarity });
+  }
+}
+
+// ── Claw Smooth Sliding Controller Loops ────────────────────────────────────
+let moveInterval = null;
+
+function startMovingClaw(direction) {
+  if (isClawRunning) return;
+  
+  // Tilt joystick visual
+  if (joystickBase) {
+    joystickBase.classList.remove('tilt-left', 'tilt-right');
+    joystickBase.classList.add(direction === 'left' ? 'tilt-left' : 'tilt-right');
+  }
+
+  moveInterval = setInterval(() => {
+    if (direction === 'left') {
+      clawPositionPercent = Math.max(16, clawPositionPercent - 1.5); // min left (above chute is 10%)
+    } else {
+      clawPositionPercent = Math.min(94, clawPositionPercent + 1.5); // max right
+    }
+    
+    if (clawAssembly) {
+      clawAssembly.style.left = `${clawPositionPercent}%`;
+    }
+  }, 16);
+}
+
+function stopMovingClaw() {
+  if (moveInterval) {
+    clearInterval(moveInterval);
+    moveInterval = null;
+  }
+  if (joystickBase) {
+    joystickBase.classList.remove('tilt-left', 'tilt-right');
+  }
+}
+
+// Bind button directional controllers
+if (btnJoystickLeft) {
+  btnJoystickLeft.addEventListener('mousedown', () => startMovingClaw('left'));
+  btnJoystickLeft.addEventListener('mouseup', stopMovingClaw);
+  btnJoystickLeft.addEventListener('mouseleave', stopMovingClaw);
+  
+  btnJoystickLeft.addEventListener('touchstart', (e) => {
+    e.preventDefault();
+    startMovingClaw('left');
+  }, { passive: false });
+  btnJoystickLeft.addEventListener('touchend', stopMovingClaw);
+}
+
+if (btnJoystickRight) {
+  btnJoystickRight.addEventListener('mousedown', () => startMovingClaw('right'));
+  btnJoystickRight.addEventListener('mouseup', stopMovingClaw);
+  btnJoystickRight.addEventListener('mouseleave', stopMovingClaw);
+  
+  btnJoystickRight.addEventListener('touchstart', (e) => {
+    e.preventDefault();
+    startMovingClaw('right');
+  }, { passive: false });
+  btnJoystickRight.addEventListener('touchend', stopMovingClaw);
+}
+
+// Joystick touch drag movement helper
+if (joystickBase) {
+  joystickBase.addEventListener('touchstart', (e) => {
+    e.preventDefault();
+    const touchX = e.touches[0].clientX;
+    const baseRect = joystickBase.getBoundingClientRect();
+    const centerX = baseRect.left + baseRect.width / 2;
+    
+    if (touchX < centerX) {
+      startMovingClaw('left');
+    } else {
+      startMovingClaw('right');
+    }
+  }, { passive: false });
+  
+  joystickBase.addEventListener('touchend', stopMovingClaw);
+}
+
+// ── Interactive Claw Drop Sequence ──────────────────────────────────────────
+async function performClawDrop() {
+  if (isClawRunning) return;
+  
+  const user = auth.currentUser;
+  if (!user || !userDocData) {
+    showToast("Please log in to play the claw machine!", "error");
+    return;
+  }
+
+  const currentCoins = userDocData.playCoins !== undefined ? userDocData.playCoins : 200;
+  if (currentCoins < 100) {
+    showToast("Requires 100 Coins to play!", "error");
+    return;
+  }
+
+  isClawRunning = true;
+  
+  // Disable controls
+  if (btnClawDrop) btnClawDrop.disabled = true;
+  if (btnJoystickLeft) btnJoystickLeft.disabled = true;
+  if (btnJoystickRight) btnJoystickRight.disabled = true;
+
+  // 1. Deduct 100 Coins
+  const userRef = doc(db, "users", user.uid);
+  const nextCoins = currentCoins - 100;
+  
+  try {
+    await updateDoc(userRef, { playCoins: nextCoins });
+    userDocData.playCoins = nextCoins;
+    updateCurrencyDisplay(userDocData);
+  } catch (deductErr) {
+    console.error("Coin deduction failed:", deductErr);
+    showToast("Transaction failed. Try again.", "error");
+    isClawRunning = false;
+    if (btnClawDrop) btnClawDrop.disabled = false;
+    if (btnJoystickLeft) btnJoystickLeft.disabled = false;
+    if (btnJoystickRight) btnJoystickRight.disabled = false;
+    return;
+  }
+
+  showToast("🕹️ Claw dropping! Good luck!", "success");
+
+  // 2. Extend Claw String Downward (Phase 1)
+  if (clawString) {
+    clawString.style.height = '210px';
+  }
+  if (clawHand) {
+    clawHand.style.transform = 'translate(-50%, 100%) scale(1.05)';
+  }
+
+  // Wait 1.4 seconds for claw string extension to complete
+  await new Promise(res => setTimeout(res, 1400));
+
+  // 3. Find closest visual prize box box horizontally
+  const chamberRect = document.getElementById('claw-chamber').getBoundingClientRect();
+  const clawTargetX = (clawPositionPercent / 100) * chamberRect.width;
+  
+  let closestBox = null;
+  let minDiff = Infinity;
+  
+  spawnedPrizes.forEach(b => {
+    // Chamber coordinates are relative to chamber width
+    const diff = Math.abs(b.x - clawTargetX);
+    if (diff < minDiff) {
+      minDiff = diff;
+      closestBox = b;
+    }
+  });
+
+  // Determine rolled prize matching the grabbed box's rarity
+  const grabbedRarity = closestBox ? closestBox.rarity : 'common';
+  const rolledItem = drawRandomCosmeticOfRarity(grabbedRarity);
+  const owned = userDocData.ownedCosmetics || [];
+  const isDuplicate = owned.includes(rolledItem.id) || rolledItem.rarity === 'common';
+
+  // 4. Claw Grab / Close Fingers around box (Phase 2)
+  if (clawHand) {
+    clawHand.classList.add('is-closed');
+  }
+
+  let prizeBoxNode = null;
+  if (closestBox && closestBox.element) {
+    // Hide box from bottom pile
+    closestBox.element.style.opacity = '0';
+    closestBox.element.style.transition = 'opacity 0.2s';
+    
+    // Create box inside claw hand
+    prizeBoxNode = document.createElement('div');
+    prizeBoxNode.className = `prize-box prize-box--${closestBox.rarity}`;
+    prizeBoxNode.style.cssText = `
+      position: absolute;
+      bottom: -15px;
+      left: 50%;
+      transform: translateX(-50%) scale(0.85);
+      border-radius: 4px;
+      z-index: 100;
+    `;
+    clawHand.appendChild(prizeBoxNode);
+  }
+
+  // Wait 0.6 seconds for grab animation
+  await new Promise(res => setTimeout(res, 600));
+
+  // 5. Retract Gantry String (Phase 3)
+  if (clawString) {
+    clawString.style.height = '40px';
+  }
+
+  // Wait 1.4 seconds for string retraction
+  await new Promise(res => setTimeout(res, 1400));
+
+  // 6. Slide Claw Assembly to Left Drop Chute (Phase 4)
+  if (clawAssembly) {
+    clawAssembly.style.transition = 'left 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+    clawAssembly.style.left = '8%';
+  }
+
+  // Wait 1.2 seconds for assembly slide to complete
+  await new Promise(res => setTimeout(res, 1200));
+
+  // 7. Open Claw / Drop Prize Box down chute (Phase 5)
+  if (clawHand) {
+    clawHand.classList.remove('is-closed');
+  }
+
+  if (prizeBoxNode) {
+    // Drop animation downwards
+    prizeBoxNode.style.transition = 'all 0.6s cubic-bezier(0.55, 0.085, 0.68, 0.53)';
+    prizeBoxNode.style.bottom = '-110px';
+    prizeBoxNode.style.opacity = '0';
+    
+    const chuteOutlet = document.getElementById('prize-chute');
+    if (chuteOutlet) {
+      setTimeout(() => {
+        chuteOutlet.innerText = "🎁";
+        chuteOutlet.style.transform = 'scale(1.2)';
+        setTimeout(() => chuteOutlet.style.transform = 'scale(1)', 200);
+      }, 400);
+    }
+  }
+
+  // Wait 0.8 seconds for falling drop to finish
+  await new Promise(res => setTimeout(res, 800));
+
+  // 8. Open Prize Win Reveal Modal Popup (Phase 6)
+  if (clawRevealModal) {
+    // Populate modal tags
+    if (modalRevealIcon) {
+      modalRevealIcon.innerText = rolledItem.type === 'avatar' ? rolledItem.val : (rolledItem.emoji || '🎁');
+    }
+    if (modalRevealBadge) {
+      modalRevealBadge.innerText = `${rolledItem.rarity.toUpperCase()} UNLOCK`;
+      modalRevealBadge.style.borderColor = RARITY_COLORS[rolledItem.rarity];
+      modalRevealBadge.style.color = RARITY_COLORS[rolledItem.rarity];
+    }
+    if (modalRevealName) {
+      modalRevealName.innerText = rolledItem.name;
+    }
+    if (modalRevealType) {
+      modalRevealType.innerText = rolledItem.type;
+    }
+
+    // Direct database update
+    try {
+      if (!isDuplicate) {
+        // Add to owned list
+        const updatedOwned = [...owned, rolledItem.id];
+        await updateDoc(userRef, { ownedCosmetics: updatedOwned });
+        userDocData.ownedCosmetics = updatedOwned;
+
+        // Custom Equip Button Hook
+        if (btnModalEquip) {
+          btnModalEquip.style.display = 'block';
+          btnModalEquip.replaceWith(btnModalEquip.cloneNode(true)); // remove old listeners
+          const newEquipBtn = document.getElementById('btn-modal-equip');
+          newEquipBtn.addEventListener('click', () => {
+            equipItem(rolledItem);
+            clawRevealModal.classList.remove('active');
+          });
+        }
+        showToast(`NEW UNLOCK! You grabbed a ${rolledItem.rarity.toUpperCase()} "${rolledItem.name}"!`, "success");
+      } else {
+        // Recycle Duplicate to Gems
+        const scrapCompensation = DUP_REWARDS[rolledItem.rarity] || 10;
+        const nextScrap = (userDocData.scrap || 0) + scrapCompensation;
+        await updateDoc(userRef, { scrap: nextScrap });
+        userDocData.scrap = nextScrap;
+        
+        updateCurrencyDisplay(userDocData);
+
+        if (btnModalEquip) {
+          btnModalEquip.style.display = 'none'; // hide equip button for recycled duplicates
+        }
+        
+        if (modalRevealBadge) {
+          modalRevealBadge.innerText = `DUPLICATE (+${scrapCompensation} GEMS)`;
+          modalRevealBadge.style.color = '#10B981';
+          modalRevealBadge.style.borderColor = '#10B981';
+        }
+
+        showToast(`Duplicate! Converted to +${scrapCompensation} Gems.`, "warning");
+      }
+
+      // Open visual modal
+      clawRevealModal.classList.add('active');
+      
+      // Fire confetti if Legendary!
+      if (rolledItem.rarity === 'legendary') {
+        triggerConfetti();
+      }
+
+      // Re-render inventory grid
+      renderLockerGrid();
+
+    } catch (dbErr) {
+      console.error("DB update failed during claw sequence:", dbErr);
+      showToast("Error updating inventory items.", "error");
+    }
+  }
+
+  // 9. Reset Claw Position (Phase 7)
+  if (prizeBoxNode) prizeBoxNode.remove();
+  
+  if (clawAssembly) {
+    // Slide back to center 50%
+    clawAssembly.style.transition = 'left 0.8s ease-in-out';
+    clawAssembly.style.left = '50%';
+    clawPositionPercent = 50;
+  }
+
+  // Regenerate boxes pile
+  initPrizePile();
+
+  // Wait for claw center transition
+  await new Promise(res => setTimeout(res, 800));
+
+  if (clawAssembly) {
+    clawAssembly.style.transition = 'left 0.15s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+  }
+
+  // Unlock controls
+  isClawRunning = false;
+  if (btnClawDrop) btnClawDrop.disabled = false;
+  if (btnJoystickLeft) btnJoystickLeft.disabled = false;
+  if (btnJoystickRight) btnJoystickRight.disabled = false;
+}
+
+// Bind Grab Prize click handler
+if (btnClawDrop) {
+  btnClawDrop.addEventListener('click', performClawDrop);
+}
+
+// Bind win modal Close/Continue buttons
+if (btnModalContinue) {
+  btnModalContinue.addEventListener('click', () => {
+    if (clawRevealModal) clawRevealModal.classList.remove('active');
+  });
+}
+
+// Trigger initial piles load
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', () => {
+    initPrizePile();
+  });
+} else {
+  initPrizePile();
+}
+
+// Regenerate prizes if they navigate to vending panel
+if (tabVending) {
+  tabVending.addEventListener('click', () => {
+    initPrizePile();
+  });
 }
 
 // --- SANDBOX DEVELOPER TESTING SUITE ---
@@ -1118,3 +1634,13 @@ if (document.readyState === 'loading') {
 } else {
   initGemsStore();
 }
+
+// ── Hamburger Menu Toggle ───────────────────────────────────────────────────
+const hamburger = document.getElementById('hamburger');
+const mobileMenu = document.getElementById('mobile-menu');
+if (hamburger && mobileMenu) {
+  hamburger.addEventListener('click', () => {
+    mobileMenu.classList.toggle('open');
+  });
+}
+

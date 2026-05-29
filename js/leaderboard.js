@@ -131,6 +131,12 @@ function showToast(message, type = 'success') {
 
 // --- SAVE SCORE ---
 window.saveScore = async function(gameName, score) {
+  if (window.isPracticeMode === true) {
+    console.log("Practice run completed. Score not saved to global leaderboard.");
+    showToast(`✨ Practice run complete! You scored ${score.toLocaleString()}. Ready for Competitive?`, "success");
+    return;
+  }
+
   const user = auth.currentUser;
   if (!user) {
     console.log("User not logged in, score not saved to global leaderboard.");
@@ -139,13 +145,6 @@ window.saveScore = async function(gameName, score) {
   }
 
   try {
-    const isDaily = window.isDailyRun === true;
-    let dateString = null;
-    if (isDaily) {
-      const { dateString: activeDate } = getDailyGame();
-      dateString = activeDate;
-    }
-
     // 1. Fetch current user avatar
     let userAvatar = "👾";
     try {
@@ -159,7 +158,7 @@ window.saveScore = async function(gameName, score) {
       console.log("Could not fetch user avatar for leaderboard scores:", avatarError);
     }
 
-    // 2. Add score to the global scores collection
+    // 2. Add score to the global scores collection (competitive runs are recorded for the game rankings)
     await addDoc(collection(db, "scores"), {
       uid: user.uid,
       username: user.displayName || "Unknown Player",
@@ -167,11 +166,10 @@ window.saveScore = async function(gameName, score) {
       game: gameName,
       score: score,
       timestamp: new Date(),
-      daily: isDaily,
-      dateString: dateString
+      daily: false
     });
     
-    // 2. Map raw score to normalized XP and Coins (exactly +10 XP/Coins per action, capped at 100 per match)
+    // 3. Map raw score to normalized XP and Coins (exactly +10 XP/Coins per action, capped at 100 per match)
     const gameConfigs = {
       'Higher or Lower': { mult: 10.0, max: 100 },
       'Word Rush':       { mult: 10.0, max: 100 },
@@ -190,11 +188,6 @@ window.saveScore = async function(gameName, score) {
     let xpEarned = score > 0 ? Math.max(10, Math.min(config.max, baseEarned)) : 0;
     let coinsEarned = score > 0 ? Math.max(10, Math.min(config.max, baseEarned)) : 0;
 
-    if (isDaily) {
-      xpEarned += 25; // +25 XP Bonus for daily challenge run
-      coinsEarned += 15; // +15 Coins Bonus for daily challenge run
-    }
-
     try {
       const userRef = doc(db, "users", user.uid);
       await updateDoc(userRef, {
@@ -208,15 +201,12 @@ window.saveScore = async function(gameName, score) {
     }
     
     // Show premium visual success feedback displaying both XP and Coins
-    if (isDaily) {
-      showToast(`🚀 Daily Score saved! Earned +${xpEarned} XP ⭐ & +${coinsEarned} Coins 🪙!`, "success");
-    } else {
-      showToast(`🏆 Score of ${score.toLocaleString()} saved! Earned +${xpEarned} XP ⭐ & +${coinsEarned} Coins 🪙!`, "success");
-    }
+    showToast(`🏆 Competitive Score of ${score.toLocaleString()} saved! Earned +${xpEarned} XP ⭐ & +${coinsEarned} Coins 🪙!`, "success");
     
     // Refresh leaderboard if we are on the homepage
     if (document.getElementById('leaderboard-table')) {
-      window.loadLeaderboard();
+      const lbFilter = document.getElementById('leaderboard-filter');
+      window.loadLeaderboard(lbFilter ? lbFilter.value : gameName);
     }
   } catch (e) {
     console.error("Error adding score: ", e);
@@ -225,33 +215,28 @@ window.saveScore = async function(gameName, score) {
 };
 
 // --- LOAD LEADERBOARD ---
-window.loadLeaderboard = async function(gameFilter = 'all') {
+window.loadLeaderboard = async function(gameFilter = '') {
   const table = document.getElementById('leaderboard-table');
   if (!table) return;
 
   table.innerHTML = '<div style="text-align:center; padding:20px; color:#94a3b8;">Loading live rankings...</div>';
 
+  const lbFilter = document.getElementById('leaderboard-filter');
+  let activeFilter = gameFilter;
+  if (!activeFilter || activeFilter === 'all') {
+    activeFilter = lbFilter ? lbFilter.value : 'Higher or Lower';
+  }
+
   try {
     let rawScores = [];
-
-    if (activeRankingsTab === 'daily') {
-      const { dateString } = getDailyGame();
-      const q = query(
-        collection(db, "scores"),
-        where("daily", "==", true),
-        where("dateString", "==", dateString)
-      );
-      const querySnapshot = await getDocs(q);
-      querySnapshot.forEach(doc => rawScores.push(doc.data()));
-    } else {
-      const q = query(collection(db, "scores"), orderBy("score", "desc"), limit(300));
-      const querySnapshot = await getDocs(q);
-      querySnapshot.forEach(doc => rawScores.push(doc.data()));
-      
-      if (gameFilter !== 'all') {
-        rawScores = rawScores.filter(data => data.game === gameFilter);
-      }
-    }
+    const q = query(
+      collection(db, "scores"),
+      where("game", "==", activeFilter),
+      orderBy("score", "desc"),
+      limit(300)
+    );
+    const querySnapshot = await getDocs(q);
+    querySnapshot.forEach(doc => rawScores.push(doc.data()));
 
     // Deduplicate: Keep only the highest score for each unique player (uid)
     const bestScoresMap = new Map();
@@ -369,36 +354,15 @@ async function loadYesterdayChampion() {
 
 // --- SETUP TABS AND LISTENERS ---
 function initLeaderboard() {
-  const btnDaily = document.getElementById('tab-daily-rankings');
-  const btnAllTime = document.getElementById('tab-alltime-rankings');
   const lbFilter = document.getElementById('leaderboard-filter');
-
-  if (btnDaily && btnAllTime) {
-    btnDaily.addEventListener('click', () => {
-      activeRankingsTab = 'daily';
-      btnDaily.style.background = '#1f2937';
-      btnDaily.style.color = '#38BDF8';
-      btnAllTime.style.background = 'transparent';
-      btnAllTime.style.color = '#94a3b8';
-      if (lbFilter) lbFilter.style.display = 'none';
-      window.loadLeaderboard();
-    });
-
-    btnAllTime.addEventListener('click', () => {
-      activeRankingsTab = 'alltime';
-      btnAllTime.style.background = '#1f2937';
-      btnAllTime.style.color = '#38BDF8';
-      btnDaily.style.background = 'transparent';
-      btnDaily.style.color = '#94a3b8';
-      if (lbFilter) lbFilter.style.display = 'block';
-      window.loadLeaderboard(lbFilter ? lbFilter.value : 'all');
-    });
+  if (lbFilter) {
+    lbFilter.style.display = 'block';
   }
 
   // Load initial states
   if (document.getElementById('leaderboard-table')) {
-    window.loadLeaderboard();
-    loadYesterdayChampion();
+    const activeFilter = lbFilter ? lbFilter.value : 'Higher or Lower';
+    window.loadLeaderboard(activeFilter);
   }
   
   // Register close handlers for player card modal
@@ -458,7 +422,10 @@ window.showPlayerCard = async function(uid, fallbackUsername, fallbackScore) {
   const activeTitle = activeCosmetics.title || "THE ROOKIE";
   const activeBorder = activeCosmetics.border || "border-common";
   const activeTheme = activeCosmetics.theme || "theme-common";
-
+  const activeTrail = activeCosmetics.trail || "trail-none";
+  const activeCardAnim = activeCosmetics.card_anim || "anim-none";
+  const activeFrame = activeCosmetics.frame || "frame-none";
+  
   // Set card contents
   cardUsername.innerText = username;
   cardTagline.innerText = `"${tagline}"`;
@@ -497,8 +464,11 @@ window.showPlayerCard = async function(uid, fallbackUsername, fallbackScore) {
   cardTitleBadge.style.borderColor = badgeColor + "33"; // 20% alpha border
 
   // Apply equipped layout cosmetic styles
-  gamerCard.className = `gamer-card ${activeTheme}`;
+  gamerCard.className = `gamer-card ${activeTheme} ${activeCardAnim} ${activeFrame}`;
   avatarRing.className = `avatar-ring ${activeBorder}`;
+  
+  // Set up cursor-trailing interactive particles
+  setupCardTrail(gamerCard, activeTrail);
 
   // Swap spinner for loaded profile
   loadingSection.style.display = 'none';
@@ -522,7 +492,93 @@ function initPlayerCardCloseHandlers() {
 }
 
 if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', initLeaderboard);
+  document.addEventListener('DOMContentLoaded', () => {
+    initLeaderboard();
+    initPlayerCardCloseHandlers();
+  });
 } else {
   initLeaderboard();
+  initPlayerCardCloseHandlers();
+}
+
+// ── Interactive Cursor Trailing Emojis Generator for Leaderboard Player Card ──
+function setupCardTrail(cardEl, trailType) {
+  if (!cardEl) return;
+  
+  // Clean up any old listeners to prevent duplication
+  if (cardEl._trailCleanup) {
+    cardEl._trailCleanup();
+  }
+  
+  if (!trailType || trailType === 'trail-none') {
+    cardEl._trailCleanup = null;
+    return;
+  }
+
+  const emojiMap = {
+    'trail-bubbles': '🫧',
+    'trail-sparks': '✨',
+    'trail-hearts': '💖',
+    'trail-stars': '⭐',
+    'trail-fire': '🔥',
+    'trail-rainbow': '🌈'
+  };
+
+  const emoji = emojiMap[trailType] || '✨';
+  let lastParticleTime = 0;
+
+  const handleMove = (e) => {
+    // Throttling to prevent spamming too many particles
+    const now = Date.now();
+    if (now - lastParticleTime < 40) return;
+    lastParticleTime = now;
+
+    const rect = cardEl.getBoundingClientRect();
+    let clientX = e.clientX;
+    let clientY = e.clientY;
+
+    if (e.touches && e.touches.length > 0) {
+      clientX = e.touches[0].clientX;
+      clientY = e.touches[0].clientY;
+    }
+
+    const x = clientX - rect.left;
+    const y = clientY - rect.top;
+
+    if (x === undefined || y === undefined || x < 0 || y < 0 || x > rect.width || y > rect.height) return;
+
+    const p = document.createElement('div');
+    p.innerText = emoji;
+    p.style.cssText = `
+      position: absolute;
+      left: ${x}px;
+      top: ${y}px;
+      transform: translate(-50%, -50%) scale(1);
+      pointer-events: none;
+      font-size: 1.1rem;
+      z-index: 100;
+      opacity: 1;
+      transition: all 0.7s cubic-bezier(0.1, 0.8, 0.3, 1);
+    `;
+    
+    cardEl.appendChild(p);
+    
+    // Animate particle floating upwards
+    requestAnimationFrame(() => {
+      p.style.transform = `translate(-50%, -100%) scale(0.3) rotate(${Math.random() * 90 - 45}deg)`;
+      p.style.opacity = '0';
+    });
+
+    setTimeout(() => {
+      p.remove();
+    }, 750);
+  };
+
+  cardEl.addEventListener('mousemove', handleMove);
+  cardEl.addEventListener('touchmove', handleMove, { passive: true });
+
+  cardEl._trailCleanup = () => {
+    cardEl.removeEventListener('mousemove', handleMove);
+    cardEl.removeEventListener('touchmove', handleMove);
+  };
 }

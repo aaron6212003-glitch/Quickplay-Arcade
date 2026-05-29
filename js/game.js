@@ -290,13 +290,20 @@ if (game) {
         </div>
 
         <p style="font-size: 0.8rem; color: #64748b; margin-top: 5px; text-align: center; font-weight: 700;">
-          🏆 Competitive scores post to Leaderboards and award XP ⭐ & Coins 🪙.
+          Competitive scores post to Leaderboards and award XP and Coins.
         </p>
+
+        ${game.earn ? `
+        <div style="background: rgba(251,191,36,0.08); border: 1px solid rgba(251,191,36,0.2); border-radius: 12px; padding: 10px 16px; margin: 12px auto 0; max-width: 400px; width: 100%; box-sizing: border-box; text-align: center;">
+          <div style="font-size: 0.8rem; font-weight: 900; color: #fbbf24; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px;">How to Earn</div>
+          <div style="font-size: 0.88rem; color: #e2e8f0; font-weight: 600; line-height: 1.4;">${game.earn}</div>
+        </div>
+        ` : ''}
 
         <div class="pre-screen-divider" style="margin: 15px 0 !important;"></div>
 
         <button id="pre-screen-rules-toggle" style="background: transparent; border: none; color: #a78bfa; font-weight: 800; font-size: 0.95rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; padding: 5px 15px; margin: 0 auto; transition: color 0.2s;">
-          📖 View Rules & Controls
+          View Rules &amp; Controls
         </button>
       `;
 

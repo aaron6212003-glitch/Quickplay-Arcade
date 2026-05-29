@@ -15,7 +15,12 @@
     body {
       background-color: #050811;
       font-family: 'Outfit', sans-serif;
-      overflow-x: hidden;
+      overflow-x: hidden !important;
+      width: 100%;
+      max-width: 100vw;
+      overscroll-behavior: none !important;
+      overscroll-behavior-x: none !important;
+      overscroll-behavior-y: none !important;
     }
 
     /* Ambient Glowing Orbs background */
@@ -391,110 +396,386 @@
       border-color: transparent;
     }
 
-    /* Vending capsule drawer view */
+    /* ── Claw Machine Layout ─────────────────────────────── */
     .vending-wrapper {
-      display: grid;
-      grid-template-columns: 1.2fr 1fr;
-      gap: 30px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
       align-items: center;
-    }
-    @media (max-width: 650px) {
-      .vending-wrapper {
-        grid-template-columns: 1fr;
-      }
+      width: 100%;
     }
 
-    /* Gashapon machine graphic visualizer */
-    .machine-graphic {
-      background: radial-gradient(circle at 50% 30%, #1e293b, #0f172a);
-      border: 3px solid rgba(255,255,255,0.1);
-      border-radius: 30px;
-      padding: 30px 20px;
-      text-align: center;
+    /* ── The Glass Claw Chamber ───────────────────────────── */
+    .claw-chamber {
       position: relative;
-      box-shadow: 0 15px 35px rgba(0,0,0,0.6), inset 0 0 30px rgba(255,255,255,0.05);
+      width: 100%;
+      max-width: 420px;
+      height: 320px;
+      background: linear-gradient(180deg, #0b0d19 0%, #151a30 75%, #0e111f 100%);
+      border: 6px solid #282f42;
+      border-top: 14px solid #1c2130;
+      border-bottom: 20px solid #1c2130;
+      border-radius: 16px;
+      box-shadow: 
+        inset 0 0 35px rgba(0,0,0,0.9), 
+        0 15px 35px rgba(0,0,0,0.6);
       overflow: hidden;
+    }
+
+    /* Neon header bar */
+    .claw-chamber::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, #ec4899, #8b5cf6, #3b82f6);
+      background-size: 200% 100%;
+      animation: neonFlow 4s linear infinite;
+      z-index: 10;
+    }
+
+    /* Claw Gantry Rail */
+    .gantry-bar {
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 6px;
+      background: #3b4252;
+      border-bottom: 1.5px solid rgba(255,255,255,0.06);
+      z-index: 2;
+    }
+
+    /* ── Claw Assembly ────────────────────────────────────── */
+    .claw-assembly {
+      position: absolute;
+      top: 0; left: 50%;
+      width: 40px; height: 100%;
+      transform: translateX(-50%);
+      transition: left 0.15s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+      z-index: 5;
+    }
+
+    .claw-string {
+      position: absolute;
+      top: 0; left: 50%;
+      width: 2px; height: 40px; /* Initial string length */
+      background: linear-gradient(to bottom, #d8dee9, #8892b0);
+      transform: translateX(-50%);
+      box-shadow: 0 0 2px rgba(0,0,0,0.5);
+      transition: height 0.15s linear;
+    }
+
+    .claw-hand {
+      position: absolute;
+      bottom: 0; left: 50%;
+      width: 36px; height: 36px;
+      transform: translate(-50%, 100%);
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 15px;
+      transition: transform 0.15s linear;
+    }
+
+    .claw-body {
+      width: 14px; height: 10px;
+      background: linear-gradient(to bottom, #88c0d0, #5e81ac);
+      border-radius: 4px;
+      border: 1px solid rgba(255,255,255,0.2);
+      box-shadow: 0 2px 4px rgba(0,0,0,0.5);
+    }
+
+    .claw-fingers {
+      display: flex;
+      justify-content: space-between;
+      width: 100%;
+      margin-top: -2px;
+    }
+
+    .claw-finger {
+      width: 9px; height: 18px;
+      border: 2px.5 solid #88c0d0;
+      border-top: none;
+      transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    }
+
+    .claw-finger-left {
+      border-radius: 0 0 0 10px;
+      transform-origin: top right;
+      transform: rotate(-25deg);
+    }
+
+    .claw-finger-right {
+      border-radius: 0 0 10px 0;
+      transform-origin: top left;
+      transform: rotate(25deg);
+    }
+
+    /* Grab closed fingers state */
+    .claw-hand.is-closed .claw-finger-left {
+      transform: rotate(10deg);
+    }
+    .claw-hand.is-closed .claw-finger-right {
+      transform: rotate(-10deg);
+    }
+
+    /* ── The Prizes Chamber Bottom ─────────────────────────── */
+    .prize-pile {
+      position: absolute;
+      bottom: 0; left: 60px; right: 0;
+      height: 60px;
+      display: flex;
+      flex-wrap: wrap;
+      align-content: flex-end;
+      gap: 5px;
+      padding: 6px;
+      pointer-events: none;
+      z-index: 3;
+    }
+
+    /* Colorful rarity prize box cubes */
+    .prize-box {
+      width: 22px; height: 22px;
+      border-radius: 5px;
+      border: 1.5px solid rgba(255,255,255,0.2);
+      box-shadow: 
+        0 4px 6px rgba(0,0,0,0.4), 
+        inset 0 1px 0 rgba(255,255,255,0.15);
+      position: relative;
+      animation: boxGlow 2.5s infinite alternate ease-in-out;
+      transform-origin: bottom center;
     }
     
-    .machine-dome {
-      width: 140px; height: 140px;
-      border-radius: 50%;
-      background: rgba(56, 189, 248, 0.05);
-      border: 2px solid rgba(56, 189, 248, 0.2);
-      display: flex; align-items: center; justify-content: center;
-      position: relative;
-      box-shadow: inset 0 0 20px rgba(56, 189, 248, 0.15);
-    }
-    .machine-dome::after {
-      content: '🔮'; font-size: 4rem;
-      animation: floatDome 4s ease-in-out infinite;
-    }
-    @keyframes floatDome {
-      0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(-10px); }
-    }
-    .dome-sparks {
-      position: absolute; inset: 0;
-      background: radial-gradient(circle, transparent, rgba(56, 189, 248, 0.05));
+    @keyframes boxGlow {
+      0% { filter: brightness(0.85) saturate(0.9); transform: scale(1) translateY(0); }
+      100% { filter: brightness(1.15) saturate(1.1); transform: scale(1.02) translateY(-1px); }
     }
 
-    /* Capsule Crank handle */
-    .crank-handle {
-      width: 80px; height: 80px;
-      border-radius: 50%;
-      background: linear-gradient(135deg, #FF6B6B, #FF8E53);
-      border: 4px solid #fff;
-      display: flex; align-items: center; justify-content: center;
-      cursor: pointer;
-      font-size: 1.8rem; color: #fff;
-      box-shadow: 0 5px 15px rgba(255,107,107,0.4), inset 0 2px 6px rgba(255,255,255,0.4);
-      transition: all 0.3s;
-    }
-    .crank-handle:hover {
-      transform: scale(1.08) rotate(15deg);
-    }
-    .crank-handle:active {
-      transform: scale(0.95) rotate(180deg);
+    .prize-box--common { background: linear-gradient(135deg, #64748b, #334155); }
+    .prize-box--uncommon { background: linear-gradient(135deg, #10b981, #064e3b); }
+    .prize-box--rare { background: linear-gradient(135deg, #38bdf8, #0369a1); }
+    .prize-box--epic { background: linear-gradient(135deg, #a78bfa, #5b21b6); }
+    .prize-box--legendary { background: linear-gradient(135deg, #fbbf24, #92400e); }
+
+    /* Drop chute */
+    .prize-chute {
+      position: absolute;
+      bottom: 0; left: 0;
+      width: 60px; height: 75px;
+      background: #06070a;
+      border-top-right-radius: 14px;
+      border-right: 2px solid rgba(255,255,255,0.06);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.6rem;
+      box-shadow: 
+        inset -8px 8px 20px rgba(0,0,0,0.9),
+        inset 0 0 5px rgba(255,255,255,0.02);
+      z-index: 2;
     }
 
-    .chute {
-      background: #090d16;
-      border: 1px solid rgba(255,255,255,0.08);
-      border-radius: 12px;
-      width: 80px; height: 50px;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 1.5rem;
-      position: relative;
-    }
-
-    /* Pull reveal slide */
-    .reveal-card {
-      background: rgba(255, 255, 255, 0.02);
-      border: 1px dashed rgba(255, 255, 255, 0.08);
+    /* ── The Physical Console ─────────────────────────────── */
+    .claw-console {
+      width: 100%;
+      max-width: 420px;
+      background: linear-gradient(180deg, #222838 0%, #151824 100%);
+      border: 2px solid rgba(255,255,255,0.06);
       border-radius: 20px;
-      padding: 24px;
-      text-align: center;
+      padding: 16px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      box-shadow: 
+        0 10px 25px rgba(0,0,0,0.5),
+        inset 0 1px 0 rgba(255,255,255,0.05);
+    }
+
+    .joystick-outer {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .joystick-container {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    /* Left and Right directional arrows */
+    .joystick-pad-btn {
+      width: 40px; height: 40px;
+      border-radius: 50%;
+      background: #2d354d;
+      border: 1px solid rgba(255,255,255,0.06);
+      color: #cbd5e1;
+      font-size: 1.1rem;
+      font-weight: bold;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.4);
+      transition: all 0.1s ease;
+      touch-action: none;
+    }
+    .joystick-pad-btn:active {
+      transform: scale(0.9);
+      background: #3b4566;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    }
+
+    /* Interactive 3D tilt joystick */
+    .joystick-base {
+      width: 72px; height: 72px;
+      border-radius: 50%;
+      background: radial-gradient(circle, #2d354d 30%, #11141e 100%);
+      border: 3px solid #3b4566;
+      position: relative;
+      box-shadow: 
+        inset 0 4px 10px rgba(0,0,0,0.8),
+        0 4px 6px rgba(0,0,0,0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      touch-action: none;
+    }
+    
+    .joystick-shaft {
+      width: 8px; height: 32px;
+      background: linear-gradient(to right, #94a3b8, #cbd5e1, #94a3b8);
+      position: absolute;
+      bottom: 50%; left: 50%;
+      transform-origin: bottom center;
+      transform: translateX(-50%) rotate(0deg);
+      border-radius: 4px;
+      transition: transform 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .joystick-knob {
+      width: 24px; height: 24px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 35% 35%, #f43f5e, #be123c);
+      position: absolute;
+      top: -12px; left: -8px;
+      box-shadow: 
+        0 4px 8px rgba(0,0,0,0.6),
+        inset 0 2px 2px rgba(255,255,255,0.25);
+    }
+
+    /* Joystick tilting animations */
+    .joystick-base.tilt-left .joystick-shaft {
+      transform: translateX(-50%) rotate(-25deg);
+    }
+    .joystick-base.tilt-right .joystick-shaft {
+      transform: translateX(-50%) rotate(25deg);
+    }
+
+    /* The Drop Button */
+    .btn-claw-drop {
+      flex: 1;
+      height: 60px;
+      border-radius: 16px;
+      border: none;
+      font-family: 'Outfit', sans-serif;
+      font-weight: 900;
+      font-size: 0.95rem;
+      color: #fff;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      background: linear-gradient(135deg, #f43f5e, #be123c);
+      box-shadow: 
+        0 0 15px rgba(244,63,94,0.35),
+        inset 0 2px 4px rgba(255,255,255,0.3);
+      cursor: pointer;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      min-height: 280px;
-      transition: all 0.4s ease;
+      gap: 2px;
+    }
+    .btn-claw-drop:hover {
+      box-shadow: 
+        0 0 20px rgba(244,63,94,0.5),
+        inset 0 2px 4px rgba(255,255,255,0.4);
+    }
+    .btn-claw-drop:active {
+      transform: scale(0.96);
+      box-shadow: 0 0 5px rgba(244,63,94,0.2);
+    }
+    .btn-claw-drop:disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+
+    /* ── Claw Reveal Window Modal ──────────────────────────── */
+    .claw-reveal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(5,8,17,0.85);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.4s ease;
+    }
+    .claw-reveal-overlay.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    
+    .claw-reveal-card {
+      width: 90%;
+      max-width: 440px;
+      background: radial-gradient(circle at 50% 0%, #1e293b 0%, #0f172a 100%);
+      border: 2px solid rgba(255,255,255,0.08);
+      border-radius: 28px;
+      padding: 36px 28px;
+      text-align: center;
       position: relative;
+      box-shadow: 
+        0 25px 60px rgba(0,0,0,0.8),
+        0 0 0 1px rgba(56,189,248,0.15);
+      transform: scale(0.8) translateY(30px);
+      transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
     }
-    .capsule-shake-anim {
-      animation: capsuleShake 0.6s cubic-bezier(.36,.07,.19,.97) infinite;
+    .claw-reveal-overlay.active .claw-reveal-card {
+      transform: scale(1) translateY(0);
     }
-    @keyframes capsuleShake {
-      10%, 90% { transform: translate3d(-2px, 0, 0); }
-      20%, 80% { transform: translate3d(4px, 0, 0); }
-      30%, 50%, 70% { transform: translate3d(-6px, 0, 0); }
-      40%, 60% { transform: translate3d(6px, 0, 0); }
+
+    .claw-win-glow {
+      position: absolute;
+      top: -50px; left: 50%;
+      transform: translateX(-50%);
+      width: 140px; height: 140px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(56,189,248,0.2) 0%, transparent 70%);
+      filter: blur(10px);
+      pointer-events: none;
     }
+
+    /* Confetti particle */
+    .confetti-piece {
+      position: absolute;
+      width: 8px; height: 8px;
+      border-radius: 2px;
+      opacity: 0;
+      pointer-events: none;
+      animation: confettiFall 1.4s ease-out forwards;
+    }
+    @keyframes confettiFall {
+      0% { transform: translateY(-20px) rotate(0deg); opacity: 1; }
+      100% { transform: translateY(180px) rotate(540deg); opacity: 0; }
+    }
+
 
     /* Inventory Locker list grid */
     .inventory-grid {
@@ -583,22 +864,40 @@
 </head>
 <body>
 
-<div class="profile-orb profile-orb-1"></div>
-<div class="profile-orb profile-orb-2"></div>
+<div class="ambient-glow-wrapper" style="position: absolute; width: 100%; height: 100%; top: 0; left: 0; overflow: hidden; pointer-events: none; z-index: 0;">
+  <div class="profile-orb profile-orb-1"></div>
+  <div class="profile-orb profile-orb-2"></div>
+</div>
 
 <header class="nav" id="top-nav">
   <div class="nav__inner">
     <a href="index.html" class="nav__logo">
-      <span class="nav__logo-icon">🏠</span>
+      <span class="nav__logo-icon">🕹️</span>
       <span>Play<strong>haus</strong></span>
     </a>
     <nav class="nav__links" id="desktop-nav">
-      <a href="index.html" class="nav__link">Arcade Home</a>
-      <a href="profile.html" class="nav__link">Profile</a>
+      <a href="index.html" class="nav__link">Lobby</a>
+      <a href="index.html#rooms" class="nav__link">Arcade Games</a>
+      <a href="index.html#leaderboard" class="nav__link">Leaderboards</a>
+      <a href="index.html?tutorial=true" class="nav__link">How to Play</a>
     </nav>
     <div id="auth-container" style="display: flex; gap: 10px; align-items: center;">
       <button class="btn btn--outline" id="btn-login-trigger" style="padding: 8px 16px;">Log In</button>
     </div>
+    <button class="nav__hamburger" id="hamburger" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+  <!-- Mobile slide-down menu -->
+  <div class="nav__mobile-menu" id="mobile-menu">
+    <a href="index.html" class="nav__mobile-link">🏠 Lobby</a>
+    <a href="index.html#rooms" class="nav__mobile-link">🚪 Arcade Games</a>
+    <a href="index.html#leaderboard" class="nav__mobile-link">🏆 Leaderboards</a>
+    <a href="index.html?tutorial=true" class="nav__mobile-link">📖 How to Play</a>
+    <a href="profile.html" class="nav__mobile-link" id="mobile-profile-link" style="display: none;">👾 Gamer Profile</a>
+    <a href="locker.html" class="nav__mobile-link active" id="mobile-locker-link" style="display: none;">🎒 Locker Room</a>
+    <a href="#" class="nav__mobile-link" id="mobile-login-trigger">🔑 Log In</a>
+    <a href="#" class="nav__mobile-link" id="mobile-logout" style="display: none; color: #EF4444; border-top: 1px solid rgba(255,255,255,0.06); margin-top: 8px; padding-top: 12px; font-weight: 800;">🚪 Log Out</a>
   </div>
 </header>
 
@@ -672,40 +971,97 @@
     <div class="dashboard-card">
       <div class="dashboard-title">
         <div class="tab-bar">
-          <button class="tab-btn active" id="tab-vending">🎰 Capsule Station</button>
+          <button class="tab-btn active" id="tab-vending">🕹️ Claw Machine</button>
           <button class="tab-btn" id="tab-locker">🎒 My Locker</button>
         </div>
       </div>
 
-      <!-- Tab: Vending machine draw room -->
+      <!-- Tab: Vending machine draw room (Claw Machine) -->
       <div id="panel-vending">
-        <p style="color:#94a3b8; font-size:0.95rem; margin-bottom:20px; line-height:1.5;">
-          Insert <strong>100 Coins (🪙)</strong> and crank the capsule wheel to pull a random Fortnite-style rarity cosmetic!
+        <p style="color:#94a3b8; font-size:0.9rem; margin-bottom:12px; line-height:1.5; text-align:center;">
+          Use the **joystick or arrow pads** to position the claw over a mystery box, then tap **Grab Prize**! (🪙 100 Coins)
         </p>
+
         <div class="vending-wrapper">
-          <!-- The vending machine visual cabinet -->
-          <div class="machine-graphic">
-            <div style="font-weight:900; font-size:1.1rem; color:#fff; text-transform:uppercase; letter-spacing:1px; margin-bottom:5px;">
-              Capsule Machine
+
+          <!-- Claw Machine Chamber -->
+          <div class="claw-chamber" id="claw-chamber">
+            <div class="gantry-bar"></div>
+            
+            <div class="claw-assembly" id="claw-assembly" style="left: 50%;">
+              <div class="claw-string" id="claw-string" style="height: 40px;"></div>
+              <div class="claw-hand" id="claw-hand">
+                <div class="claw-body"></div>
+                <div class="claw-fingers">
+                  <div class="claw-finger claw-finger-left"></div>
+                  <div class="claw-finger claw-finger-right"></div>
+                </div>
+              </div>
             </div>
-            <div class="machine-dome">
-              <div class="dome-sparks"></div>
+
+            <!-- Chute drop box -->
+            <div class="prize-chute" id="prize-chute">🎁</div>
+
+            <!-- Prize box pile -->
+            <div class="prize-pile" id="prize-pile">
+              <!-- Dynamically generated mystery box nodes -->
             </div>
-            <div style="color:#64748b; font-size:0.75rem; font-weight:800; text-transform:uppercase;">
-              Crank to Draw (100 Coins)
-            </div>
-            <div class="crank-handle" id="crank-lever">🌀</div>
-            <div class="chute" id="chute-outlet">📪</div>
           </div>
 
-          <!-- Reveal card viewport -->
-          <div class="reveal-card" id="reveal-viewport">
-            <div style="font-size:3.5rem; margin-bottom:15px; filter:grayscale(80%); opacity:0.3;">🎁</div>
-            <h3 style="font-size:1.1rem; font-weight:900; color:#fff; margin-bottom:6px; text-transform:uppercase;">Station Idle</h3>
-            <p style="color:#64748b; font-size:0.8rem; max-width:180px;">Crank the left wheel to pull an item!</p>
+          <!-- Physical Console Controls -->
+          <div class="claw-console">
+            <div class="joystick-outer">
+              <div class="joystick-container">
+                <button class="joystick-pad-btn" id="btn-joystick-left">◀</button>
+                <div class="joystick-base" id="joystick-base">
+                  <div class="joystick-shaft">
+                    <div class="joystick-knob"></div>
+                  </div>
+                </div>
+                <button class="joystick-pad-btn" id="btn-joystick-right">▶</button>
+              </div>
+              <div style="font-size:0.6rem; color:#64748b; font-weight:800; text-transform:uppercase; letter-spacing:1px; margin-top:2px;">Move Claw</div>
+            </div>
+
+            <button class="btn-claw-drop" id="btn-claw-drop">
+              <span>Grab Prize</span>
+              <span style="font-size:0.75rem; font-weight:800; opacity:0.85;">🪙 100 Coins</span>
+            </button>
           </div>
+
+          <!-- Claw Grab Odds Table -->
+          <div class="rarity-odds" style="margin-top: 5px;">
+            <div class="rarity-odds__title">Claw Grab Odds</div>
+            <div class="rarity-odds__row">
+              <span style="color:#94A3B8;">Grey Mystery Box (Common)</span>
+              <div class="rarity-odds__bar"><div class="rarity-odds__fill" style="width:45%; background:#94A3B8;"></div></div>
+              <span style="color:#94A3B8; min-width:32px; text-align:right;">45%</span>
+            </div>
+            <div class="rarity-odds__row">
+              <span style="color:#10B981;">Green Mystery Box (Uncommon)</span>
+              <div class="rarity-odds__bar"><div class="rarity-odds__fill" style="width:25%; background:#10B981;"></div></div>
+              <span style="color:#10B981; min-width:32px; text-align:right;">25%</span>
+            </div>
+            <div class="rarity-odds__row">
+              <span style="color:#38BDF8;">Blue Mystery Box (Rare)</span>
+              <div class="rarity-odds__bar"><div class="rarity-odds__fill" style="width:17%; background:#38BDF8;"></div></div>
+              <span style="color:#38BDF8; min-width:32px; text-align:right;">17%</span>
+            </div>
+            <div class="rarity-odds__row">
+              <span style="color:#A78BFA;">Purple Mystery Box (Epic)</span>
+              <div class="rarity-odds__bar"><div class="rarity-odds__fill" style="width:10%; background:#A78BFA;"></div></div>
+              <span style="color:#A78BFA; min-width:32px; text-align:right;">10%</span>
+            </div>
+            <div class="rarity-odds__row">
+              <span style="color:#F59E0B;">Golden Mystery Box (Legendary)</span>
+              <div class="rarity-odds__bar"><div class="rarity-odds__fill" style="width:3%; background:#F59E0B;"></div></div>
+              <span style="color:#F59E0B; min-width:32px; text-align:right;">3%</span>
+            </div>
+          </div>
+
         </div>
       </div>
+
 
       <!-- Tab: Locker items grid -->
       <div id="panel-locker" style="display:none;">
@@ -714,6 +1070,9 @@
           <button class="subtab-btn" data-type="border">🛡️ Borders</button>
           <button class="subtab-btn" data-type="theme">🖼️ Backgrounds</button>
           <button class="subtab-btn" data-type="title">🏷️ Titles</button>
+          <button class="subtab-btn" data-type="trail">💫 Trails</button>
+          <button class="subtab-btn" data-type="card_anim">✨ Effects</button>
+          <button class="subtab-btn" data-type="frame">🖼️ Frames</button>
         </div>
         
         <p style="color:#94a3b8; font-size:0.85rem; margin-bottom:15px;" id="locker-sub-desc">
@@ -742,6 +1101,26 @@
       <p class="footer__copy" style="color: #475569; font-size: 0.75rem;">© 2026 Playhaus. All rights reserved.</p>
     </div>
   </footer>
+</div>
+
+<!-- ===== CLAW WIN REVEAL MODAL ===== -->
+<div id="claw-reveal-modal" class="claw-reveal-overlay">
+  <div class="claw-reveal-card">
+    <div class="claw-win-glow"></div>
+    <div style="font-size: 4.8rem; margin-bottom: 16px; animation: floatDome 3s ease-in-out infinite;" id="modal-reveal-icon">🎁</div>
+    
+    <div style="display:inline-block; font-size: 0.65rem; font-weight: 900; color: #fff; text-transform: uppercase; letter-spacing: 1.5px; padding: 4px 14px; border-radius: 50px; background: rgba(0,0,0,0.35); border: 1px solid rgba(255,255,255,0.08); margin-bottom: 12px;" id="modal-reveal-badge">
+      Common Unlock
+    </div>
+    
+    <h3 style="font-size: 1.45rem; font-weight: 900; color: #fff; margin-bottom: 4px;" id="modal-reveal-name">Midas Gold</h3>
+    <p style="color: #64748b; font-size: 0.8rem; text-transform: uppercase; font-weight: 800; letter-spacing: 1px; margin-bottom: 24px;" id="modal-reveal-type">Frame</p>
+    
+    <div style="display: flex; gap: 12px; width: 100%;">
+      <button class="btn btn--primary" id="btn-modal-equip" style="flex:1; border-radius:12px; font-weight:800; padding:12px 0; font-size: 0.85rem;">Equip Now</button>
+      <button class="btn btn--secondary" id="btn-modal-continue" style="flex:1; border-radius:12px; font-weight:800; padding:12px 0; font-size: 0.85rem;">Continue</button>
+    </div>
+  </div>
 </div>
 
 <!-- ===== AUTH MODAL ===== -->

@@ -21,14 +21,14 @@
 <header class="nav" id="top-nav">
   <div class="nav__inner">
     <a href="index.html" class="nav__logo">
-      <span class="nav__logo-icon">🏠</span>
+      <span class="nav__logo-icon">🕹️</span>
       <span>Play<strong>haus</strong></span>
     </a>
-    <nav class="nav__links">
-      <a href="index.html" class="nav__link">Home</a>
-      <a href="index.html#rooms" class="nav__link">Rooms</a>
-      <a href="index.html#daily" class="nav__link">Daily</a>
-      <a href="index.html#leaderboard" class="nav__link">House Rankings</a>
+    <nav class="nav__links" id="desktop-nav">
+      <a href="index.html" class="nav__link">Lobby</a>
+      <a href="index.html#rooms" class="nav__link">Arcade Games</a>
+      <a href="index.html#leaderboard" class="nav__link">Leaderboards</a>
+      <a href="index.html?tutorial=true" class="nav__link">How to Play</a>
     </nav>
     <div style="display: flex; gap: 10px; align-items: center;">
       <button class="btn btn--random" id="random-btn">🎲 Random</button>
@@ -36,6 +36,20 @@
         <button class="btn btn--outline" id="btn-login-trigger" style="padding: 8px 16px;">Log In</button>
       </div>
     </div>
+    <button class="nav__hamburger" id="hamburger" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+  <!-- Mobile slide-down menu -->
+  <div class="nav__mobile-menu" id="mobile-menu">
+    <a href="index.html" class="nav__mobile-link">🏠 Lobby</a>
+    <a href="index.html#rooms" class="nav__mobile-link">🚪 Arcade Games</a>
+    <a href="index.html#leaderboard" class="nav__mobile-link">🏆 Leaderboards</a>
+    <a href="index.html?tutorial=true" class="nav__mobile-link">📖 How to Play</a>
+    <a href="profile.html" class="nav__mobile-link" id="mobile-profile-link" style="display: none;">👾 Gamer Profile</a>
+    <a href="locker.html" class="nav__mobile-link" id="mobile-locker-link" style="display: none;">🎒 Locker Room</a>
+    <a href="#" class="nav__mobile-link" id="mobile-login-trigger">🔑 Log In</a>
+    <a href="#" class="nav__mobile-link" id="mobile-logout" style="display: none; color: #EF4444; border-top: 1px solid rgba(255,255,255,0.06); margin-top: 8px; padding-top: 12px; font-weight: 800;">🚪 Log Out</a>
   </div>
 </header>
 
