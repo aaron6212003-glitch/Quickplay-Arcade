@@ -1,6 +1,13 @@
 import { db, auth, doc, getDoc, setDoc, updateDoc, sendEmailVerification } from './firebase.js?v=12';
 import { onAuthStateChanged } from './firebase.js?v=12';
 import { triggerHaptic } from './haptics.js';
+import { 
+  checkVipStatus, 
+  showBannerAd, 
+  showRewardedAd, 
+  purchaseGems, 
+  purchaseVipMembership 
+} from './monetization.js?v=12';
 
 // --- COSMETICS DEFINITION SYSTEM ---
 const COSMETICS = [
@@ -516,6 +523,37 @@ onAuthStateChanged(auth, async (user) => {
       // Update layouts
       updateCurrencyDisplay(userDocData);
       updatePreviewCard(userDocData, user);
+
+      // ── Playhaus Monetization & VIP Verification ──
+      try {
+        const isVip = await checkVipStatus(user);
+        
+        // Enforce VIP daily drop logic (award +15 Gems once a day)
+        if (isVip) {
+          const todayStr = new Date().toDateString();
+          if (userDocData.lastVipDailyClaim !== todayStr) {
+            console.log("[Playhaus VIP] Awarding +15 Daily Gems drop...");
+            const userRef = doc(db, "users", user.uid);
+            await updateDoc(userRef, {
+              scrap: increment(15),
+              lastVipDailyClaim: todayStr
+            });
+            userDocData.scrap = (userDocData.scrap || 0) + 15;
+            userDocData.lastVipDailyClaim = todayStr;
+            updateCurrencyDisplay(userDocData);
+            
+            // Highlight VIP drop in a golden toast!
+            setTimeout(() => {
+              showToast("👑 VIP Daily Drop claimed! +15 Gems credited! 💎", "success");
+            }, 1000);
+          }
+        } else {
+          // If not a VIP, load and show bottom banner ad
+          showBannerAd();
+        }
+      } catch (err) {
+        console.error("[Playhaus VIP] Failed to evaluate VIP/Ads state on startup:", err);
+      }
 
       // ── Email Verification Rewards & Banner Loop ──
       const verifyBanner = document.getElementById('email-verify-banner');
@@ -1905,8 +1943,6 @@ function initGemsStore() {
   const checkoutModal = document.getElementById('checkout-modal');
   const btnOpenStore = document.getElementById('btn-open-store');
   const btnCloseStore = document.getElementById('store-close');
-  const checkoutStatus = document.getElementById('checkout-status');
-  const checkoutDesc = document.getElementById('checkout-desc');
   const btnWatchAd = document.getElementById('btn-watch-ad');
 
   if (!storeModal || !checkoutModal) return;
@@ -1939,77 +1975,78 @@ function initGemsStore() {
     }
   });
 
-  // Watch Ad Simulator
+  // Watch Ad Real Integration
   if (btnWatchAd) {
     btnWatchAd.addEventListener('click', async () => {
       const user = auth.currentUser;
       if (!user || !userDocData) return;
 
       storeModal.style.display = 'none';
-      checkoutModal.style.display = 'flex';
-      checkoutStatus.innerText = "Loading Video Ad...";
-      checkoutDesc.innerText = "Buffering rewarding video stream. Please do not close the window.";
-
-      setTimeout(() => {
-        checkoutStatus.innerText = "Ad Playing (5s)...";
-        checkoutDesc.innerText = "🍿 Watching a Playhaus sponsored commercial. Earn +20 Gems upon completion!";
-        
-        setTimeout(async () => {
-          try {
-            const userRef = doc(db, "users", user.uid);
-            const nextScrap = (userDocData.scrap || 0) + 20;
-            await updateDoc(userRef, { scrap: nextScrap });
-            userDocData.scrap = nextScrap;
-            updateCurrencyDisplay(userDocData);
-            
-            checkoutModal.style.display = 'none';
-            showToast("🍿 Ad watched! Earned +20 Gems! 💎", "success");
-          } catch (err) {
-            console.error(err);
-            checkoutModal.style.display = 'none';
-            showToast("❌ Failed to claim ad reward.", "error");
-          }
-        }, 5000);
-      }, 2000);
+      
+      // Call native or simulated rewarded ad
+      await showRewardedAd(async () => {
+        try {
+          const userRef = doc(db, "users", user.uid);
+          const nextScrap = (userDocData.scrap || 0) + 10; // Scaled down to +10 Gems
+          await updateDoc(userRef, { scrap: nextScrap });
+          userDocData.scrap = nextScrap;
+          updateCurrencyDisplay(userDocData);
+          showToast("🍿 Ad watched! Earned +10 Gems! 💎", "success");
+        } catch (err) {
+          console.error(err);
+          showToast("❌ Failed to claim ad reward.", "error");
+        }
+      });
     });
   }
 
-  // Tier Cards clicks
+  // Tier Cards clicks (Consumables and VIP Subscriptions)
   const storeCards = document.querySelectorAll('.store-card');
   storeCards.forEach(card => {
     card.addEventListener('click', async () => {
       const user = auth.currentUser;
       if (!user || !userDocData) return;
 
-      const gems = parseInt(card.dataset.gems);
+      const productId = card.dataset.product;
+      const gems = parseInt(card.dataset.gems || '0');
       const price = card.dataset.price;
 
+      if (!productId) return;
+
       storeModal.style.display = 'none';
-      checkoutModal.style.display = 'flex';
-      checkoutStatus.innerText = "Contacting App Store...";
-      checkoutDesc.innerText = `Establishing a secure Sandbox checkout connection for ${gems} Gems.`;
 
-      setTimeout(() => {
-        checkoutStatus.innerText = "Apple Pay / Stripe secure checkout active...";
-        checkoutDesc.innerText = `Processing simulated Sandbox payment of $${price}. Please authorize transaction.`;
-
-        setTimeout(async () => {
-          try {
+      if (productId === "fun.playhaus.vip_monthly") {
+        // VIP Subscription checkout
+        await purchaseVipMembership(
+          async () => {
+            // Success callback
+            showToast("👑 VIP Club Activated! Thank you for subscribing! 💎", "success");
+            // Check VIP status again to update global flags, hide banner ads, and verify login rewards
+            await checkVipStatus(user);
+          },
+          (err) => {
+            showToast(`❌ Subscription failed: ${err}`, "error");
+          }
+        );
+      } else {
+        // Consumable pack checkout
+        await purchaseGems(
+          productId,
+          gems,
+          async (creditedGems) => {
+            // Success callback: credit Gems directly
             const userRef = doc(db, "users", user.uid);
-            const nextScrap = (userDocData.scrap || 0) + gems;
+            const nextScrap = (userDocData.scrap || 0) + creditedGems;
             await updateDoc(userRef, { scrap: nextScrap });
             userDocData.scrap = nextScrap;
             updateCurrencyDisplay(userDocData);
-            
-            checkoutModal.style.display = 'none';
-            showToast(`🛒 Purchase successful! +${gems} Gems credited to your locker! 💎`, "success");
-          } catch (err) {
-            console.error(err);
-            checkoutModal.style.display = 'none';
-            showToast("❌ Checkout authorization failed.", "error");
+            showToast(`🛒 Purchase successful! +${creditedGems} Gems credited to your locker! 💎`, "success");
+          },
+          (err) => {
+            showToast(`❌ Purchase failed: ${err}`, "error");
           }
-        }, 3000);
-      }, 2000);
+        );
+      }
     });
   });
 }

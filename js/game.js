@@ -1,5 +1,6 @@
 import { GAMES } from '../data/games.js';
 import { auth, db, onAuthStateChanged, doc, getDoc, setDoc, increment } from './firebase.js?v=12';
+import { showInterstitialAd } from './monetization.js?v=12';
 
 // ── Get game id from URL ─────────────────────────────────────────────────────
 const params = new URLSearchParams(window.location.search);
@@ -463,4 +464,22 @@ if (hamburger && mobileMenu) {
     mobileMenu.classList.toggle('open');
   });
 }
+
+// ── Intercept Lobby Navigation for Interstitial Ad Delivery ──
+document.addEventListener('click', async (e) => {
+  // Capture any anchor tag pointing back to the index.html lobby
+  const anchor = e.target.closest('a');
+  if (anchor && anchor.getAttribute('href') && anchor.getAttribute('href').startsWith('index.html')) {
+    const targetUrl = anchor.getAttribute('href');
+    
+    e.preventDefault();
+    console.log(`[Playhaus Interstitial] Navigating to: ${targetUrl}. Triggering interstitial...`);
+    
+    // Play full screen interstitial ad
+    await showInterstitialAd();
+    
+    // Smoothly redirect
+    window.location.href = targetUrl;
+  }
+});
 

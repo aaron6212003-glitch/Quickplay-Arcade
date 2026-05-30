@@ -1,4 +1,4 @@
-const CACHE_NAME = 'playhaus-cache-v11';
+const CACHE_NAME = 'playhaus-cache-v14';
 const ASSETS_TO_CACHE = [
   '/',
   '/index.html',
@@ -17,6 +17,7 @@ const ASSETS_TO_CACHE = [
   '/js/game.js',
   '/js/security.js',
   '/js/haptics.js',
+  '/js/monetization.js',
   '/js/games/color-guess.js',
   '/js/games/higher-lower.js',
   '/js/games/math-avalanche.js',

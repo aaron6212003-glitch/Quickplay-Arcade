@@ -5,9 +5,11 @@
     "build": "mkdir -p public && cp -R index.html game.html locker.html profile.html privacy.html terms.html styles.css manifest.json sw.js js img data public 2>/dev/null || true"
   },
   "dependencies": {
+    "@capacitor-community/admob": "^8.0.0",
     "@capacitor/cli": "^8.3.4",
     "@capacitor/core": "^8.3.4",
     "@capacitor/ios": "^8.3.4",
+    "@revenuecat/purchases-capacitor": "^13.1.4",
     "@supabase/supabase-js": "^2.105.4",
     "nodemailer": "^8.0.10"
   }

@@ -32,13 +32,19 @@ module.exports = async (req, res) => {
   const smtpUser = process.env.SMTP_USER || 'playhaus.arcade@gmail.com';
   const smtpPass = process.env.SMTP_PASSWORD || 'aycr yggz caxg bcrn'; // Pre-configured App Password
 
+  console.log(`[SMTP Debug] Host: "${smtpHost}", Port: ${smtpPort}, User: "${smtpUser}", HasPass: ${!!process.env.SMTP_PASSWORD}, PassLength: ${process.env.SMTP_PASSWORD ? process.env.SMTP_PASSWORD.length : 0}`);
+
   const transporter = nodemailer.createTransport({
     host: smtpHost,
     port: smtpPort,
-    secure: smtpPort === 465,
+    secure: smtpPort === 465, // false for 587 (STARTTLS)
     auth: {
       user: smtpUser,
       pass: smtpPass
+    },
+    tls: {
+      ciphers: 'SSLv3',
+      rejectUnauthorized: false // Prevents serverless SSL handshake failures
     }
   });
 
