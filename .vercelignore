@@ -1,0 +1,12 @@
+node_modules
+ios
+scratch
+.git
+.DS_Store
+*.png
+*.jpg
+*.jpeg
+check_salaries.js
+test_daily.js
+test_pool.js
+test_pool.mjs
