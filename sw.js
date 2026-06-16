@@ -1,23 +1,23 @@
-const CACHE_NAME = 'playhaus-cache-v14';
+const CACHE_NAME = 'playhaus-cache-v22';
 const ASSETS_TO_CACHE = [
   '/',
   '/index.html',
   '/locker.html',
   '/profile.html',
   '/game.html',
-  '/styles.css?v=9',
+  '/styles.css?v=19',
   '/manifest.json',
-  '/js/main.js',
-  '/js/auth.js',
+  '/js/main.js?v=22',
+  '/js/auth.js?v=22',
   '/js/daily.js',
-  '/js/firebase.js',
-  '/js/leaderboard.js',
-  '/js/locker.js',
-  '/js/profile.js',
-  '/js/game.js',
+  '/js/firebase.js?v=20',
+  '/js/leaderboard.js?v=22',
+  '/js/locker.js?v=20',
+  '/js/profile.js?v=20',
+  '/js/game.js?v=22',
   '/js/security.js',
   '/js/haptics.js',
-  '/js/monetization.js',
+  '/js/monetization.js?v=20',
   '/js/games/color-guess.js',
   '/js/games/higher-lower.js',
   '/js/games/math-avalanche.js',
@@ -25,6 +25,12 @@ const ASSETS_TO_CACHE = [
   '/js/games/tanks.js',
   '/js/games/word-gravity.js',
   '/js/games/word-rush.js',
+  '/js/games/locker-link.js',
+  '/js/games/locker-link-data.js',
+  '/js/games/cap-room.js',
+  '/js/games/cap-room-data.js',
+  '/js/games/gridlock.js',
+  '/js/games/gridlock-data.js',
   '/data/games.js',
   '/img/icons/icon-192.png',
   '/img/icons/icon-512.png',
@@ -83,7 +89,7 @@ self.addEventListener('fetch', (event) => {
       })
       .catch(() => {
         // If network fails (offline), try the cache
-        return caches.match(event.request)
+        return caches.match(event.request, { ignoreSearch: true })
           .then((cachedResponse) => {
             if (cachedResponse) {
               return cachedResponse;

@@ -1,5 +1,5 @@
-import { auth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, updateProfile, sendEmailVerification, GoogleAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult } from './firebase.js?v=12';
-import { db, doc, setDoc, getDoc, updateDoc, increment, collection, getDocs, deleteDoc } from './firebase.js?v=12';
+import { auth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, updateProfile, sendEmailVerification, GoogleAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult, sendPasswordResetEmail } from './firebase.js';
+import { db, doc, setDoc, getDoc, updateDoc, increment, collection, getDocs, deleteDoc } from './firebase.js';
 
 const modal = document.getElementById('auth-modal');
 const btnLoginTrigger = document.getElementById('btn-login-trigger');
@@ -32,6 +32,158 @@ if (btnTogglePassword && inputPassword) {
 }
 
 let isSignupMode = false;
+let isForgotPasswordMode = false;
+
+// Premium local Toast system for Auth feedback
+function showToast(message, type = 'success') {
+  let toastContainer = document.getElementById('toast-container');
+  if (!toastContainer) {
+    toastContainer = document.createElement('div');
+    toastContainer.id = 'toast-container';
+    toastContainer.style.cssText = `
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      z-index: 99999;
+      pointer-events: none;
+    `;
+    document.body.appendChild(toastContainer);
+  }
+
+  const toast = document.createElement('div');
+  toast.style.cssText = `
+    min-width: 280px;
+    max-width: 400px;
+    padding: 16px 20px;
+    border-radius: 12px;
+    background: rgba(15, 23, 42, 0.95);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #fff;
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 600;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.4), 0 8px 10px -6px rgba(0, 0, 0, 0.4);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    transform: translateY(20px);
+    opacity: 0;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    pointer-events: auto;
+  `;
+
+  let icon = 'ℹ️';
+  if (type === 'success') {
+    icon = '✅';
+    toast.style.borderLeft = '4px solid #38BDF8';
+  } else if (type === 'error') {
+    icon = '❌';
+    toast.style.borderLeft = '4px solid #EF4444';
+  }
+
+  toast.innerHTML = `
+    <span style="font-size: 1.25rem;">${icon}</span>
+    <span style="flex: 1;">${message}</span>
+  `;
+
+  toastContainer.appendChild(toast);
+
+  setTimeout(() => {
+    toast.style.transform = 'translateY(0)';
+    toast.style.opacity = '1';
+  }, 10);
+
+  setTimeout(() => {
+    toast.style.transform = 'translateY(-20px)';
+    toast.style.opacity = '0';
+    setTimeout(() => {
+      toast.remove();
+    }, 300);
+  }, 4000);
+}
+
+// Forgot Password UI Injection & Control
+function initForgotPasswordUI() {
+  const toggleContainer = document.querySelector('.auth-toggle-container');
+  if (!toggleContainer) return;
+
+  if (document.getElementById('auth-forgot-container')) return;
+
+  const forgotContainer = document.createElement('p');
+  forgotContainer.id = 'auth-forgot-container';
+  forgotContainer.style.cssText = 'font-size: 0.85rem; margin-top: 12px; text-align: center;';
+  forgotContainer.innerHTML = `<a href="#" id="auth-forgot-link" style="color: #38BDF8; text-decoration: none; font-weight: 700; transition: color 0.2s;">Forgot Password?</a>`;
+  
+  toggleContainer.parentNode.insertBefore(forgotContainer, toggleContainer);
+
+  const forgotLink = document.getElementById('auth-forgot-link');
+  forgotLink.addEventListener('click', (e) => {
+    e.preventDefault();
+    if (isForgotPasswordMode) {
+      exitForgotPasswordMode();
+    } else {
+      enterForgotPasswordMode();
+    }
+  });
+}
+
+function enterForgotPasswordMode() {
+  isForgotPasswordMode = true;
+  errorMsg.style.display = 'none';
+  
+  title.innerText = 'Reset Password';
+  btnSubmit.innerText = 'Send Reset Link';
+  
+  const passwordContainer = document.querySelector('.auth-password-container');
+  if (passwordContainer) passwordContainer.style.display = 'none';
+  if (inputUsername) inputUsername.style.display = 'none';
+  if (inputInviteCode) inputInviteCode.style.display = 'none';
+  
+  const toggleContainer = document.querySelector('.auth-toggle-container');
+  if (toggleContainer) toggleContainer.style.display = 'none';
+  const divider = document.querySelector('.auth-divider');
+  if (divider) divider.style.display = 'none';
+  const googleBtn = document.getElementById('btn-google-login');
+  if (googleBtn) googleBtn.style.display = 'none';
+  
+  const forgotLink = document.getElementById('auth-forgot-link');
+  if (forgotLink) {
+    forgotLink.innerText = '← Back to Log In';
+    forgotLink.style.color = '#94a3b8';
+  }
+}
+
+function exitForgotPasswordMode() {
+  isForgotPasswordMode = false;
+  errorMsg.style.display = 'none';
+  
+  title.innerText = isSignupMode ? 'Create Account' : 'Log In';
+  btnSubmit.innerText = isSignupMode ? 'Sign Up' : 'Log In';
+  
+  const passwordContainer = document.querySelector('.auth-password-container');
+  if (passwordContainer) passwordContainer.style.display = 'flex';
+  
+  if (isSignupMode) {
+    if (inputUsername) inputUsername.style.display = 'block';
+    if (inputInviteCode) inputInviteCode.style.display = 'block';
+  } else {
+    if (inputUsername) inputUsername.style.display = 'none';
+    if (inputInviteCode) inputInviteCode.style.display = 'none';
+  }
+  
+  const toggleContainer = document.querySelector('.auth-toggle-container');
+  if (toggleContainer) toggleContainer.style.display = 'block';
+  
+  const forgotLink = document.getElementById('auth-forgot-link');
+  if (forgotLink) {
+    forgotLink.innerText = 'Forgot Password?';
+    forgotLink.style.color = '#38BDF8';
+  }
+}
 
 // Toggle Modal
 if (btnLoginTrigger) {
@@ -39,6 +191,7 @@ if (btnLoginTrigger) {
     modal.style.display = 'flex';
     errorMsg.style.display = 'none';
     resetPasswordVisibility();
+    initForgotPasswordUI();
   });
 }
 
@@ -47,6 +200,7 @@ if (btnClose) {
     modal.style.display = 'none';
     resetPasswordVisibility();
     removeOtpOverlay();
+    if (isForgotPasswordMode) exitForgotPasswordMode();
   });
 }
 
@@ -54,6 +208,7 @@ if (btnClose) {
 if (toggleLink) {
   toggleLink.addEventListener('click', (e) => {
     e.preventDefault();
+    if (isForgotPasswordMode) exitForgotPasswordMode();
     isSignupMode = !isSignupMode;
     errorMsg.style.display = 'none';
     
@@ -316,6 +471,30 @@ if (btnSubmit) {
     const password = inputPassword.value;
     const username = inputUsername.value.trim();
     const inviteCode = inputInviteCode ? inputInviteCode.value.trim().toUpperCase() : "";
+    
+    if (isForgotPasswordMode) {
+      if (!email) {
+        errorMsg.innerText = 'Please enter your email address.';
+        errorMsg.style.display = 'block';
+        return;
+      }
+      btnSubmit.innerText = 'Sending...';
+      btnSubmit.disabled = true;
+      errorMsg.style.display = 'none';
+      try {
+        await sendPasswordResetEmail(auth, email);
+        showToast("✉️ Password reset email sent! Check your inbox.", "success");
+        exitForgotPasswordMode();
+      } catch (err) {
+        console.error("Password reset error:", err);
+        errorMsg.innerText = err.message.replace('Firebase: ', '');
+        errorMsg.style.display = 'block';
+      } finally {
+        btnSubmit.innerText = 'Send Reset Link';
+        btnSubmit.disabled = false;
+      }
+      return;
+    }
     
     if (!email || !password || (isSignupMode && (!username || !inviteCode))) {
       errorMsg.innerText = 'Please fill out all fields.';
@@ -682,6 +861,7 @@ onAuthStateChanged(auth, (user) => {
       document.getElementById('btn-login-trigger').addEventListener('click', () => {
         modal.style.display = 'flex';
         errorMsg.style.display = 'none';
+        initForgotPasswordUI();
       });
     }
 
@@ -697,6 +877,7 @@ onAuthStateChanged(auth, (user) => {
         modal.style.display = 'flex';
         errorMsg.style.display = 'none';
         mobileMenu?.classList.remove('open');
+        initForgotPasswordUI();
       });
     }
   }

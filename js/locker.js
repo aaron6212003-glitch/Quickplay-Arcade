@@ -1,13 +1,13 @@
-import { db, auth, doc, getDoc, setDoc, updateDoc, sendEmailVerification } from './firebase.js?v=12';
-import { onAuthStateChanged } from './firebase.js?v=12';
-import { triggerHaptic } from './haptics.js';
+import { db, auth, doc, getDoc, setDoc, updateDoc, sendEmailVerification, increment } from './firebase.js';
+import { onAuthStateChanged } from './firebase.js';
+import { triggerHaptic, playSound } from './haptics.js';
 import { 
   checkVipStatus, 
   showBannerAd, 
   showRewardedAd, 
   purchaseGems, 
   purchaseVipMembership 
-} from './monetization.js?v=12';
+} from './monetization.js';
 
 // --- COSMETICS DEFINITION SYSTEM ---
 const COSMETICS = [
@@ -88,6 +88,11 @@ const COSMETICS = [
   { id: "border:border-diamond", type: "border", name: "Prism Crystal", val: "border-diamond", rarity: "legendary" },
   { id: "border:border-phoenix", type: "border", name: "Solar Prominence", val: "border-phoenix", rarity: "legendary" },
   { id: "border:border-nebula", type: "border", name: "Celestial Nebula", val: "border-nebula", rarity: "legendary" },
+  { id: "border:border-glitch-neon", type: "border", name: "Cyber Neon Glitch", val: "border-glitch-neon", rarity: "legendary" },
+  { id: "border:border-hyper-glow", type: "border", name: "Hyper Glowing Gold", val: "border-hyper-glow", rarity: "legendary" },
+  { id: "border:border-plasma-wave", type: "border", name: "Liquid Plasma Wave", val: "border-plasma-wave", rarity: "epic" },
+  { id: "border:border-fire-ring", type: "border", name: "Solar Fire Ring", val: "border-fire-ring", rarity: "legendary" },
+  { id: "border:border-void-spiral", type: "border", name: "Cosmic Void Spiral", val: "border-void-spiral", rarity: "legendary" },
 
   // --- THEMES (Card Backgrounds) ---
   // Common
@@ -122,6 +127,11 @@ const COSMETICS = [
   { id: "theme:theme-vortex", type: "theme", name: "Chrono Vortex", val: "theme-vortex", rarity: "legendary" },
   { id: "theme:theme-prism", type: "theme", name: "Prismatic Hologram", val: "theme-prism", rarity: "legendary" },
   { id: "theme:theme-inferno", type: "theme", name: "Infernal Embers", val: "theme-inferno", rarity: "legendary" },
+  { id: "theme:theme-nebula-vortex", type: "theme", name: "Nebula Vortex", val: "theme-nebula-vortex", rarity: "legendary" },
+  { id: "theme:theme-lava-flow", type: "theme", name: "Lava Flow Chamber", val: "theme-lava-flow", rarity: "legendary" },
+  { id: "theme:theme-aurora-borealis", type: "theme", name: "Northern Aurora Borealis", val: "theme-aurora-borealis", rarity: "epic" },
+  { id: "theme:theme-neon-glitch", type: "theme", name: "Digital Neon Glitch", val: "theme-neon-glitch", rarity: "legendary" },
+  { id: "theme:theme-fire-storm", type: "theme", name: "Infernal Fire Storm", val: "theme-fire-storm", rarity: "legendary" },
 
   // --- TITLES (Witty Clash Royale-style slogan tags) ---
   // Common — Self-deprecating, relatable, new player energy
@@ -268,6 +278,7 @@ const btnModalContinue = document.getElementById('btn-modal-continue');
 // Locker Grid Elements
 const subtabButtons = document.querySelectorAll('.subtab-btn');
 const inventoryContainer = document.getElementById('inventory-container');
+const revealViewport = document.getElementById('reveal-viewport');
 
 // State Cache Variables
 let userDocData = null;
@@ -422,6 +433,8 @@ function updateCurrencyDisplay(data) {
 // --- TAB SWITCHER LOGIC ---
 if (tabVending && tabLocker) {
   tabVending.addEventListener('click', () => {
+    triggerHaptic('light');
+    playSound('click');
     tabVending.classList.add('active');
     tabLocker.classList.remove('active');
     panelVending.style.display = 'block';
@@ -429,6 +442,8 @@ if (tabVending && tabLocker) {
   });
 
   tabLocker.addEventListener('click', () => {
+    triggerHaptic('light');
+    playSound('click');
     tabLocker.classList.add('active');
     tabVending.classList.remove('active');
     panelLocker.style.display = 'block';
@@ -440,6 +455,8 @@ if (tabVending && tabLocker) {
 // --- CATEGORY SUBTAB SWITCHER LOGIC ---
 subtabButtons.forEach(btn => {
   btn.addEventListener('click', () => {
+    triggerHaptic('light');
+    playSound('click');
     subtabButtons.forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
     currentLockerCategory = btn.getAttribute('data-type');
@@ -473,15 +490,15 @@ onAuthStateChanged(auth, async (user) => {
       }
 
       // Sync and initialize cosmetic economy defaults
-      if (data.playCoins === undefined) {
+      if (data.playCoins === undefined || data.playCoins === null) {
         data.playCoins = 200; // Starter coins
         needsMerge = true;
       }
-      if (data.scrap === undefined) {
+      if (data.scrap === undefined || data.scrap === null) {
         data.scrap = 0;
         needsMerge = true;
       }
-      if (data.ownedCosmetics === undefined) {
+      if (!Array.isArray(data.ownedCosmetics)) {
         // Base starter pack
         data.ownedCosmetics = [
           "avatar:👾", "border:border-common", "theme:theme-common", "title:THE ROOKIE",
@@ -497,19 +514,17 @@ onAuthStateChanged(auth, async (user) => {
           }
         });
       }
-      if (data.activeCosmetics === undefined) {
+      if (!data.activeCosmetics || typeof data.activeCosmetics !== 'object') {
         data.activeCosmetics = {
           avatar: data.avatar || "👾",
           border: "border-common",
           theme: "theme-common",
           title: "THE ROOKIE",
-
           card_anim: "anim-none",
           frame: "frame-none"
         };
         needsMerge = true;
       } else {
-
         if (!data.activeCosmetics.card_anim) { data.activeCosmetics.card_anim = "anim-none"; needsMerge = true; }
         if (!data.activeCosmetics.frame) { data.activeCosmetics.frame = "frame-none"; needsMerge = true; }
       }
@@ -523,37 +538,6 @@ onAuthStateChanged(auth, async (user) => {
       // Update layouts
       updateCurrencyDisplay(userDocData);
       updatePreviewCard(userDocData, user);
-
-      // ── Playhaus Monetization & VIP Verification ──
-      try {
-        const isVip = await checkVipStatus(user);
-        
-        // Enforce VIP daily drop logic (award +15 Gems once a day)
-        if (isVip) {
-          const todayStr = new Date().toDateString();
-          if (userDocData.lastVipDailyClaim !== todayStr) {
-            console.log("[Playhaus VIP] Awarding +15 Daily Gems drop...");
-            const userRef = doc(db, "users", user.uid);
-            await updateDoc(userRef, {
-              scrap: increment(15),
-              lastVipDailyClaim: todayStr
-            });
-            userDocData.scrap = (userDocData.scrap || 0) + 15;
-            userDocData.lastVipDailyClaim = todayStr;
-            updateCurrencyDisplay(userDocData);
-            
-            // Highlight VIP drop in a golden toast!
-            setTimeout(() => {
-              showToast("👑 VIP Daily Drop claimed! +15 Gems credited! 💎", "success");
-            }, 1000);
-          }
-        } else {
-          // If not a VIP, load and show bottom banner ad
-          showBannerAd();
-        }
-      } catch (err) {
-        console.error("[Playhaus VIP] Failed to evaluate VIP/Ads state on startup:", err);
-      }
 
       // ── Email Verification Rewards & Banner Loop ──
       const verifyBanner = document.getElementById('email-verify-banner');
@@ -607,11 +591,45 @@ onAuthStateChanged(auth, async (user) => {
         }
       }
 
+      // Hide loading screen and display content IMMEDIATELY to prevent blocking page loads
       if (loadingOverlay) loadingOverlay.style.display = 'none';
       if (lockerContent) lockerContent.style.display = 'grid';
 
-      // Render items grid in background
+      // Render items grid
       renderLockerGrid();
+
+      // ── Playhaus Monetization & VIP Verification (Run in background to avoid blocking transition) ──
+      (async () => {
+        try {
+          const isVip = await checkVipStatus(user);
+          
+          // Enforce VIP daily drop logic (award +15 Gems once a day)
+          if (isVip) {
+            const todayStr = new Date().toDateString();
+            if (userDocData.lastVipDailyClaim !== todayStr) {
+              console.log("[Playhaus VIP] Awarding +15 Daily Gems drop...");
+              const userRef = doc(db, "users", user.uid);
+              await updateDoc(userRef, {
+                scrap: increment(15),
+                lastVipDailyClaim: todayStr
+              });
+              userDocData.scrap = (userDocData.scrap || 0) + 15;
+              userDocData.lastVipDailyClaim = todayStr;
+              updateCurrencyDisplay(userDocData);
+              
+              // Highlight VIP drop in a golden toast!
+              setTimeout(() => {
+                showToast("👑 VIP Daily Drop claimed! +15 Gems credited! 💎", "success");
+              }, 1000);
+            }
+          } else {
+            // If not a VIP, load and show bottom banner ad
+            showBannerAd();
+          }
+        } catch (err) {
+          console.error("[Playhaus VIP] Failed to evaluate VIP/Ads state on startup:", err);
+        }
+      })();
 
     } catch (err) {
       console.error("Error loading locker assets:", err);
@@ -677,63 +695,57 @@ function renderLockerGrid() {
       isEquipped = (active.frame === item.val);
     }
 
-    // Create item DOM structure
+    // Create item DOM structure - Super Compact Premium Slots
     const el = document.createElement('div');
     el.className = `inventory-item rarity-${item.rarity}`;
     if (isEquipped) el.classList.add('equipped');
     if (!isOwned) el.classList.add('locked');
 
-    const lockTag = !isOwned ? `<div style="font-size:0.6rem; color:#EF4444; font-weight:800; margin-top:4px;">🔒 ${SCRAP_COSTS[item.rarity]} Gems</div>` : '';
+    const lockTag = !isOwned ? `<div class="lock-tag">🔒 ${SCRAP_COSTS[item.rarity]}</div>` : '';
 
     // Build the visual preview based on item type
     if (item.type === 'theme') {
       el.classList.add('inventory-item--theme');
       el.innerHTML = `
         <div class="theme-preview-card gamer-card ${item.val}" aria-label="${item.name} preview">
-          <span class="theme-preview-emoji">👾</span>
+          <span class="theme-preview-emoji" style="font-size: 0.65rem;">👾</span>
         </div>
         <div class="inventory-name" title="${item.name}">${item.name}</div>
-        <div class="inventory-rarity-lbl" style="color: ${RARITY_COLORS[item.rarity]};">${item.rarity}</div>
         ${lockTag}
       `;
     } else if (item.type === 'border') {
       el.innerHTML = `
         <div class="border-preview-wrap">
           <div class="avatar-ring ${item.val} border-preview-ring">
-            <div class="gamer-avatar" style="font-size:1.8rem; width:52px; height:52px;">👾</div>
+            <div class="gamer-avatar">👾</div>
           </div>
         </div>
         <div class="inventory-name" title="${item.name}">${item.name}</div>
-        <div class="inventory-rarity-lbl" style="color: ${RARITY_COLORS[item.rarity]};">${item.rarity}</div>
         ${lockTag}
       `;
     } else if (item.type === 'avatar') {
       el.innerHTML = `
         <div class="inventory-icon">${item.val}</div>
         <div class="inventory-name" title="${item.name}">${item.name}</div>
-        <div class="inventory-rarity-lbl" style="color: ${RARITY_COLORS[item.rarity]};">${item.rarity}</div>
         ${lockTag}
       `;
     } else if (item.type === 'title') {
       el.innerHTML = `
-        <div class="inventory-icon" style="color: ${RARITY_COLORS[item.rarity]}; font-size: 0.62rem; font-weight: 900; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 8px; padding: 6px 8px; border: 1px solid ${RARITY_COLORS[item.rarity]}44; border-radius: 6px; background: rgba(0,0,0,0.4); max-width: 100%; text-align:center; line-height:1.4;">${item.val}</div>
+        <div class="inventory-icon" style="color: ${RARITY_COLORS[item.rarity]}; font-size: 0.52rem; font-weight: 900; letter-spacing: 0.5px; text-transform: uppercase; margin-bottom: 4px; padding: 4px; border: 1px solid ${RARITY_COLORS[item.rarity]}33; border-radius: 4px; background: rgba(0,0,0,0.4); text-align:center; max-width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${item.val}</div>
         <div class="inventory-name" title="${item.name}">${item.name}</div>
-        <div class="inventory-rarity-lbl" style="color: ${RARITY_COLORS[item.rarity]};">${item.rarity}</div>
         ${lockTag}
       `;
 
     } else if (item.type === 'card_anim') {
       el.innerHTML = `
-        <div class="inventory-icon" style="font-size: 1.8rem; height: 52px; display: flex; align-items: center; justify-content: center;">${item.emoji || '✨'}</div>
+        <div class="inventory-icon" style="font-size: 1.4rem; height: 32px; display: flex; align-items: center; justify-content: center; margin-bottom: 4px;">${item.emoji || '✨'}</div>
         <div class="inventory-name" title="${item.name}">${item.name}</div>
-        <div class="inventory-rarity-lbl" style="color: ${RARITY_COLORS[item.rarity]};">${item.rarity}</div>
         ${lockTag}
       `;
     } else if (item.type === 'frame') {
       el.innerHTML = `
-        <div class="inventory-icon" style="font-size: 1.8rem; height: 52px; display: flex; align-items: center; justify-content: center;">${item.emoji || '🖼️'}</div>
+        <div class="inventory-icon" style="font-size: 1.4rem; height: 32px; display: flex; align-items: center; justify-content: center; margin-bottom: 4px;">${item.emoji || '🖼️'}</div>
         <div class="inventory-name" title="${item.name}">${item.name}</div>
-        <div class="inventory-rarity-lbl" style="color: ${RARITY_COLORS[item.rarity]};">${item.rarity}</div>
         ${lockTag}
       `;
     }
@@ -777,6 +789,10 @@ async function equipItem(item) {
 
   userDocData.activeCosmetics = updatedActive;
 
+  // Trigger feedback
+  triggerHaptic('medium');
+  playSound('upgrade');
+
   // Render instantly!
   updatePreviewCard(userDocData, user);
   renderLockerGrid();
@@ -809,6 +825,8 @@ async function purchaseItemWithScrap(item) {
 
   const currentScrap = userDocData.scrap || 0;
   if (currentScrap < cost) {
+    triggerHaptic('medium');
+    playSound('error');
     showToast(`Insufficient Gems! Need ${cost} Gems but you only have ${currentScrap}.`, "error");
     return;
   }
@@ -837,6 +855,8 @@ async function purchaseItemWithScrap(item) {
     userDocData.scrap = updatedScrap;
     userDocData.ownedCosmetics = updatedOwned;
 
+    triggerHaptic('heavy');
+    playSound('powerup');
     showToast(`Unlocked "${item.name}"! Direct purchase completed!`, "success");
     updateCurrencyDisplay(userDocData);
     renderLockerGrid();
@@ -883,14 +903,18 @@ function drawRandomCosmeticOfRarity(rarity) {
 // ── Status LED State Management ──────────────────────────────────────────────
 function updateClawLED(state) {
   const clawLed = document.getElementById('claw-led');
+  const displayEl = document.getElementById('claw-display-text');
   if (!clawLed) return;
   clawLed.classList.remove('led-ready', 'led-moving', 'led-grabbing');
   if (state === 'ready') {
     clawLed.classList.add('led-ready');
+    if (displayEl) displayEl.innerText = "READY";
   } else if (state === 'moving') {
     clawLed.classList.add('led-moving');
+    if (displayEl) displayEl.innerText = "POSITIONING";
   } else if (state === 'grabbing') {
     clawLed.classList.add('led-grabbing');
+    if (displayEl) displayEl.innerText = "GRABBING...";
   }
 }
 
@@ -1020,28 +1044,28 @@ function initPrizePile() {
 
     // Determine layered vertical positioning to form a full physical pile heap
     let posY = 0;
-    let minX = 70;
+    let minX = 6;
     let maxX = 405;
     
     if (i < 40) {
-      // Layer 1 (Base Floor): spread wide sitting on the floor
+      // Layer 1 (Base Floor): spread wide sitting on the floor, keep clear of chute (left 70px)
       posY = Math.floor(Math.random() * 6);
       minX = 70;
       maxX = 405;
     } else if (i < 70) {
       // Layer 2 (Middle Heap): stacked middle gifts spread wide
       posY = Math.floor(Math.random() * 8 + 14);
-      minX = 75;
+      minX = 70;
       maxX = 400;
     } else if (i < 90) {
       // Layer 3 (High Peak): stacked higher peak pile
       posY = Math.floor(Math.random() * 8 + 26);
-      minX = 85;
+      minX = 75;
       maxX = 390;
     } else {
       // Layer 4 (Top Summit): top summit peak pile
       posY = Math.floor(Math.random() * 8 + 36);
-      minX = 100;
+      minX = 15;
       maxX = 375;
     }
 
@@ -1266,11 +1290,22 @@ function updateClawPhysics() {
     }
   }
 
-  // Update horizontal position
-  clawX = Math.max(16, Math.min(94, clawX + clawVx * 0.45));
+  // Update horizontal position — left limit is 8% so claw can reach the prize chute at left:0
+  clawX = Math.max(8, Math.min(94, clawX + clawVx * 0.45));
   clawPositionPercent = clawX;
   
-  if (clawX <= 16 || clawX >= 94) {
+  // If claw is at hard boundary and target is on the far side, snap target to prevent deadlock
+  if (clawX <= 8 && clawXTarget !== null && clawXTarget < 8) {
+    clawX = 8;
+    clawXTarget = null;
+    clawVx = 0;
+  }
+  if (clawX >= 94 && clawXTarget !== null && clawXTarget > 94) {
+    clawX = 94;
+    clawXTarget = null;
+    clawVx = 0;
+  }
+  if (clawX <= 8 || clawX >= 94) {
     clawVx = 0;
   }
 
@@ -1311,6 +1346,8 @@ function startMovingClaw(direction) {
   if (isClawRunning) return;
   activeMoveDirection = direction;
   ClawAudio.playClick();
+  triggerHaptic('light');
+  playSound('click');
   updateClawLED('moving');
   
   if (joystickBase) {
@@ -1352,23 +1389,83 @@ if (btnJoystickRight) {
   btnJoystickRight.addEventListener('touchend', stopMovingClaw);
 }
 
-// Joystick touch drag movement helper
+// Joystick touch drag and mouse drag movement helper
 if (joystickBase) {
-  joystickBase.addEventListener('touchstart', (e) => {
-    e.preventDefault();
-    const touchX = e.touches[0].clientX;
+  let isMouseDragging = false;
+
+  const handleJoystickInteraction = (clientX) => {
     const baseRect = joystickBase.getBoundingClientRect();
     const centerX = baseRect.left + baseRect.width / 2;
-    
-    if (touchX < centerX) {
+    if (clientX < centerX) {
       startMovingClaw('left');
     } else {
       startMovingClaw('right');
     }
+  };
+
+  // Touch drag events
+  joystickBase.addEventListener('touchstart', (e) => {
+    e.preventDefault();
+    handleJoystickInteraction(e.touches[0].clientX);
   }, { passive: false });
-  
+
+  joystickBase.addEventListener('touchmove', (e) => {
+    e.preventDefault();
+    handleJoystickInteraction(e.touches[0].clientX);
+  }, { passive: false });
+
   joystickBase.addEventListener('touchend', stopMovingClaw);
+
+  // Mouse drag events for Desktop
+  joystickBase.addEventListener('mousedown', (e) => {
+    e.preventDefault();
+    isMouseDragging = true;
+    handleJoystickInteraction(e.clientX);
+  });
+
+  window.addEventListener('mousemove', (e) => {
+    if (!isMouseDragging) return;
+    handleJoystickInteraction(e.clientX);
+  });
+
+  const handleMouseUp = () => {
+    if (isMouseDragging) {
+      isMouseDragging = false;
+      stopMovingClaw();
+    }
+  };
+
+  window.addEventListener('mouseup', handleMouseUp);
 }
+
+// Global Keyboard Controls
+window.addEventListener('keydown', (e) => {
+  // Ignore keys if typing in username/password/tagline input or textareas
+  if (document.activeElement && (document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA')) {
+    return;
+  }
+
+  if (isClawRunning) return;
+
+  if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') {
+    startMovingClaw('left');
+  } else if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') {
+    startMovingClaw('right');
+  } else if (e.key === ' ' || e.key === 'Spacebar' || e.key === 'Enter') {
+    e.preventDefault(); // Prevent page scrolling
+    performClawDrop();
+  }
+});
+
+window.addEventListener('keyup', (e) => {
+  if (document.activeElement && (document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA')) {
+    return;
+  }
+
+  if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A' || e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') {
+    stopMovingClaw();
+  }
+});
 
 // ── Interactive Sparks Burst when Claw Clamps Cargo ─────────────────────────
 function triggerGrabSparks() {
@@ -1480,7 +1577,11 @@ async function performClawDrop() {
 
   showToast("🕹️ Claw dropping! Good luck!", "success");
   ClawAudio.playDropSound();
+  triggerHaptic('heavy');
+  playSound('laser');
   updateClawLED('moving'); // State LED -> Moving yellow flash
+  const displayEl = document.getElementById('claw-display-text');
+  if (displayEl) displayEl.innerText = "DESCENDING";
 
   // 2. Open Claw Fingers at the Top (Phase 1a)
   if (clawHand) {
@@ -1552,6 +1653,7 @@ async function performClawDrop() {
 
   // 4. Claw Grab / Close Fingers around box (Phase 2)
   updateClawLED('grabbing'); // State LED -> Grabbing solid red
+  if (displayEl) displayEl.innerText = closestBox ? "TARGET LOCKED" : "MISSED CLAMP";
   if (clawHand) {
     clawHand.classList.remove('is-open');
     clawHand.classList.add('is-closed');
@@ -1596,6 +1698,7 @@ async function performClawDrop() {
 
   // 5. Retract Gantry String (Phase 3)
   updateClawLED('grabbing'); // Keep red solid as it ascends with cargo
+  if (displayEl) displayEl.innerText = closestBox ? "RETRACT CARGO" : "EMPTY RETRACT";
   if (clawString) {
     // Retract with a heavy spring-rebound overshoot curve!
     clawString.style.transition = 'height 1.2s cubic-bezier(0.34, 1.56, 0.64, 1)';
@@ -1606,16 +1709,22 @@ async function performClawDrop() {
   await new Promise(res => setTimeout(res, 1200));
 
   // 6. Slide Claw Assembly to Left Drop Chute (Phase 4)
-  // Use our continuous physics engine to travel left to the center of the chute (16%)
-  clawXTarget = 16; 
+  // Claw clamp floor is 8%; chute center ~9% so claw parks directly over the chute opening
+  if (displayEl) displayEl.innerText = "MOVING LEFT";
+  clawXTarget = 9; 
   await waitForClawArrival();
 
   // 7. Open Claw / Drop Prize Box down chute (Phase 5)
   updateClawLED('moving'); // Back to yellow flash as cargo drops
+  if (displayEl) displayEl.innerText = prizeBoxNode ? "DROP CARGO" : "EMPTY RESET";
   if (clawHand) {
     clawHand.classList.remove('is-closed');
+    clawHand.classList.add('is-open');
   }
   ClawAudio.playClang();
+
+  // Wait for prongs to visually open before releasing prize
+  await new Promise(res => setTimeout(res, 280));
 
   if (prizeBoxNode) {
     // 1. Get absolute positions relative to the entire chamber container
@@ -1725,6 +1834,7 @@ async function performClawDrop() {
         }
         ClawAudio.playWinSound();
         triggerHaptic(rolledItem.rarity === 'legendary' ? 'heavy' : rolledItem.rarity === 'epic' || rolledItem.rarity === 'rare' ? 'medium' : 'light');
+        playSound('gacha_reveal');
         showToast(`NEW UNLOCK! You grabbed a ${rolledItem.rarity.toUpperCase()} "${rolledItem.name}"!`, "success");
       } else {
         // Recycle Duplicate to Gems
@@ -1748,11 +1858,14 @@ async function performClawDrop() {
         
         ClawAudio.playClick();
         triggerHaptic('light');
+        playSound('coin');
         showToast(`Duplicate! Converted to +${scrapCompensation} Gems.`, "warning");
       }
 
       // Open visual modal
       clawRevealModal.classList.add('active');
+      const displayEl = document.getElementById('claw-display-text');
+      if (displayEl) displayEl.innerText = isDuplicate ? "DUPLICATE" : "YOU WIN!";
       
       // Fire explosive unboxing particles matching rolled rarity!
       triggerConfetti(rolledItem.rarity);

@@ -1,8 +1,26 @@
-import { db, auth, collection, addDoc, getDocs, query, orderBy, limit, doc, getDoc, updateDoc, increment, where } from './firebase.js?v=12';
+import { db, auth, collection, addDoc, getDocs, query, orderBy, limit, doc, getDoc, updateDoc, increment, where } from './firebase.js';
 import { getDailyGame, getYesterdayDateString } from './daily.js';
 import { verifyScoreSignature } from './security.js';
 
 let activeRankingsTab = 'daily'; // 'daily' or 'alltime'
+
+function formatLeaderboardScore(score, gameName) {
+  if (gameName === 'Locker Link' && score >= 900000) {
+    const links = Math.floor((1000000 - score) / 10000);
+    const errs = Math.floor(((1000000 - score) % 10000) / 100);
+    const sec = (1000000 - score) % 100;
+    return `${links} L (${errs} err, ${sec}s)`;
+  }
+  if (gameName === 'Cap Room') {
+    const wins = Math.floor((score % 10000000) / 100000);
+    const playoffProgress = Math.floor((score % 100000) / 10000);
+    const rating = Math.floor((score % 10000) / 100);
+    const finishes = ["No Playoffs", "Quarterfinals", "Semifinals", "Finals", "Champions 🏆"];
+    const finish = finishes[playoffProgress] || "Finished";
+    return `${wins} W (${finish}, ${rating} OVR)`;
+  }
+  return score.toLocaleString();
+}
 
 // --- CLASH ROYALE LEVEL PROGRESSION CALCULATOR ---
 function getLevelData(totalXP) {
@@ -255,12 +273,13 @@ window.loadLeaderboard = async function(gameFilter = '') {
     let rawScores = [];
     const q = query(
       collection(db, "scores"),
-      where("game", "==", activeFilter),
-      orderBy("score", "desc"),
-      limit(300)
+      where("game", "==", activeFilter)
     );
     const querySnapshot = await getDocs(q);
     querySnapshot.forEach(doc => rawScores.push(doc.data()));
+
+    // Sort in-memory by score descending to bypass Firestore composite index requirements
+    rawScores.sort((a, b) => b.score - a.score);
 
     // Deduplicate: Keep only the highest score for each unique player (uid)
     const bestScoresMap = new Map();
@@ -309,7 +328,7 @@ window.loadLeaderboard = async function(gameFilter = '') {
             ${isCurrentUser ? '<span style="font-size:0.6rem; background:#38BDF8; color:#000; padding:2px 4px; border-radius:4px; margin-left:6px; font-weight:800;">YOU</span>' : ''}
           </span>
           <span class="lb-game">${data.game}</span>
-          <span class="lb-score">${data.score.toLocaleString()}</span>
+          <span class="lb-score">${formatLeaderboardScore(data.score, data.game)}</span>
         </div>
       `;
       rank++;
@@ -334,7 +353,7 @@ window.loadLeaderboard = async function(gameFilter = '') {
             <span style="font-size:0.6rem; background:#38BDF8; color:#000; padding:2px 4px; border-radius:4px; margin-left:6px; font-weight:800;">YOU</span>
           </span>
           <span class="lb-game">${data.game}</span>
-          <span class="lb-score">${data.score.toLocaleString()}</span>
+          <span class="lb-score">${formatLeaderboardScore(data.score, data.game)}</span>
         </div>
       `;
     }
@@ -366,7 +385,8 @@ async function loadYesterdayChampion() {
     if (allScores.length > 0) {
       allScores.sort((a, b) => b.score - a.score);
       const champ = allScores[0];
-      textEl.innerHTML = `Yesterday's Champion: <strong>@${champ.username}</strong> with <strong>${champ.score.toLocaleString()}</strong> points on ${champ.game}! 👑`;
+      const champScoreStr = formatLeaderboardScore(champ.score, champ.game);
+      textEl.innerHTML = `Yesterday's Champion: <strong>@${champ.username}</strong> with <strong>${champScoreStr}</strong> on ${champ.game}! 👑`;
       banner.style.display = 'flex';
     } else {
       banner.style.display = 'none';

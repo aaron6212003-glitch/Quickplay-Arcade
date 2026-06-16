@@ -61,7 +61,7 @@ function diffClass(diff) {
 function gameCardHTML(game) {
   const [c1, c2] = game.gradient;
   return `
-    <article class="game-card fade-in-up" data-id="${game.id}" role="article">
+    <a href="game.html?id=${game.id}" class="game-card fade-in-up" data-id="${game.id}" role="article" style="text-decoration: none; color: inherit;">
       <div class="game-card__thumb" style="background:linear-gradient(135deg,${c1},${c2})">
         ${game.emoji}
         <div class="game-card__badges">${badgesHTML(game.badges)}</div>
@@ -76,9 +76,9 @@ function gameCardHTML(game) {
         ${game.earn ? `<div class="game-card__earn">${game.earn}</div>` : ''}
       </div>
       <div class="game-card__footer">
-        <a href="game.html?id=${game.id}" class="btn btn--primary btn--sm">▶ Play Game</a>
+        <div class="btn btn--primary btn--sm">▶ Play Game</div>
       </div>
-    </article>
+    </a>
   `;
 }
 

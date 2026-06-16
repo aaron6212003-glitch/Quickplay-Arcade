@@ -1,6 +1,6 @@
 import { GAMES } from '../data/games.js';
-import { auth, db, onAuthStateChanged, doc, getDoc, setDoc, increment } from './firebase.js?v=12';
-import { showInterstitialAd } from './monetization.js?v=12';
+import { auth, db, onAuthStateChanged, doc, getDoc, setDoc, increment } from './firebase.js';
+import { showInterstitialAd } from './monetization.js';
 
 // ── Get game id from URL ─────────────────────────────────────────────────────
 const params = new URLSearchParams(window.location.search);
@@ -126,7 +126,7 @@ if (game) {
   const comingSoon = document.getElementById('coming-soon');
   const preScreen = document.getElementById('game-pre-screen');
   
-  const activeGames = ['color-guess', 'higher-lower', 'word-rush', 'word-gravity', 'math-avalanche', 'tanks', 'pop-lock'];
+  const activeGames = ['color-guess', 'higher-lower', 'word-rush', 'word-gravity', 'math-avalanche', 'tanks', 'pop-lock', 'sports-guess', 'locker-link', 'cap-room', 'gridlock'];
   
   if (activeGames.includes(gameId)) {
     comingSoon.style.display = 'none';
@@ -342,13 +342,26 @@ if (game) {
             'word-rush': './games/word-rush.js',
             'word-gravity': './games/word-gravity.js',
             'math-avalanche': './games/math-avalanche.js',
-            'pop-lock': './games/pop-lock.js'
+            'pop-lock': './games/pop-lock.js',
+            'sports-guess': './games/sports-guess.js',
+            'locker-link': './games/locker-link.js',
+            'cap-room': './games/cap-room.js',
+            'gridlock': './games/gridlock.js'
           };
 
           if (gameId === 'tanks') {
             import('./games/tanks.js').then(module => {
               module.initTanks(gameContainer);
               centerActiveGame();
+            }).catch(err => {
+              console.error("Failed to load/init Tanks:", err);
+              gameContainer.innerHTML = `
+                <div style="padding: 30px 20px; text-align: center; color: #ff6b6b; font-family: 'Outfit', sans-serif; background: rgba(15,23,42,0.6); border-radius: 16px; border: 1px solid rgba(255,255,255,0.08); margin: 0 auto; max-width: 550px;">
+                  <h3 style="font-size: 1.5rem; margin-top: 0; margin-bottom: 10px;">🎮 Failed to load Tanks</h3>
+                  <p style="color: #94a3b8; margin-bottom: 20px; font-size: 0.95rem;">${err.message}</p>
+                  <button onclick="location.reload()" style="padding: 10px 24px; background: #38bdf8; border: none; color: white; border-radius: 8px; font-weight: 800; cursor: pointer; transition: background 0.2s;">Retry</button>
+                </div>
+              `;
             });
           } else {
             const path = modules[gameId];
@@ -356,6 +369,15 @@ if (game) {
               import(path).then(module => {
                 module.init(gameContainer);
                 centerActiveGame();
+              }).catch(err => {
+                console.error(`Failed to load/init game module (${gameId}):`, err);
+                gameContainer.innerHTML = `
+                  <div style="padding: 30px 20px; text-align: center; color: #ff6b6b; font-family: 'Outfit', sans-serif; background: rgba(15,23,42,0.6); border-radius: 16px; border: 1px solid rgba(255,255,255,0.08); margin: 0 auto; max-width: 550px;">
+                    <h3 style="font-size: 1.5rem; margin-top: 0; margin-bottom: 10px;">🎮 Failed to load game</h3>
+                    <p style="color: #94a3b8; margin-bottom: 20px; font-size: 0.95rem;">${err.message}</p>
+                    <button onclick="location.reload()" style="padding: 10px 24px; background: #38bdf8; border: none; color: white; border-radius: 8px; font-weight: 800; cursor: pointer; transition: background 0.2s;">Retry</button>
+                  </div>
+                `;
               });
             }
           }

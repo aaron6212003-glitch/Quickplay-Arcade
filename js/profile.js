@@ -1,4 +1,28 @@
-import { db, auth, doc, getDoc, setDoc, onAuthStateChanged, collection, query, where, getDocs, updateProfile, updateDoc, sendEmailVerification, storage } from './firebase.js?v=12';
+import { 
+  db, 
+  auth, 
+  doc, 
+  getDoc, 
+  setDoc, 
+  onAuthStateChanged, 
+  collection, 
+  query, 
+  where, 
+  getDocs, 
+  updateProfile, 
+  updateDoc, 
+  sendEmailVerification, 
+  storage,
+  ref,
+  uploadBytes,
+  getDownloadURL,
+  deleteObject,
+  updatePassword,
+  updateEmail,
+  deleteUser,
+  reauthenticateWithCredential,
+  EmailAuthProvider
+} from './firebase.js';
 
 // DOM selection
 const loadingOverlay = document.getElementById('profile-loading');
@@ -277,6 +301,9 @@ onAuthStateChanged(auth, async (user) => {
       // Update Analytics stats
       if (pointsEl) pointsEl.innerText = totalPoints.toLocaleString();
       if (gamesEl) gamesEl.innerText = (data.gamesPlayed || 0).toLocaleString();
+      
+      const emailDisplay = document.getElementById('settings-email-display');
+      if (emailDisplay) emailDisplay.innerText = user.email || "";
       
       // Query score history timeline dynamically without requiring composite indexes
       let scores = [];
@@ -732,6 +759,236 @@ if (hamburger && mobileMenu) {
   hamburger.addEventListener('click', () => {
     mobileMenu.classList.toggle('open');
   });
+}
+
+// ── ACCOUNT SETTINGS & ADMINISTRATION PANEL SYSTEM ───────────────────────────
+function initAccountSettings() {
+  // Modal Elements
+  const updateEmailModal = document.getElementById('update-email-modal');
+  const updatePasswordModal = document.getElementById('update-password-modal');
+  const reauthModal = document.getElementById('reauth-modal');
+
+  // Trigger Buttons
+  const btnChangeEmail = document.getElementById('btn-change-email');
+  const btnChangePassword = document.getElementById('btn-change-password');
+  const btnDeleteAccountTrigger = document.getElementById('btn-delete-account-trigger');
+
+  // Close Buttons
+  const btnEmailModalClose = document.getElementById('btn-email-modal-close');
+  const btnPasswordModalClose = document.getElementById('btn-password-modal-close');
+  const btnReauthModalClose = document.getElementById('btn-reauth-modal-close');
+
+  // Input Fields
+  const inputNewEmail = document.getElementById('input-new-email');
+  const inputNewPassword = document.getElementById('input-new-password');
+  const inputConfirmNewPassword = document.getElementById('input-confirm-new-password');
+  const inputReauthPassword = document.getElementById('input-reauth-password');
+
+  // Action Buttons
+  const btnSaveNewEmail = document.getElementById('btn-save-new-email');
+  const btnSaveNewPassword = document.getElementById('btn-save-new-password');
+  const btnReauthSubmit = document.getElementById('btn-reauth-submit');
+  const reauthDesc = document.getElementById('reauth-modal-description');
+
+  if (!btnChangeEmail) return; // Exit if not on profile page
+
+  // Reauth context state variables
+  let currentReauthAction = ""; // "email", "password", or "delete"
+  let currentReauthPayload = "";
+
+  // 1. Show Email Modal
+  btnChangeEmail.addEventListener('click', () => {
+    if (inputNewEmail) inputNewEmail.value = "";
+    if (updateEmailModal) updateEmailModal.style.display = 'flex';
+  });
+
+  if (btnEmailModalClose) {
+    btnEmailModalClose.addEventListener('click', () => {
+      if (updateEmailModal) updateEmailModal.style.display = 'none';
+    });
+  }
+
+  // 2. Show Password Modal
+  btnChangePassword.addEventListener('click', () => {
+    if (inputNewPassword) inputNewPassword.value = "";
+    if (inputConfirmNewPassword) inputConfirmNewPassword.value = "";
+    if (updatePasswordModal) updatePasswordModal.style.display = 'flex';
+  });
+
+  if (btnPasswordModalClose) {
+    btnPasswordModalClose.addEventListener('click', () => {
+      if (updatePasswordModal) updatePasswordModal.style.display = 'none';
+    });
+  }
+
+  // 3. Close Reauth Modal
+  if (btnReauthModalClose) {
+    btnReauthModalClose.addEventListener('click', () => {
+      if (reauthModal) reauthModal.style.display = 'none';
+    });
+  }
+
+  // 4. Trigger Reauth for Email Update
+  if (btnSaveNewEmail) {
+    btnSaveNewEmail.addEventListener('click', () => {
+      const newEmail = inputNewEmail.value.trim();
+      if (!newEmail || !newEmail.includes('@')) {
+        showToast("Please enter a valid email address.", "error");
+        return;
+      }
+      currentReauthAction = "email";
+      currentReauthPayload = newEmail;
+      if (reauthDesc) {
+        reauthDesc.innerText = "For your security, please verify your current password before updating your registered email address.";
+      }
+      if (inputReauthPassword) inputReauthPassword.value = "";
+      if (reauthModal) reauthModal.style.display = 'flex';
+    });
+  }
+
+  // 5. Trigger Reauth for Password Update
+  if (btnSaveNewPassword) {
+    btnSaveNewPassword.addEventListener('click', () => {
+      const newPass = inputNewPassword.value;
+      const confirmPass = inputConfirmNewPassword.value;
+      
+      if (newPass.length < 6) {
+        showToast("New password must be at least 6 characters.", "error");
+        return;
+      }
+      if (newPass !== confirmPass) {
+        showToast("Passwords do not match!", "error");
+        return;
+      }
+      currentReauthAction = "password";
+      currentReauthPayload = newPass;
+      if (reauthDesc) {
+        reauthDesc.innerText = "For your security, please verify your current password before changing your password credentials.";
+      }
+      if (inputReauthPassword) inputReauthPassword.value = "";
+      if (reauthModal) reauthModal.style.display = 'flex';
+    });
+  }
+
+  // 6. Trigger Reauth for Account Deletion
+  btnDeleteAccountTrigger.addEventListener('click', () => {
+    currentReauthAction = "delete";
+    currentReauthPayload = "";
+    if (reauthDesc) {
+      reauthDesc.innerHTML = `<span style="color: #EF4444; font-weight: 800;">⚠️ WARNING:</span> You are about to permanently delete your Playhaus account, match timeline history, and Firestore records. This is irreversible. Please verify your password to proceed.`;
+    }
+    if (inputReauthPassword) inputReauthPassword.value = "";
+    if (reauthModal) reauthModal.style.display = 'flex';
+  });
+
+  // 7. Handle Re-Authentication & Action Execution
+  if (btnReauthSubmit) {
+    btnReauthSubmit.addEventListener('click', async () => {
+      const user = auth.currentUser;
+      if (!user) return;
+
+      const password = inputReauthPassword.value;
+      if (!password) {
+        showToast("Password cannot be empty!", "error");
+        return;
+      }
+
+      btnReauthSubmit.innerText = "Verifying...";
+      btnReauthSubmit.disabled = true;
+
+      try {
+        // Step 1: Re-authenticate session
+        const credential = EmailAuthProvider.credential(user.email, password);
+        await reauthenticateWithCredential(user, credential);
+        console.log("[Playhaus Admin] Security check passed. Executing: " + currentReauthAction);
+
+        // Step 2: Execute requested security action
+        if (currentReauthAction === "email") {
+          await updateEmail(user, currentReauthPayload);
+          // Sync with Firestore
+          await updateDoc(doc(db, "users", user.uid), { email: currentReauthPayload });
+          if (currentUserDoc) currentUserDoc.email = currentReauthPayload;
+          
+          showToast("📧 Registered email updated successfully!", "success");
+          
+          const emailDisplay = document.getElementById('settings-email-display');
+          if (emailDisplay) emailDisplay.innerText = currentReauthPayload;
+          
+          if (updateEmailModal) updateEmailModal.style.display = 'none';
+          if (reauthModal) reauthModal.style.display = 'none';
+
+        } else if (currentReauthAction === "password") {
+          await updatePassword(user, currentReauthPayload);
+          showToast("🔑 Password updated successfully!", "success");
+          
+          if (updatePasswordModal) updatePasswordModal.style.display = 'none';
+          if (reauthModal) reauthModal.style.display = 'none';
+
+        } else if (currentReauthAction === "delete") {
+          // Perform full data scrubbing deletion
+          if (reauthModal) reauthModal.style.display = 'none';
+          if (loadingOverlay) {
+            loadingOverlay.innerHTML = `<div style="text-align: center;"><div class="loading-spinner"></div><div>Scrubbing account data...</div></div>`;
+            loadingOverlay.style.display = 'flex';
+          }
+
+          const uid = user.uid;
+
+          // 1. Delete Firestore user document
+          await deleteDoc(doc(db, "users", uid));
+
+          // 2. Query and delete all scores belonging to this user
+          const scoresQuery = query(collection(db, "scores"), where("uid", "==", uid));
+          const scoresSnap = await getDocs(scoresQuery);
+          const deletePromises = [];
+          scoresSnap.forEach(sDoc => {
+            deletePromises.push(deleteDoc(sDoc.ref));
+          });
+          await Promise.all(deletePromises);
+
+          // 3. Delete avatar from Firebase Storage if custom image
+          try {
+            if (currentUserDoc && currentUserDoc.avatar && currentUserDoc.avatar.includes("firebasestorage")) {
+              const avatarRef = ref(storage, `avatars/${uid}`);
+              await deleteObject(avatarRef);
+            }
+          } catch (avatarError) {
+            console.log("No custom avatar to scrub or deletion skipped:", avatarError);
+          }
+
+          // 4. Delete the Firebase Auth User
+          await deleteUser(user);
+
+          if (loadingOverlay) loadingOverlay.style.display = 'none';
+          showToast("🚪 Account permanently deleted. We're sorry to see you go!", "success");
+          
+          setTimeout(() => {
+            window.location.href = "index.html";
+          }, 1500);
+        }
+
+      } catch (err) {
+        console.error("Administrative action failed:", err);
+        let errorMsgText = "Security verification failed. Please try again.";
+        if (err.code === "auth/wrong-password") {
+          errorMsgText = "Incorrect password! Verification failed.";
+        } else if (err.code === "auth/invalid-credential" || err.code === "auth/invalid-email") {
+          errorMsgText = "Invalid credentials. Please verify your password.";
+        }
+        showToast("❌ " + errorMsgText, "error");
+      } finally {
+        btnReauthSubmit.innerText = "Confirm Identity";
+        btnReauthSubmit.disabled = false;
+      }
+    });
+  }
+}
+
+// Bind Settings Panel
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initAccountSettings);
+} else {
+  initAccountSettings();
 }
 
 

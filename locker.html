@@ -10,10 +10,9 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="Playhaus" />
   <link rel="apple-touch-icon" href="img/icons/apple-touch-icon.png" />
-  <link rel="stylesheet" href="styles.css?v=8" />
+  <link rel="stylesheet" href="styles.css?v=20" />
   <style>
     * {
-      touch-action: manipulation;
       -webkit-tap-highlight-color: transparent;
     }
 
@@ -23,9 +22,10 @@
       overflow-x: hidden !important;
       width: 100%;
       max-width: 100vw;
-      overscroll-behavior: none !important;
       overscroll-behavior-x: none !important;
-      overscroll-behavior-y: none !important;
+      /* Allow free vertical scroll on locker page */
+      touch-action: pan-y pinch-zoom;
+      -webkit-overflow-scrolling: touch;
     }
 
     /* Ambient Glowing Orbs background */
@@ -51,7 +51,16 @@
     @media (max-width: 900px) {
       .locker-container {
         grid-template-columns: 1fr;
-        margin-top: 80px;
+        margin-top: 120px;
+      }
+      .gamer-card {
+        max-width: 350px;
+        width: 100%;
+        margin: 0 auto;
+      }
+      .currency-grid {
+        grid-template-columns: 1fr !important;
+        gap: 12px !important;
       }
     }
 
@@ -255,7 +264,7 @@
       margin-bottom: 20px;
       display: flex;
       align-items: center;
-      justify-content: space-between;
+      justify-content: center;
       border-bottom: 1px solid rgba(255,255,255,0.05);
       padding-bottom: 12px;
       text-transform: uppercase;
@@ -320,12 +329,14 @@
       letter-spacing: 1.5px;
       display: flex;
       align-items: center;
+      justify-content: center;
       gap: 6px;
     }
     .dev-buttons {
       display: flex;
       flex-wrap: wrap;
       gap: 10px;
+      justify-content: center;
     }
     .dev-btn {
       background: #1e1b4b;
@@ -382,6 +393,7 @@
       gap: 8px;
       margin-bottom: 20px;
       flex-wrap: wrap;
+      justify-content: center;
     }
     .subtab-btn {
       background: rgba(255,255,255,0.02);
@@ -406,31 +418,46 @@
     .vending-wrapper {
       display: flex;
       flex-direction: column;
-      gap: 20px;
       align-items: center;
       width: 100%;
       perspective: 800px;
       overflow-x: hidden; /* Prevent claw sidewipe wobbles */
     }
 
+    /* Unified Premium Cabinet Chassis */
+    .claw-cabinet {
+      width: 100%;
+      max-width: 420px;
+      background: linear-gradient(180deg, #181c2b 0%, #0c0d16 100%);
+      border: 4px solid #3b4252;
+      border-radius: 28px;
+      box-shadow: 
+        0 20px 45px rgba(0, 0, 0, 0.8),
+        0 0 25px rgba(56, 189, 248, 0.15),
+        inset 0 1px 2px rgba(255, 255, 255, 0.12);
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      overflow: hidden;
+      position: relative;
+      z-index: 10;
+    }
+
     /* Cabinet Marquee Header */
     .claw-marquee {
       position: relative;
       width: 100%;
-      max-width: 420px;
       height: 48px;
       background: #111424;
-      border: 3px solid #f59e0b;
-      border-radius: 10px 10px 0 0;
+      border-bottom: 3px solid #f59e0b;
       box-shadow: 
-        0 0 15px rgba(245, 158, 11, 0.4),
+        0 2px 8px rgba(0, 0, 0, 0.5),
         inset 0 0 12px rgba(245, 158, 11, 0.2);
       display: flex;
       align-items: center;
       justify-content: center;
       overflow: hidden;
-      margin-bottom: -22px;
-      z-index: 10;
+      z-index: 12;
     }
     
     .marquee-text {
@@ -490,18 +517,16 @@
     .claw-chamber {
       position: relative;
       width: 100%;
-      max-width: 420px;
       height: 330px;
-      background: #0f1224;
-      border: 8px solid #2d354d;
-      border-top: 18px solid #23293b;
-      border-bottom: 24px solid #1a1e2b;
-      border-radius: 20px;
+      background: #0d0f1e;
+      border-top: 18px solid #111420;
+      border-bottom: 24px solid #0b0c14;
       box-shadow: 
         inset 0 0 45px rgba(0,0,0,0.95), 
-        0 15px 40px rgba(0,0,0,0.7);
+        0 0 15px rgba(56, 189, 248, 0.15); /* Internal glow shadow */
       overflow: hidden;
       transform-style: preserve-3d;
+      z-index: 11;
     }
 
     /* 3D Wall Perspective Skews */
@@ -807,7 +832,7 @@
     /* ── The Prizes Bottom Chamber ────────────────────────── */
     .prize-pile {
       position: absolute;
-      bottom: 0; left: 60px; right: 0;
+      bottom: 0; left: 0; right: 0;
       height: 60px;
       display: flex;
       flex-wrap: wrap;
@@ -942,31 +967,72 @@
     /* ── The Physical Console ─────────────────────────────── */
     .claw-console {
       width: 100%;
-      max-width: 420px;
-      background: linear-gradient(180deg, #2b3247 0%, #151824 100%);
-      border: 3px solid #38425e;
-      border-radius: 24px;
-      padding: 20px 24px;
+      background: linear-gradient(180deg, #232a3d 0%, #10131e 100%);
+      border-top: 4px solid #3b4252;
+      padding: 16px 20px;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 16px;
-      box-shadow: 
-        0 15px 30px rgba(0,0,0,0.6),
-        inset 0 2px 0 rgba(255,255,255,0.08);
+      gap: 12px;
+      box-shadow: inset 0 2px 4px rgba(255, 255, 255, 0.08);
+      position: relative;
+      z-index: 12;
+    }
+
+    /* Coin slot styling */
+    .coin-slot-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    .coin-slot {
+      width: 50px;
+      height: 64px;
+      background: linear-gradient(135deg, #10131e, #07090f);
+      border: 2px solid #334155;
+      border-radius: 8px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      box-shadow: inset 0 2px 6px rgba(0,0,0,0.85), 0 3px 6px rgba(0,0,0,0.4);
       position: relative;
     }
-    
-    /* Cabinet Footer Shadow Base */
-    .claw-console::after {
+    .coin-slot::after {
       content: '';
       position: absolute;
-      bottom: -12px; left: 16px; right: 16px;
-      height: 12px;
-      background: #0f1118;
-      border-radius: 0 0 10px 10px;
-      z-index: -1;
-      border: 1px solid rgba(255,255,255,0.03);
+      inset: -4px;
+      border-radius: 11px;
+      border: 1.5px solid rgba(255,255,255,0.03);
+      pointer-events: none;
+    }
+    .coin-slot-light {
+      width: 16px;
+      height: 4px;
+      background: #ef4444;
+      box-shadow: 0 0 10px #ef4444, 0 0 4px #ef4444;
+      margin-bottom: 6px;
+      border-radius: 2px;
+      animation: coinPulse 1.5s infinite alternate ease-in-out;
+    }
+    @keyframes coinPulse {
+      0% { opacity: 0.5; filter: brightness(0.8); }
+      100% { opacity: 1; filter: brightness(1.2); }
+    }
+    .coin-slot-entry {
+      width: 5px;
+      height: 22px;
+      background: #000;
+      border-radius: 1px;
+      box-shadow: inset 0 1px 3px rgba(255,255,255,0.15);
+      margin-bottom: 4px;
+    }
+    .coin-slot-text {
+      font-size: 0.55rem;
+      color: #94a3b8;
+      font-weight: 800;
+      letter-spacing: 0.5px;
     }
 
     .joystick-outer {
@@ -1065,6 +1131,9 @@
     /* Big Tactile Glowing Arcade Grab Button */
     .btn-claw-drop {
       flex: 1;
+      min-width: 90px;
+      flex-shrink: 0;
+      white-space: nowrap;
       height: 64px;
       border-radius: 18px;
       border: 3px solid #b4153e;
@@ -1465,17 +1534,17 @@
     }
 
 
-    /* Inventory Locker list grid */
+    /* Inventory Locker list grid - Compact Design (4 columns on mobile!) */
     .inventory-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-      gap: 15px;
+      grid-template-columns: repeat(auto-fill, minmax(82px, 1fr));
+      gap: 10px;
     }
     .inventory-item {
-      background: rgba(15, 23, 42, 0.5);
-      border: 1px solid rgba(255,255,255,0.04);
-      border-radius: 16px;
-      padding: 16px 10px;
+      background: rgba(15, 23, 42, 0.45);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 12px;
+      padding: 8px 6px;
       text-align: center;
       display: flex;
       flex-direction: column;
@@ -1483,53 +1552,110 @@
       justify-content: center;
       cursor: pointer;
       position: relative;
-      transition: all 0.25s ease;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
       box-sizing: border-box;
+      min-height: 90px;
     }
+    
+    /* Glowing Rarity Borders for Slots */
+    .inventory-item.rarity-common { 
+      border-color: rgba(148, 163, 184, 0.15); 
+    }
+    .inventory-item.rarity-uncommon { 
+      border-color: rgba(16, 185, 129, 0.25); 
+      background: radial-gradient(circle at top, rgba(16, 185, 129, 0.05) 0%, rgba(15, 23, 42, 0.45) 100%); 
+    }
+    .inventory-item.rarity-rare { 
+      border-color: rgba(56, 189, 248, 0.25); 
+      background: radial-gradient(circle at top, rgba(56, 189, 248, 0.05) 0%, rgba(15, 23, 42, 0.45) 100%); 
+    }
+    .inventory-item.rarity-epic { 
+      border-color: rgba(167, 139, 250, 0.3); 
+      background: radial-gradient(circle at top, rgba(167, 139, 250, 0.06) 0%, rgba(15, 23, 42, 0.45) 100%); 
+    }
+    .inventory-item.rarity-legendary { 
+      border-color: rgba(245, 158, 11, 0.4); 
+      background: radial-gradient(circle at top, rgba(245, 158, 11, 0.08) 0%, rgba(15, 23, 42, 0.45) 100%); 
+      box-shadow: inset 0 0 8px rgba(245, 158, 11, 0.03);
+    }
+
     .inventory-item.locked {
-      opacity: 0.3;
-      filter: grayscale(80%);
+      opacity: 0.45;
+      filter: grayscale(40%);
     }
     .inventory-item:hover {
-      transform: translateY(-3px);
-      border-color: rgba(255,255,255,0.15);
+      transform: translateY(-2px);
+      border-color: rgba(255,255,255,0.25);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.4);
     }
     .inventory-item.locked:hover {
       transform: none;
-      border-color: rgba(239, 68, 68, 0.25);
+      border-color: rgba(239, 68, 68, 0.35);
+      box-shadow: none;
     }
     .inventory-item.equipped {
       border: 2px solid #38BDF8 !important;
-      box-shadow: 0 0 10px rgba(56, 189, 248, 0.15);
+      box-shadow: 0 0 10px rgba(56, 189, 248, 0.35);
     }
     .inventory-item.equipped::after {
       content: '✅';
-      position: absolute; top: -6px; right: -6px;
-      font-size: 0.8rem;
-      background: #050811;
-      padding: 2px; border-radius: 50%;
+      position: absolute; top: -5px; right: -5px;
+      font-size: 0.65rem;
+      background: #38BDF8;
+      padding: 1px; border-radius: 50%;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.5);
     }
+    
+    /* Highly scaled previews to fit inside small slots */
     .inventory-icon {
-      font-size: 2.2rem;
-      margin-bottom: 8px;
+      font-size: 1.6rem;
+      margin-bottom: 6px;
     }
     .inventory-name {
-      font-size: 0.75rem;
+      font-size: 0.65rem;
       font-weight: 800;
       color: #cbd5e1;
       line-height: 1.2;
-      margin-bottom: 4px;
+      margin-top: 4px;
       text-align: center;
-      max-width: 95px;
+      width: 100%;
+      max-width: 72px;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
     }
-    .inventory-rarity-lbl {
-      font-size: 0.6rem;
+    
+    /* Scaled down preview layouts */
+    .inventory-item .theme-preview-card {
+      width: 44px;
+      height: 28px;
+      border-radius: 6px;
+      margin-bottom: 4px !important;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.8rem;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+    }
+    .inventory-item .border-preview-ring {
+      width: 36px !important;
+      height: 36px !important;
+      margin-bottom: 4px !important;
+    }
+    .inventory-item .border-preview-ring .gamer-avatar {
+      font-size: 1.1rem !important;
+      width: 28px !important;
+      height: 28px !important;
+    }
+    .inventory-item .lock-tag {
+      font-size: 0.58rem !important;
       font-weight: 900;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
+      color: #FBBF24 !important;
+      margin-top: 4px;
+      display: flex;
+      align-items: center;
+      gap: 2px;
+      justify-content: center;
     }
 
     /* Frosted overlays */
@@ -1545,9 +1671,350 @@
       border-radius: 50%;
       width: 40px; height: 40px;
       animation: spin 1s linear infinite;
-      margin-bottom: 20px;
     }
     @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+    /* --- PREMIUM UPGRADED CLAW MACHINE DESIGN SYSTEM --- */
+    
+    /* 1. Digital LED Display Screen */
+    .claw-display-screen {
+      position: absolute;
+      top: 8px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #050508;
+      border: 1.5px solid rgba(56, 189, 248, 0.4);
+      border-radius: 5px;
+      padding: 2px 8px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-width: 90px;
+      box-shadow: 
+        inset 0 0 8px rgba(34, 197, 94, 0.2),
+        0 0 8px rgba(0, 0, 0, 0.8);
+      z-index: 10;
+      pointer-events: none;
+    }
+    .display-label {
+      font-size: 0.45rem;
+      color: #475569;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 0;
+    }
+    .display-text {
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 0.7rem;
+      font-weight: 900;
+      color: #10b981; /* Glowing retro phosphor green */
+      text-shadow: 
+        0 0 4px rgba(16, 185, 129, 0.75),
+        0 0 10px rgba(16, 185, 129, 0.3);
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      text-align: center;
+      animation: displayFlicker 4s infinite alternate;
+    }
+    @keyframes displayFlicker {
+      0%, 100% { opacity: 0.98; }
+      23% { opacity: 0.95; }
+      24% { opacity: 0.75; }
+      26% { opacity: 0.95; }
+      78% { opacity: 0.98; }
+      79% { opacity: 0.6; }
+      81% { opacity: 0.98; }
+    }
+
+    /* 2. Glass Reflections & Wall Neon Trims */
+    .chamber-glass-reflection {
+      background: linear-gradient(135deg, rgba(255,255,255,0.22) 0%, rgba(255,255,255,0) 40%, rgba(255,255,255,0) 75%, rgba(255,255,255,0.08) 100%) !important;
+    }
+    .chamber-glass-shimmer {
+      position: absolute;
+      top: 0; left: -150%;
+      width: 100%; height: 100%;
+      background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.12) 50%, rgba(255,255,255,0) 100%);
+      transform: skewX(-25deg);
+      animation: glassShimmer 8s infinite ease-in-out;
+      z-index: 9;
+      pointer-events: none;
+    }
+    @keyframes glassShimmer {
+      0% { left: -150%; }
+      30% { left: -150%; }
+      50% { left: 150%; }
+      100% { left: 150%; }
+    }
+    
+    /* Neon vertical trims on internal side walls */
+    .chamber-wall.wall-left::before {
+      content: '';
+      position: absolute;
+      top: 0; bottom: 0; right: 0;
+      width: 3px;
+      background: #38bdf8;
+      box-shadow: 0 0 10px rgba(56, 189, 248, 0.85);
+    }
+    .chamber-wall.wall-right::before {
+      content: '';
+      position: absolute;
+      top: 0; bottom: 0; left: 0;
+      width: 3px;
+      background: #8b5cf6;
+      box-shadow: 0 0 10px rgba(139, 92, 246, 0.85);
+    }
+
+    /* 3. Upgraded Chrome Gradients for Claw Gantry & Assembly */
+    .gantry-bar {
+      background: linear-gradient(180deg, #64748b 0%, #cbd5e1 40%, #94a3b8 60%, #475569 100%) !important;
+      border-bottom: 2px solid rgba(0,0,0,0.4) !important;
+      box-shadow: 0 3px 6px rgba(0,0,0,0.5) !important;
+    }
+    .gantry-trolley {
+      background: linear-gradient(180deg, #475569 0%, #334155 100%) !important;
+      border: 1.5px solid #64748b !important;
+      box-shadow: inset 0 1px 3px rgba(255,255,255,0.2) !important;
+    }
+    .claw-string {
+      background: repeating-linear-gradient(0deg, #94a3b8, #cbd5e1 3px, #475569 6px) !important;
+      width: 3px !important;
+      box-shadow: 1px 0 3px rgba(0,0,0,0.4);
+    }
+    .claw-body {
+      background: linear-gradient(180deg, #334155 0%, #0f172a 100%) !important;
+      border: 2px solid #475569 !important;
+      box-shadow: inset 0 2px 4px rgba(255,255,255,0.15) !important;
+    }
+    .claw-prong {
+      background: linear-gradient(135deg, #cbd5e1 0%, #94a3b8 50%, #475569 100%) !important;
+      border: 1px solid rgba(255,255,255,0.2) !important;
+      box-shadow: inset 1px 1px 2px rgba(255,255,255,0.4) !important;
+    }
+
+    /* 4. Touch & Interactive elements styling */
+    .joystick-base {
+      border: 4px solid #64748b !important;
+      box-shadow: 
+        inset 0 8px 16px rgba(0,0,0,0.9),
+        0 4px 6px rgba(0,0,0,0.4),
+        0 0 10px rgba(56, 189, 248, 0.15) !important;
+    }
+    .coin-slot-entry {
+      background: #050508 !important;
+      box-shadow: 
+        inset 0 1px 3px rgba(0,0,0,0.9),
+        0 0 6px rgba(239, 68, 68, 0.4) !important;
+    }
+    .coin-slot-light {
+      background: #ef4444 !important;
+      box-shadow: 
+        0 0 12px #ef4444,
+        0 0 4px #ef4444 !important;
+    }
+
+    /* 5. Neon Outlined Glowing Mystery Boxes */
+    .prize-box {
+      border: 1px solid rgba(255,255,255,0.15) !important;
+      box-shadow: 
+        inset 0 1px 2px rgba(255,255,255,0.4),
+        0 4px 8px rgba(0,0,0,0.5) !important;
+    }
+    .prize-box::after {
+      background: linear-gradient(to bottom, #ff4e50, #f9d423) !important; /* premium multi-tone ribbon */
+      opacity: 0.9;
+    }
+    .prize-box::before {
+      background: linear-gradient(to right, #ff4e50, #f9d423) !important; /* premium multi-tone ribbon */
+      opacity: 0.9;
+    }
+    /* Rarity Glow outlines */
+    .prize-box--common {
+      background: linear-gradient(135deg, #94a3b8 0%, #475569 100%) !important;
+      box-shadow: 
+        inset 0 1px 2px rgba(255,255,255,0.3),
+        0 2px 4px rgba(0,0,0,0.4),
+        0 0 6px rgba(148, 163, 184, 0.35) !important;
+    }
+    .prize-box--uncommon {
+      background: linear-gradient(135deg, #10b981 0%, #064e3b 100%) !important;
+      box-shadow: 
+        inset 0 1px 2px rgba(255,255,255,0.3),
+        0 2px 4px rgba(0,0,0,0.4),
+        0 0 8px rgba(16, 185, 129, 0.6) !important;
+    }
+    .prize-box--rare {
+      background: linear-gradient(135deg, #38bdf8 0%, #0369a1 100%) !important;
+      box-shadow: 
+        inset 0 1px 2px rgba(255,255,255,0.3),
+        0 2px 4px rgba(0,0,0,0.4),
+        0 0 10px rgba(56, 189, 248, 0.7) !important;
+    }
+    .prize-box--epic {
+      background: linear-gradient(135deg, #a78bfa 0%, #5b21b6 100%) !important;
+      box-shadow: 
+        inset 0 1px 2px rgba(255,255,255,0.3),
+        0 2px 4px rgba(0,0,0,0.4),
+        0 0 12px rgba(167, 139, 250, 0.8) !important;
+    }
+    .prize-box--legendary {
+      background: linear-gradient(135deg, #fbbf24 0%, #78350f 100%) !important;
+      border: 1px solid #fff3c4 !important;
+      box-shadow: 
+        inset 0 1px 3px rgba(255,255,255,0.5),
+        0 3px 6px rgba(0,0,0,0.4),
+        0 0 18px rgba(245, 158, 11, 0.95) !important;
+    }
+    /* Mobile-Responsive Scaling Overrides for Claw Machine */
+    @media (max-width: 768px) {
+      .dashboard-card {
+        padding: 16px !important;
+      }
+      .claw-cabinet {
+        max-width: 100%;
+        border-radius: 20px;
+      }
+      .claw-console {
+        padding: 12px 14px !important;
+        gap: 10px !important;
+      }
+      .joystick-container {
+        gap: 6px !important;
+      }
+      .joystick-pad-btn {
+        width: 36px !important;
+        height: 36px !important;
+        font-size: 1rem !important;
+      }
+      .joystick-base {
+        width: 60px !important;
+        height: 60px !important;
+      }
+      .joystick-shaft {
+        height: 26px !important;
+        width: 7px !important;
+      }
+      .joystick-knob {
+        width: 20px !important;
+        height: 20px !important;
+        top: -10px !important;
+        left: -6px !important;
+      }
+      .coin-slot {
+        width: 40px !important;
+        height: 52px !important;
+      }
+      .coin-slot-light {
+        width: 12px !important;
+        height: 3px !important;
+        margin-bottom: 4px !important;
+      }
+      .coin-slot-entry {
+        width: 4px !important;
+        height: 18px !important;
+        margin-bottom: 2px !important;
+      }
+      .coin-slot-text {
+        font-size: 0.5rem !important;
+      }
+      .btn-claw-drop {
+        height: 52px !important;
+        border-radius: 14px !important;
+        font-size: 0.95rem !important;
+        min-width: 80px !important;
+        padding: 6px 12px !important;
+      }
+      .btn-claw-drop span {
+        font-size: 0.8rem !important;
+      }
+      .btn-claw-drop span[style] {
+        font-size: 0.7rem !important;
+      }
+      .locker-container {
+        padding: 0 12px !important;
+        margin-top: 120px !important;
+      }
+      .currency-box {
+        padding: 12px 16px !important;
+        gap: 12px !important;
+      }
+      .currency-icon {
+        font-size: 1.8rem !important;
+      }
+      .currency-val {
+        font-size: 1.5rem !important;
+      }
+      .currency-lbl {
+        font-size: 0.7rem !important;
+      }
+    }
+
+    /* Currency grid stacking on mobile viewports */
+    @media (max-width: 600px) {
+      .currency-grid {
+        grid-template-columns: 1fr !important;
+        gap: 12px !important;
+      }
+    }
+
+    /* Claw Grab Odds Section Styles (Global - applies on all screens!) */
+    .rarity-odds {
+      width: 100%;
+      max-width: 420px;
+      margin: 20px auto 0;
+      background: rgba(15, 23, 42, 0.4);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 16px;
+      padding: 16px;
+      box-sizing: border-box;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .rarity-odds__title {
+      font-size: 0.9rem;
+      font-weight: 800;
+      color: #fff;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 4px;
+      text-align: center;
+    }
+    .rarity-odds__row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      font-size: 0.8rem;
+      font-weight: 700;
+    }
+    .rarity-odds__row > span:first-child {
+      width: 120px;
+      flex-shrink: 0;
+      text-align: left;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .rarity-odds__row > span:last-child {
+      width: 36px;
+      flex-shrink: 0;
+      text-align: right;
+    }
+    .rarity-odds__bar {
+      flex: 1;
+      height: 8px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 4px;
+      overflow: hidden;
+      position: relative;
+    }
+    .rarity-odds__fill {
+      height: 100%;
+      border-radius: 4px;
+      transition: width 0.3s ease;
+    }
   </style>
 </head>
 <body>
@@ -1666,97 +2133,107 @@
 
       <!-- Tab: Vending machine draw room (Claw Machine) -->
       <div id="panel-vending">
-        <p style="color:#94a3b8; font-size:0.9rem; margin-bottom:12px; line-height:1.5; text-align:center;">
-          Use the **joystick or arrow pads** to position the claw over a mystery box, then tap **Grab Prize**! (🪙 100 Coins)
-        </p>
 
         <div class="vending-wrapper">
 
-          <!-- Retro LED Cabinet Header Marquee -->
-          <div class="claw-marquee">
-            <div class="marquee-lights left-lights">
-              <span class="light red"></span><span class="light blue"></span><span class="light gold"></span>
+          <!-- Unified Premium Cabinet Shell -->
+          <div class="claw-cabinet">
+
+            <!-- Retro LED Cabinet Header Marquee -->
+            <div class="claw-marquee">
+              <div class="marquee-lights left-lights">
+                <span class="light red"></span><span class="light blue"></span><span class="light gold"></span>
+              </div>
+              <span class="marquee-text">🕹️ CLAW MACHINE 🕹️</span>
+              <div class="marquee-lights right-lights">
+                <span class="light gold"></span><span class="light blue"></span><span class="light red"></span>
+              </div>
             </div>
-            <span class="marquee-text">🕹️ CLAW MACHINE 🕹️</span>
-            <div class="marquee-lights right-lights">
-              <span class="light gold"></span><span class="light blue"></span><span class="light red"></span>
-            </div>
-          </div>
 
-          <!-- Claw Machine Chamber -->
-          <div class="claw-chamber" id="claw-chamber">
-            <!-- Glass Reflective Overlays -->
-            <div class="chamber-glass-reflection"></div>
-            <div class="chamber-glass-shimmer"></div>
-            
-            <!-- Chamber Depth Walls -->
-            <div class="chamber-wall wall-left"></div>
-            <div class="chamber-wall wall-right"></div>
-            <div class="chamber-neon-grid"></div>
-
-            <!-- Gantry Carriage Track -->
-            <div class="gantry-bar"></div>
-            
-            <!-- Claw Assembly (Sways dynamically!) -->
-            <div class="claw-assembly" id="claw-assembly" style="left: 50%;">
-              <!-- Gantry Trolley Mount -->
-              <div class="gantry-trolley"></div>
-
-              <!-- Steel Twisted Cable String -->
-              <div class="claw-string" id="claw-string" style="height: 40px;">
-                <!-- 3-Pronged Mechanical Claw (Child of string so it follows height perfectly!) -->
-                <div class="claw-hand" id="claw-hand">
-                  <div class="claw-shifter"></div>
-                  <div class="claw-body">
-                    <!-- Dynamic Mechanical LED Indicator -->
-                    <div class="claw-led led-ready" id="claw-led"></div>
-                  </div>
-                  <div class="claw-prongs">
-                    <div class="claw-prong claw-prong-left"></div>
-                    <div class="claw-prong claw-prong-right"></div>
-                    <div class="claw-prong claw-prong-center"></div>
-                  </div>
-                </div>
+            <!-- Claw Machine Chamber -->
+            <div class="claw-chamber" id="claw-chamber">
+              <!-- Glass Reflective Overlays -->
+              <div class="chamber-glass-reflection"></div>
+              <div class="chamber-glass-shimmer"></div>
+              
+              <!-- Retro LCD Screen Display -->
+              <div class="claw-display-screen">
+                <div class="display-label">STATUS</div>
+                <div class="display-text" id="claw-display-text">READY</div>
               </div>
               
-              <!-- Glowing laser targeting line -->
-              <div class="claw-laser" id="claw-laser"></div>
-            </div>
+              <!-- Chamber Depth Walls -->
+              <div class="chamber-wall wall-left"></div>
+              <div class="chamber-wall wall-right"></div>
+              <div class="chamber-neon-grid"></div>
 
-            <!-- Dynamic Glowing Laser Sight Spot on Chamber Floor -->
-            <div class="laser-target-spot" id="laser-target-spot" style="left: 50%;"></div>
+              <!-- Gantry Carriage Track -->
+              <div class="gantry-bar"></div>
+              
+              <!-- Claw Assembly (Sways dynamically!) -->
+              <div class="claw-assembly" id="claw-assembly" style="left: 50%;">
+                <!-- Gantry Trolley Mount -->
+                <div class="gantry-trolley"></div>
 
-            <!-- 3D Visual Funnel Chute Drop Box -->
-            <div class="prize-chute" id="prize-chute">
-              <div class="chute-funnel"></div>
-              <div class="chute-outlet" id="chute-outlet">🎁</div>
-            </div>
-
-            <!-- Prize box pile -->
-            <div class="prize-pile" id="prize-pile">
-              <!-- Dynamically generated mystery box nodes -->
-            </div>
-          </div>
-
-          <!-- Physical Console Controls -->
-          <div class="claw-console">
-            <div class="joystick-outer">
-              <div class="joystick-container">
-                <button class="joystick-pad-btn" id="btn-joystick-left">◀</button>
-                <div class="joystick-base" id="joystick-base">
-                  <div class="joystick-shaft">
-                    <div class="joystick-knob"></div>
+                <!-- Steel Twisted Cable String -->
+                <div class="claw-string" id="claw-string" style="height: 40px;">
+                  <!-- 3-Pronged Mechanical Claw (Child of string so it follows height perfectly!) -->
+                  <div class="claw-hand" id="claw-hand">
+                    <div class="claw-shifter"></div>
+                    <div class="claw-body">
+                      <!-- Dynamic Mechanical LED Indicator -->
+                      <div class="claw-led led-ready" id="claw-led"></div>
+                    </div>
+                    <div class="claw-prongs">
+                      <div class="claw-prong claw-prong-left"></div>
+                      <div class="claw-prong claw-prong-right"></div>
+                      <div class="claw-prong claw-prong-center"></div>
+                    </div>
                   </div>
                 </div>
-                <button class="joystick-pad-btn" id="btn-joystick-right">▶</button>
+                
+                <!-- Glowing laser targeting line -->
+                <div class="claw-laser" id="claw-laser"></div>
               </div>
-              <div style="font-size:0.6rem; color:#64748b; font-weight:800; text-transform:uppercase; letter-spacing:1px; margin-top:2px;">Move Claw</div>
+
+              <!-- Dynamic Glowing Laser Sight Spot on Chamber Floor -->
+              <div class="laser-target-spot" id="laser-target-spot" style="left: 50%;"></div>
+
+              <!-- 3D Visual Funnel Chute Drop Box -->
+              <div class="prize-chute" id="prize-chute">
+                <div class="chute-funnel"></div>
+                <div class="chute-outlet" id="chute-outlet">🎁</div>
+              </div>
+
+              <!-- Prize box pile -->
+              <div class="prize-pile" id="prize-pile">
+                <!-- Dynamically generated mystery box nodes -->
+              </div>
             </div>
 
-            <button class="btn-claw-drop" id="btn-claw-drop">
-              <span>GRAB</span>
-              <span style="font-size:0.8rem; font-weight:800; opacity:0.85;">🪙 100</span>
-            </button>
+            <!-- Physical Console Controls -->
+            <div class="claw-console">
+              <div class="joystick-outer">
+                <div class="joystick-container">
+                  <button class="joystick-pad-btn" id="btn-joystick-left">◀</button>
+                  <div class="joystick-base" id="joystick-base">
+                    <div class="joystick-shaft">
+                      <div class="joystick-knob"></div>
+                    </div>
+                  </div>
+                  <button class="joystick-pad-btn" id="btn-joystick-right">▶</button>
+                </div>
+                <div style="font-size:0.6rem; color:#64748b; font-weight:800; text-transform:uppercase; letter-spacing:1px; margin-top:2px;">Move Claw</div>
+              </div>
+
+              <!-- Coin slot removed per design request -->
+
+              <button class="btn-claw-drop" id="btn-claw-drop">
+                <span>GRAB</span>
+                <span style="font-size:0.8rem; font-weight:800; opacity:0.85;">🪙 100</span>
+              </button>
+            </div>
+
           </div>
 
           <!-- Claw Grab Odds Table -->
@@ -1950,7 +2427,7 @@
   </div>
 </div>
 
-<script type="module" src="js/auth.js?v=12"></script>
-<script type="module" src="js/locker.js"></script>
+<script type="module" src="js/auth.js?v=20"></script>
+<script type="module" src="js/locker.js?v=20"></script>
 </body>
 </html>

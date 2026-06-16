@@ -1,7 +1,20 @@
-import { auth, db, doc, updateDoc, increment, getDoc } from './firebase.js?v=12';
+import { auth, db, doc, updateDoc, increment, getDoc } from './firebase.js';
 
 // ── NATIVE OR WEB ENVIRONMENT DETECTION ──────────────────────────────────────
-export const isNative = window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform();
+export const isNative = !!(window.Capacitor && window.Capacitor.isNativePlatform);
+
+// ── REVENUECAT & APPLSTORE BILLING CONFIGURATION ──────────────────────────────
+export const REVENUECAT_CONFIG = {
+  // Replace this with your actual RevenueCat Public API Key (starts with appl_)
+  apiKey: "appl_RbtfeazYPSHzmywnGaMNrTdncan",
+  // Entitlement ID defined in your RevenueCat Dashboard for VIP access
+  entitlementId: "vip_membership",
+  // Product ID for the recurring monthly VIP subscription in App Store Connect / RevenueCat
+  vipProductId: "fun.playhaus.vip_monthly"
+};
+
+// Check if the current API key is the default placeholder key
+const isPlaceholderKey = () => REVENUECAT_CONFIG.apiKey === "PLACEHOLDER_KEY" || REVENUECAT_CONFIG.apiKey === "";
 
 // Global VIP subscription state cached globally on the window
 window.isPlayhausVip = false;
@@ -96,7 +109,7 @@ export async function checkVipStatus(user) {
       // Configure once dynamically on demand
       try {
         await Purchases.configure({
-          apiKey: "appl_playhaus_sandbox_key", // Placeholder Apple API key
+          apiKey: REVENUECAT_CONFIG.apiKey,
           appUserID: user.uid
         });
       } catch (e) {
@@ -106,7 +119,7 @@ export async function checkVipStatus(user) {
       const customerInfoResponse = await Purchases.getCustomerInfo();
       // Ensure compatibility with different versions of the RevenueCat plugin response structure
       const customerInfo = customerInfoResponse.customerInfo || customerInfoResponse;
-      const hasVip = customerInfo.entitlements.active['vip_membership'] !== undefined;
+      const hasVip = customerInfo.entitlements.active[REVENUECAT_CONFIG.entitlementId] !== undefined;
       window.isPlayhausVip = hasVip;
 
       // Update Firestore cached value so web & native loads stay in sync
@@ -118,12 +131,12 @@ export async function checkVipStatus(user) {
       }
       return hasVip;
     } catch (err) {
-      console.error("[Playhaus Monetization] RevenueCat customerInfo verification failed:", err);
+      console.warn("[Playhaus Monetization] RevenueCat customerInfo verification failed, falling back to Firestore cache:", err);
     }
   }
 
-  window.isPlayhausVip = false;
-  return false;
+  // If native verification fails/is unconfigured, fallback to Firestore-cached state
+  return window.isPlayhausVip;
 }
 
 // ── BANNER ADS (BOTTOM OF THE APP) ───────────────────────────────────────────
@@ -244,7 +257,7 @@ export async function purchaseGems(productId, gemAmount, onSuccess, onError) {
     // Configure once dynamically on demand
     try {
       await Purchases.configure({
-        apiKey: "appl_playhaus_sandbox_key",
+        apiKey: REVENUECAT_CONFIG.apiKey,
         appUserID: auth.currentUser.uid
       });
     } catch (e) {}
@@ -262,12 +275,24 @@ export async function purchaseGems(productId, gemAmount, onSuccess, onError) {
     
     await onSuccess(gemAmount);
   } catch (err) {
-    console.error("[Playhaus Purchases] Purchase failed:", err);
-    if (err.userCancelled) {
-      console.log("[Playhaus Purchases] User cancelled App Store sheet.");
-    } else {
-      onError(err.message || "App Store transaction failed.");
+    // Check if the user cancelled the payment sheet
+    if (err && (err.userCancelled || err.code === 1 || err.code === "1" || err.code === "PurchaseCancelledError")) {
+      console.log("[Playhaus Purchases] User cancelled the native gem purchase.");
+      if (onError) onError("Purchase cancelled");
+      return;
     }
+
+    console.warn("[Playhaus Purchases] Native RevenueCat gem purchase failed:", err);
+
+    if (isPlaceholderKey()) {
+      console.log("[Playhaus Purchases] Default API key in use. Falling back to simulated Apple Pay sandbox checkout sheet...");
+      return simulateStoreKitCheckout(productId, gemAmount, onSuccess, onError);
+    }
+
+    // Propagate the real purchase failure to the UI
+    const errorMsg = err.message || "Purchase failed. Please try again.";
+    alert(`[Playhaus Billing Error] Purchase failed:\n${errorMsg}`);
+    if (onError) onError(errorMsg);
   }
 }
 
@@ -283,12 +308,12 @@ export async function purchaseVipMembership(onSuccess, onError) {
     // Configure once dynamically on demand
     try {
       await Purchases.configure({
-        apiKey: "appl_playhaus_sandbox_key",
+        apiKey: REVENUECAT_CONFIG.apiKey,
         appUserID: auth.currentUser.uid
       });
     } catch (e) {}
 
-    const productId = "fun.playhaus.vip_monthly";
+    const productId = REVENUECAT_CONFIG.vipProductId;
     const productsResponse = await Purchases.getProducts({ productIdentifiers: [productId] });
     const products = productsResponse.products || [];
     const product = products.find(p => p.identifier === productId);
@@ -300,21 +325,33 @@ export async function purchaseVipMembership(onSuccess, onError) {
     const customerInfo = purchaseResponse.customerInfo || purchaseResponse;
     
     // Verify entitlement state
-    const hasVip = customerInfo.entitlements.active['vip_membership'] !== undefined;
+    const hasVip = customerInfo.entitlements.active[REVENUECAT_CONFIG.entitlementId] !== undefined;
     if (hasVip) {
       window.isPlayhausVip = true;
       await updateDoc(doc(db, "users", auth.currentUser.uid), { isVip: true });
       await onSuccess();
     } else {
-      onError("Subscription validation failed. Please contact Support.");
+      if (onError) onError("Subscription validation failed. Please contact Support.");
     }
   } catch (err) {
-    console.error("[Playhaus Purchases] VIP Purchase failed:", err);
-    if (err.userCancelled) {
-      console.log("[Playhaus Purchases] User cancelled subscription sheet.");
-    } else {
-      onError(err.message || "App Store subscription failed.");
+    // Check if the user cancelled the subscription payment sheet
+    if (err && (err.userCancelled || err.code === 1 || err.code === "1" || err.code === "PurchaseCancelledError")) {
+      console.log("[Playhaus Purchases] User cancelled the native VIP subscription purchase.");
+      if (onError) onError("Purchase cancelled");
+      return;
     }
+
+    console.warn("[Playhaus Purchases] Native RevenueCat subscription purchase failed:", err);
+
+    if (isPlaceholderKey()) {
+      console.log("[Playhaus Purchases] Default API key in use. Falling back to simulated VIP checkout sheet...");
+      return simulateStoreKitVipCheckout(onSuccess, onError);
+    }
+
+    // Propagate the real purchase failure to the UI
+    const errorMsg = err.message || "Purchase failed. Please try again.";
+    alert(`[Playhaus Billing Error] Subscription failed:\n${errorMsg}`);
+    if (onError) onError(errorMsg);
   }
 }
 

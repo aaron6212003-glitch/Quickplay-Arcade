@@ -3,6 +3,7 @@ export const CATEGORIES = [
   { id: "puzzle", label: "🧩 Puzzle Room" },
   { id: "arcade", label: "🕹️ Arcade Room" },
   { id: "guessing", label: "🔍 Guessing Room" },
+  { id: "sports", label: "🏆 Sports Room" },
 ];
 
 // Add new games here — they auto-appear site-wide
@@ -105,6 +106,60 @@ export const GAMES = [
     earn: "🪙 25 coins per lock popped · ⭐ XP bonus for each consecutive perfect level clear",
     rules: "<div style='display:flex; gap:12px;'><span style='font-size:1.3rem;'>🎯</span><span>Tap/click the screen when the rotating dot overlaps the yellow target.</span></div><div style='display:flex; gap:12px;'><span style='font-size:1.3rem;'>🔄</span><span>Each successful pop reverses the direction of rotation.</span></div><div style='display:flex; gap:12px;'><span style='font-size:1.3rem;'>🔓</span><span>Clear all target dots consecutively to advance to the next level.</span></div><div style='display:flex; gap:12px;'><span style='font-size:1.3rem;'>💀</span><span>One missed tap or wrong timing, and it's game over!</span></div>"
   },
-
-
+  {
+    id: "sports-guess",
+    title: "StatLine",
+    description: "Guess the active NFL, NBA, and NHL players from stats and details.",
+    category: "sports",
+    difficulty: "Medium",
+    playTime: "2 min",
+    emoji: "🏆",
+    gradient: ["#3B82F6", "#8B5CF6"],
+    badges: ["new", "hot"],
+    featured: true,
+    earn: "🪙 Up to 100 coins · ⭐ XP based on guesses used",
+    rules: "<div style='display:flex; gap:12px;'><span style='font-size:1.3rem;'>🔍</span><span>Search and guess an active player.</span></div><div style='display:flex; gap:12px;'><span style='font-size:1.3rem;'>🔒</span><span>In Practice Mode, you are locked to your chosen sport until you solve the puzzle!</span></div><div style='display:flex; gap:12px;'><span style='font-size:1.3rem;'>🟩</span><span>Green: Exact match.</span></div><div style='display:flex; gap:12px;'><span style='font-size:1.3rem;'>🟨</span><span>Yellow: Close/partial match (within 2 years/inches/numbers, or correct division/conference).</span></div><div style='display:flex; gap:12px;'><span style='font-size:1.3rem;'>⬇️</span><span>Arrows (⬆️/⬇️) show if the target stats are higher or lower.</span></div>"
+  },
+  {
+    id: "locker-link",
+    title: "Locker Link",
+    description: "Group 16 sports items into 4 categories of 4 matching items.",
+    category: "sports",
+    difficulty: "Medium",
+    playTime: "2 min",
+    emoji: "🔗",
+    gradient: ["#38BDF8", "#818CF8"],
+    badges: ["new", "hot"],
+    featured: true,
+    earn: "🪙 Up to 100 coins · ⭐ XP based on attempts remaining",
+    rules: "<div style='display:flex; gap:12px;'><span style='font-size:1.3rem;'>🧩</span><span>You are shown a grid of 16 sports items (athletes, teams, numbers, etc.).</span></div><div style='display:flex; gap:12px;'><span style='font-size:1.3rem;'>🔗</span><span>Select 4 items that share a common sports category and tap Submit.</span></div><div style='display:flex; gap:12px;'><span style='font-size:1.3rem;'>⚠️</span><span>You have exactly 4 mistakes allowed before the board resolves.</span></div><div style='display:flex; gap:12px;'><span style='font-size:1.3rem;'>💡</span><span>Look out for items that could fit multiple categories — you must find the perfect 4x4 grouping!</span></div>"
+  },
+  {
+    id: "cap-room",
+    title: "Cap Room",
+    description: "Draft the best possible sports team under the salary cap and simulate the season.",
+    category: "sports",
+    difficulty: "Medium",
+    playTime: "3 min",
+    emoji: "💼",
+    gradient: ["#10B981", "#3B82F6"],
+    badges: ["new", "hot"],
+    featured: true,
+    earn: "🪙 Up to 100 coins · ⭐ XP based on wins and championship titles",
+    rules: "<div style='display:flex; gap:12px;'><span style='font-size:1.3rem;'>💼</span><span>Select a league (NFL, NBA, NHL) and draft starters under the real salary cap.</span></div><div style='display:flex; gap:12px;'><span style='font-size:1.3rem;'>⚖️</span><span>Balance expensive superstars with cheap roster depth to stay under budget.</span></div><div style='display:flex; gap:12px;'><span style='font-size:1.3rem;'>🚀</span><span>Simulate the regular season and playoffs to test your roster strength.</span></div><div style='display:flex; gap:12px;'><span style='font-size:1.3rem;'>🏆</span><span>Wins, playoff advances, and championships earn XP and Coin bonuses!</span></div>"
+  },
+  {
+    id: "gridlock",
+    title: "Gridlock",
+    description: "Fill the 3x3 sports grid by guessing players who match the row and column criteria.",
+    category: "sports",
+    difficulty: "Hard",
+    playTime: "3 min",
+    emoji: "🧱",
+    gradient: ["#F59E0B", "#EF4444"],
+    badges: ["new", "hot"],
+    featured: true,
+    earn: "🪙 Up to 100 coins · ⭐ XP based on solved cells and rarity",
+    rules: "<div style='display:flex; gap:12px;'><span style='font-size:1.3rem;'>🧱</span><span>Select a sport and fill in the 3x3 grid by matching row and column labels.</span></div><div style='display:flex; gap:12px;'><span style='font-size:1.3rem;'>🔍</span><span>Search and select a player. If they played for both categories, the cell lights up.</span></div><div style='display:flex; gap:12px;'><span style='font-size:1.3rem;'>⚖️</span><span>You have exactly 9 attempts to fill all 9 cells. No mistakes allowed for a perfect grid!</span></div><div style='display:flex; gap:12px;'><span style='font-size:1.3rem;'>⭐</span><span>Rarity Score: Guessing obscure players yields a lower score percentage, showing off your niche knowledge!</span></div>"
+  }
 ];
