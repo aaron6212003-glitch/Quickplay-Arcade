@@ -21,7 +21,9 @@ import {
   updateEmail,
   deleteUser,
   reauthenticateWithCredential,
-  EmailAuthProvider
+  EmailAuthProvider,
+  orderBy,
+  limit
 } from './firebase.js';
 
 // DOM selection
