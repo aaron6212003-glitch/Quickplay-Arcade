@@ -68,6 +68,16 @@ const btnEditModalSave = document.getElementById('btn-edit-modal-save');
 let currentUserDoc = null;
 let selectedAvatar = "👾"; // default
 
+// --- SAFE FIRESTORE DATE PARSER ---
+function parseFirestoreDate(ts) {
+  if (!ts) return new Date();
+  if (ts.seconds !== undefined) return new Date(ts.seconds * 1000);
+  if (ts instanceof Date) return ts;
+  if (typeof ts.toDate === 'function') return ts.toDate();
+  if (typeof ts === 'string' || typeof ts === 'number') return new Date(ts);
+  return new Date();
+}
+
 // --- CLASH ROYALE LEVEL PROGRESSION CALCULATOR ---
 function getLevelData(totalXP) {
   const levels = [
@@ -234,7 +244,7 @@ onAuthStateChanged(auth, async (user) => {
       const username = data.username || user.displayName || "Gamer";
       const tagline = data.tagline || "Ready to play some arcade games!";
       const favGame = data.favoriteGame || "None";
-      const avatar = data.avatar || "👾";
+      const avatar = String(data.avatar || "👾");
       
       const activeCosmetics = data.activeCosmetics || {};
       const activeTitle = activeCosmetics.title || "THE ROOKIE";
@@ -293,7 +303,7 @@ onAuthStateChanged(auth, async (user) => {
       }
       
       // XP & Gamer Leveling math calculations (Clash Royale slower quadratic curve)
-      const totalPoints = data.totalPoints || 0;
+      const totalPoints = Number(data.totalPoints) || 0;
       const lvlData = getLevelData(totalPoints);
       
       if (profileLevel) profileLevel.innerText = `LVL ${lvlData.level}`;
@@ -302,7 +312,7 @@ onAuthStateChanged(auth, async (user) => {
       
       // Update Analytics stats
       if (pointsEl) pointsEl.innerText = totalPoints.toLocaleString();
-      if (gamesEl) gamesEl.innerText = (data.gamesPlayed || 0).toLocaleString();
+      if (gamesEl) gamesEl.innerText = (Number(data.gamesPlayed) || 0).toLocaleString();
       
       const emailDisplay = document.getElementById('settings-email-display');
       if (emailDisplay) emailDisplay.innerText = user.email || "";
@@ -318,8 +328,8 @@ onAuthStateChanged(auth, async (user) => {
         
         // Sort in memory by timestamp descending
         scores.sort((a, b) => {
-          const timeA = a.timestamp ? (a.timestamp.seconds ? new Date(a.timestamp.seconds * 1000) : a.timestamp.toDate()) : new Date(0);
-          const timeB = b.timestamp ? (b.timestamp.seconds ? new Date(b.timestamp.seconds * 1000) : b.timestamp.toDate()) : new Date(0);
+          const timeA = parseFirestoreDate(a.timestamp);
+          const timeB = parseFirestoreDate(b.timestamp);
           return timeB - timeA;
         });
       } catch (scoreError) {
@@ -348,12 +358,9 @@ onAuthStateChanged(auth, async (user) => {
           timelineContainer.innerHTML = recentScores.map(scoreItem => {
             const gameName = scoreItem.game || "Game";
             const emoji = gameEmojis[gameName] || "🎯";
-            const scoreVal = scoreItem.score || 0;
+            const scoreVal = Number(scoreItem.score) || 0;
             
-            let date = new Date();
-            if (scoreItem.timestamp) {
-              date = scoreItem.timestamp.seconds ? new Date(scoreItem.timestamp.seconds * 1000) : scoreItem.timestamp.toDate();
-            }
+            let date = parseFirestoreDate(scoreItem.timestamp);
             
             const dateStr = date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) + ", " + 
                             date.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
