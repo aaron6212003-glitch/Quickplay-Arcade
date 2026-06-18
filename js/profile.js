@@ -229,14 +229,32 @@ avatarItems.forEach(item => {
 onAuthStateChanged(auth, async (user) => {
   if (user) {
     try {
-      const userRef = doc(db, "users", user.uid);
-      const userSnap = await getDoc(userRef);
-      
       let data = {};
-      if (userSnap.exists()) {
-        data = userSnap.data();
-      } else {
-        // Backfill if document does not exist yet
+      try {
+        const userRef = doc(db, "users", user.uid);
+        const userSnap = await getDoc(userRef);
+        
+        if (userSnap.exists()) {
+          data = userSnap.data();
+        } else {
+          // Backfill if document does not exist yet
+          data = {
+            uid: user.uid,
+            username: user.displayName || "Gamer",
+            email: user.email,
+            totalPoints: 0,
+            gamesPlayed: 0,
+            joinDate: new Date(),
+            badges: ["new"]
+          };
+          try {
+            await setDoc(userRef, data);
+          } catch (writeErr) {
+            console.warn("[Playhaus Auth] Failed to write backfill user doc, ignoring:", writeErr);
+          }
+        }
+      } catch (readErr) {
+        console.warn("[Playhaus Auth] Failed to read user doc, falling back to Auth details:", readErr);
         data = {
           uid: user.uid,
           username: user.displayName || "Gamer",
@@ -246,7 +264,6 @@ onAuthStateChanged(auth, async (user) => {
           joinDate: new Date(),
           badges: ["new"]
         };
-        await setDoc(userRef, data);
       }
       
       currentUserDoc = data;
