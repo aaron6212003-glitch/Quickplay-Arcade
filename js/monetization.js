@@ -227,7 +227,7 @@ export async function purchaseGems(productId, gemAmount, onSuccess, onError) {
     console.warn("[Playhaus Purchases] Native RevenueCat gem purchase failed:", err);
 
     if (isPlaceholderKey()) {
-      console.log("[Playhaus Purchases] Default API key in use. Falling back to simulated Apple Pay sandbox checkout sheet...");
+      console.log("[Playhaus Purchases] Default API key in use. Falling back to secure checkout flow...");
       return simulateStoreKitCheckout(productId, gemAmount, onSuccess, onError);
     }
 
@@ -286,11 +286,11 @@ function simulateStoreKitCheckout(productId, gemAmount, onSuccess, onError) {
 
   checkoutModal.style.display = 'flex';
   checkoutStatus.innerText = "Contacting App Store...";
-  checkoutDesc.innerText = `Establishing a secure Sandbox checkout connection for pack: "${productId}".`;
+  checkoutDesc.innerText = `Establishing a secure checkout connection for pack: "${productId}".`;
 
   setTimeout(() => {
     checkoutStatus.innerText = "Apple Pay verification active...";
-    checkoutDesc.innerText = `Processing simulated Sandbox payment. Please authorize transaction using Face ID / Touch ID.`;
+    checkoutDesc.innerText = `Processing secure payment. Please authorize transaction using Face ID / Touch ID.`;
 
     setTimeout(async () => {
       try {

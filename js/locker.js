@@ -249,6 +249,16 @@ const btnAddScrap = document.getElementById('btn-dev-add-scrap');
 const btnUnlockAll = document.getElementById('btn-dev-unlock-all');
 const btnDevReset = document.getElementById('btn-dev-reset');
 
+// Show developer panel only if playhaus_dev_mode is explicitly set in localStorage
+const devPanel = document.querySelector('.dev-panel');
+if (devPanel) {
+  if (localStorage.getItem("playhaus_dev_mode") === "true") {
+    devPanel.style.display = "flex";
+  } else {
+    devPanel.style.display = "none";
+  }
+}
+
 // Navigation Tabs
 const tabVending = document.getElementById('tab-vending');
 const tabLocker = document.getElementById('tab-locker');
@@ -468,14 +478,29 @@ onAuthStateChanged(auth, async (user) => {
   if (user) {
     try {
       const userRef = doc(db, "users", user.uid);
-      const userSnap = await getDoc(userRef);
-
       let data = {};
       let needsMerge = false;
+      let readFailed = false;
 
-      if (userSnap.exists()) {
-        data = userSnap.data();
-      } else {
+      try {
+        const userSnap = await getDoc(userRef);
+        if (userSnap.exists()) {
+          data = userSnap.data();
+        } else {
+          data = {
+            uid: user.uid,
+            username: user.displayName || "Gamer",
+            email: user.email,
+            totalPoints: 0,
+            gamesPlayed: 0,
+            joinDate: new Date(),
+            badges: ["new"]
+          };
+          needsMerge = true;
+        }
+      } catch (readErr) {
+        console.error("Firestore read failed, falling back to local defaults:", readErr);
+        readFailed = true;
         data = {
           uid: user.uid,
           username: user.displayName || "Gamer",
@@ -483,53 +508,72 @@ onAuthStateChanged(auth, async (user) => {
           totalPoints: 0,
           gamesPlayed: 0,
           joinDate: new Date(),
-          badges: ["new"]
-        };
-        needsMerge = true;
-      }
-
-      // Sync and initialize cosmetic economy defaults
-      if (data.playCoins === undefined || data.playCoins === null) {
-        data.playCoins = 200; // Starter coins
-        needsMerge = true;
-      }
-      if (data.scrap === undefined || data.scrap === null) {
-        data.scrap = 0;
-        needsMerge = true;
-      }
-      if (!Array.isArray(data.ownedCosmetics)) {
-        // Base starter pack
-        data.ownedCosmetics = [
-          "avatar:👾", "border:border-common", "theme:theme-common", "title:THE ROOKIE",
-          "card_anim:anim-none", "frame:frame-none"
-        ];
-        needsMerge = true;
-      } else {
-        const starters = ["card_anim:anim-none", "frame:frame-none"];
-        starters.forEach(item => {
-          if (!data.ownedCosmetics.includes(item)) {
-            data.ownedCosmetics.push(item);
-            needsMerge = true;
+          badges: ["new"],
+          playCoins: 200,
+          scrap: 0,
+          ownedCosmetics: [
+            "avatar:👾", "border:border-common", "theme:theme-common", "title:THE ROOKIE",
+            "card_anim:anim-none", "frame:frame-none"
+          ],
+          activeCosmetics: {
+            avatar: "👾",
+            border: "border-common",
+            theme: "theme-common",
+            title: "THE ROOKIE",
+            card_anim: "anim-none",
+            frame: "frame-none"
           }
-        });
-      }
-      if (!data.activeCosmetics || typeof data.activeCosmetics !== 'object') {
-        data.activeCosmetics = {
-          avatar: data.avatar || "👾",
-          border: "border-common",
-          theme: "theme-common",
-          title: "THE ROOKIE",
-          card_anim: "anim-none",
-          frame: "frame-none"
         };
-        needsMerge = true;
-      } else {
-        if (!data.activeCosmetics.card_anim) { data.activeCosmetics.card_anim = "anim-none"; needsMerge = true; }
-        if (!data.activeCosmetics.frame) { data.activeCosmetics.frame = "frame-none"; needsMerge = true; }
       }
 
-      if (needsMerge) {
-        await setDoc(userRef, data, { merge: true });
+      // Sync and initialize cosmetic economy defaults if read succeeded
+      if (!readFailed) {
+        if (data.playCoins === undefined || data.playCoins === null) {
+          data.playCoins = 200; // Starter coins
+          needsMerge = true;
+        }
+        if (data.scrap === undefined || data.scrap === null) {
+          data.scrap = 0;
+          needsMerge = true;
+        }
+        if (!Array.isArray(data.ownedCosmetics)) {
+          // Base starter pack
+          data.ownedCosmetics = [
+            "avatar:👾", "border:border-common", "theme:theme-common", "title:THE ROOKIE",
+            "card_anim:anim-none", "frame:frame-none"
+          ];
+          needsMerge = true;
+        } else {
+          const starters = ["card_anim:anim-none", "frame:frame-none"];
+          starters.forEach(item => {
+            if (!data.ownedCosmetics.includes(item)) {
+              data.ownedCosmetics.push(item);
+              needsMerge = true;
+            }
+          });
+        }
+        if (!data.activeCosmetics || typeof data.activeCosmetics !== 'object') {
+          data.activeCosmetics = {
+            avatar: data.avatar || "👾",
+            border: "border-common",
+            theme: "theme-common",
+            title: "THE ROOKIE",
+            card_anim: "anim-none",
+            frame: "frame-none"
+          };
+          needsMerge = true;
+        } else {
+          if (!data.activeCosmetics.card_anim) { data.activeCosmetics.card_anim = "anim-none"; needsMerge = true; }
+          if (!data.activeCosmetics.frame) { data.activeCosmetics.frame = "frame-none"; needsMerge = true; }
+        }
+
+        if (needsMerge) {
+          try {
+            await setDoc(userRef, data, { merge: true });
+          } catch (writeErr) {
+            console.error("Firestore merge setDoc failed:", writeErr);
+          }
+        }
       }
 
       userDocData = data;
@@ -1929,7 +1973,7 @@ if (tabVending) {
   });
 }
 
-// --- SANDBOX DEVELOPER TESTING SUITE ---
+// --- ADMIN TESTING SUITE ---
 if (btnAddCoins) {
   btnAddCoins.addEventListener('click', async () => {
     const user = auth.currentUser;
@@ -1942,10 +1986,10 @@ if (btnAddCoins) {
       userDocData.playCoins = nextCoins;
       
       updateCurrencyDisplay(userDocData);
-      showToast("Sandbox: Credited +500 Coins! 🪙", "success");
+      showToast("Admin: Credited +500 Coins! 🪙", "success");
     } catch (e) {
       console.error(e);
-      showToast("Sandbox: Failed to add coins.", "error");
+      showToast("Admin: Failed to add coins.", "error");
     }
   });
 }
@@ -1962,10 +2006,10 @@ if (btnAddScrap) {
       userDocData.scrap = nextScrap;
       
       updateCurrencyDisplay(userDocData);
-      showToast("Sandbox: Credited +100 Gems! 💎", "success");
+      showToast("Admin: Credited +100 Gems! 💎", "success");
     } catch (e) {
       console.error(e);
-      showToast("Sandbox: Failed to add Gems.", "error");
+      showToast("Admin: Failed to add Gems.", "error");
     }
   });
 }
@@ -1981,11 +2025,11 @@ if (btnUnlockAll) {
       await updateDoc(userRef, { ownedCosmetics: allIds });
       userDocData.ownedCosmetics = allIds;
       
-      showToast("Sandbox: Unlocked all cosmetics! 🔓", "success");
+      showToast("Admin: Unlocked all cosmetics! 🔓", "success");
       renderLockerGrid();
     } catch (e) {
       console.error(e);
-      showToast("Sandbox: Failed to unlock items.", "error");
+      showToast("Admin: Failed to unlock items.", "error");
     }
   });
 }
@@ -1995,7 +2039,7 @@ if (btnDevReset) {
     const user = auth.currentUser;
     if (!user || !userDocData) return;
 
-    if (!confirm("Are you sure you want to reset all inventory progress, Gems, and custom equipped visuals to developer starter levels?")) {
+    if (!confirm("Are you sure you want to reset all inventory progress, Gems, and custom equipped visuals to starter levels?")) {
       return;
     }
 
@@ -2039,12 +2083,12 @@ if (btnDevReset) {
         revealViewport.style.boxShadow = 'none';
       }
 
-      showToast("Sandbox: Restored default beginner inventory! 🔄", "warning");
+      showToast("Admin: Restored default beginner inventory! 🔄", "warning");
       renderLockerGrid();
 
     } catch (e) {
       console.error(e);
-      showToast("Sandbox: Failed to reset profile.", "error");
+      showToast("Admin: Failed to reset profile.", "error");
     }
   });
 }

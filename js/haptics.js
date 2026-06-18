@@ -57,7 +57,7 @@ export async function triggerHaptic(style = 'medium') {
     }
   } else {
     // Console log fallback for desktop developers
-    console.log(`[Haptics Sandbox] Vibration scale triggered: ${style.toUpperCase()}`);
+    console.log(`[Haptics Dev] Vibration scale triggered: ${style.toUpperCase()}`);
   }
 }
 
