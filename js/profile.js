@@ -70,12 +70,23 @@ let selectedAvatar = "👾"; // default
 
 // --- SAFE FIRESTORE DATE PARSER ---
 function parseFirestoreDate(ts) {
-  if (!ts) return new Date();
-  if (ts.seconds !== undefined) return new Date(ts.seconds * 1000);
-  if (ts instanceof Date) return ts;
-  if (typeof ts.toDate === 'function') return ts.toDate();
-  if (typeof ts === 'string' || typeof ts === 'number') return new Date(ts);
-  return new Date();
+  let date = new Date();
+  try {
+    if (ts) {
+      if (ts.seconds !== undefined) {
+        date = new Date(ts.seconds * 1000);
+      } else if (ts instanceof Date) {
+        date = ts;
+      } else if (typeof ts.toDate === 'function') {
+        date = ts.toDate();
+      } else if (typeof ts === 'string' || typeof ts === 'number') {
+        date = new Date(ts);
+      }
+    }
+  } catch (err) {
+    console.error("Error parsing date, using now:", err);
+  }
+  return isNaN(date.getTime()) ? new Date() : date;
 }
 
 // --- CLASH ROYALE LEVEL PROGRESSION CALCULATOR ---
@@ -485,7 +496,16 @@ onAuthStateChanged(auth, async (user) => {
       
     } catch (e) {
       console.error("Error loading profile details:", e);
-      if (loadingOverlay) loadingOverlay.innerText = "Error loading gamer profile. Please refresh.";
+      if (loadingOverlay) {
+        loadingOverlay.innerHTML = `
+          <div style="text-align: center; padding: 20px; color: #EF4444; font-family: 'Outfit', sans-serif;">
+            <h3 style="font-size: 1.5rem; font-weight: 900; margin-bottom: 8px;">Error Loading Profile</h3>
+            <p style="font-weight: bold; font-size: 1.1rem; margin-bottom: 8px; color: #fff;">${e.message}</p>
+            <pre style="text-align: left; font-size: 0.75rem; background: rgba(0,0,0,0.5); padding: 12px; border-radius: 8px; overflow-x: auto; max-width: 90vw; margin: 15px auto; line-height: 1.4; white-space: pre-wrap; word-break: break-all; color: #94a3b8; border: 1px solid rgba(255,255,255,0.08);">${e.stack || e}</pre>
+            <button class="btn btn--outline" onclick="window.location.reload()" style="margin-top: 15px; border-color: rgba(255,255,255,0.2); color: #fff; border-radius: 8px; padding: 8px 16px; cursor: pointer; font-weight: 700; background: transparent;">Retry</button>
+          </div>
+        `;
+      }
     }
   } else {
     // Show premium "Access Denied" call to action
