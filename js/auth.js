@@ -1,5 +1,5 @@
 import { auth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, updateProfile, sendEmailVerification, GoogleAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult, sendPasswordResetEmail } from './firebase.js';
-import { db, doc, setDoc, getDoc, updateDoc, increment, collection, getDocs, deleteDoc } from './firebase.js';
+import { db, doc, setDoc, getDoc, updateDoc, increment, collection, getDocs, deleteDoc, query, where } from './firebase.js';
 
 const modal = document.getElementById('auth-modal');
 const btnLoginTrigger = document.getElementById('btn-login-trigger');
@@ -640,7 +640,43 @@ if (btnSubmit) {
         showOtpOverlay(email, password, username, inviteCode);
         return;
       } else {
-        const userCredential = await signInWithEmailAndPassword(auth, email, password);
+        let loginEmail = email;
+        if (!email.includes('@')) {
+          console.log(`[Playhaus Auth] Input does not contain '@', treating as username: ${email}`);
+          const usersRef = collection(db, "users");
+          const q = query(usersRef, where("username", "==", email));
+          let querySnapshot = await getDocs(q);
+          
+          if (querySnapshot.empty) {
+            // Case-insensitive fallback lookup
+            console.log(`[Playhaus Auth] Exact query empty, executing case-insensitive fallback...`);
+            const allUsersSnap = await getDocs(usersRef);
+            let foundDoc = null;
+            allUsersSnap.forEach(uDoc => {
+              const data = uDoc.data();
+              if (data.username && data.username.toLowerCase() === email.toLowerCase()) {
+                foundDoc = data;
+              }
+            });
+            if (foundDoc && foundDoc.email) {
+              loginEmail = foundDoc.email;
+              console.log(`[Playhaus Auth] Case-insensitive match: "${email}" resolved to "${loginEmail}"`);
+            } else {
+              throw new Error(`No account found with username "${email}". Please double check your spelling or use your registered email.`);
+            }
+          } else {
+            let foundUserDoc = null;
+            querySnapshot.forEach(doc => {
+              foundUserDoc = doc.data();
+            });
+            if (foundUserDoc && foundUserDoc.email) {
+              loginEmail = foundUserDoc.email;
+              console.log(`[Playhaus Auth] Exact match: "${email}" resolved to "${loginEmail}"`);
+            }
+          }
+        }
+
+        const userCredential = await signInWithEmailAndPassword(auth, loginEmail, password);
         const user = userCredential.user;
         
         // Check if they have a profile, if not (e.g. created before this update), backfill it

@@ -1,4 +1,4 @@
-const CACHE_NAME = 'playhaus-cache-v25';
+const CACHE_NAME = 'playhaus-cache-v26';
 const ASSETS_TO_CACHE = [
   '/',
   '/index.html',
@@ -8,7 +8,7 @@ const ASSETS_TO_CACHE = [
   '/styles.css?v=19',
   '/manifest.json',
   '/js/main.js?v=23',
-  '/js/auth.js?v=23',
+  '/js/auth.js?v=25',
   '/js/daily.js',
   '/js/firebase.js?v=20',
   '/js/leaderboard.js?v=23',
