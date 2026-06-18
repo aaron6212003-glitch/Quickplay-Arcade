@@ -5,8 +5,7 @@ import {
   checkVipStatus, 
   showBannerAd, 
   showRewardedAd, 
-  purchaseGems, 
-  purchaseVipMembership 
+  purchaseGems
 } from './monetization.js';
 
 // --- COSMETICS DEFINITION SYSTEM ---
@@ -2128,38 +2127,23 @@ function initGemsStore() {
 
       storeModal.style.display = 'none';
 
-      if (productId === "fun.playhaus.vip_monthly") {
-        // VIP Subscription checkout
-        await purchaseVipMembership(
-          async () => {
-            // Success callback
-            showToast("👑 VIP Club Activated! Thank you for subscribing! 💎", "success");
-            // Check VIP status again to update global flags, hide banner ads, and verify login rewards
-            await checkVipStatus(user);
-          },
-          (err) => {
-            showToast(`❌ Subscription failed: ${err}`, "error");
-          }
-        );
-      } else {
-        // Consumable pack checkout
-        await purchaseGems(
-          productId,
-          gems,
-          async (creditedGems) => {
-            // Success callback: credit Gems directly
-            const userRef = doc(db, "users", user.uid);
-            const nextScrap = (userDocData.scrap || 0) + creditedGems;
-            await updateDoc(userRef, { scrap: nextScrap });
-            userDocData.scrap = nextScrap;
-            updateCurrencyDisplay(userDocData);
-            showToast(`🛒 Purchase successful! +${creditedGems} Gems credited to your locker! 💎`, "success");
-          },
-          (err) => {
-            showToast(`❌ Purchase failed: ${err}`, "error");
-          }
-        );
-      }
+      // Consumable pack checkout
+      await purchaseGems(
+        productId,
+        gems,
+        async (creditedGems) => {
+          // Success callback: credit Gems directly
+          const userRef = doc(db, "users", user.uid);
+          const nextScrap = (userDocData.scrap || 0) + creditedGems;
+          await updateDoc(userRef, { scrap: nextScrap });
+          userDocData.scrap = nextScrap;
+          updateCurrencyDisplay(userDocData);
+          showToast(`🛒 Purchase successful! +${creditedGems} Gems credited to your locker! 💎`, "success");
+        },
+        (err) => {
+          showToast(`❌ Purchase failed: ${err}`, "error");
+        }
+      );
     });
   });
 }

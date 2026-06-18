@@ -77,66 +77,8 @@ export async function initMonetization() {
 
 // ── VIP & MEMBERSHIP SUBSCRIPTION CHECKS ─────────────────────────────────────
 export async function checkVipStatus(user) {
-  if (!user) {
-    window.isPlayhausVip = false;
-    return false;
-  }
-
-  // 1. Fast path: Check Firestore cached VIP state
-  try {
-    const userDoc = await getDoc(doc(db, "users", user.uid));
-    if (userDoc.exists()) {
-      const data = userDoc.data();
-      if (data.isVip) {
-        window.isPlayhausVip = true;
-        console.log("[Playhaus Monetization] Active VIP membership found in Firestore cache.");
-        hideBannerAd();
-        return true;
-      }
-    }
-  } catch (err) {
-    console.error("[Playhaus Monetization] Firestore VIP check error:", err);
-  }
-
-  // 2. Native path: Verify active subscription entitlement via RevenueCat
-  if (isNative) {
-    try {
-      const Purchases = window.Capacitor?.Plugins?.Purchases;
-      if (!Purchases) {
-        throw new Error("Purchases plugin not found on window.Capacitor.Plugins");
-      }
-      
-      // Configure once dynamically on demand
-      try {
-        await Purchases.configure({
-          apiKey: REVENUECAT_CONFIG.apiKey,
-          appUserID: user.uid
-        });
-      } catch (e) {
-        // Already configured
-      }
-
-      const customerInfoResponse = await Purchases.getCustomerInfo();
-      // Ensure compatibility with different versions of the RevenueCat plugin response structure
-      const customerInfo = customerInfoResponse.customerInfo || customerInfoResponse;
-      const hasVip = customerInfo.entitlements.active[REVENUECAT_CONFIG.entitlementId] !== undefined;
-      window.isPlayhausVip = hasVip;
-
-      // Update Firestore cached value so web & native loads stay in sync
-      await updateDoc(doc(db, "users", user.uid), { isVip: hasVip });
-      
-      if (hasVip) {
-        console.log("[Playhaus Monetization] Verified active VIP entitlement via App Store!");
-        hideBannerAd();
-      }
-      return hasVip;
-    } catch (err) {
-      console.warn("[Playhaus Monetization] RevenueCat customerInfo verification failed, falling back to Firestore cache:", err);
-    }
-  }
-
-  // If native verification fails/is unconfigured, fallback to Firestore-cached state
-  return window.isPlayhausVip;
+  window.isPlayhausVip = false;
+  return false;
 }
 
 // ── BANNER ADS (BOTTOM OF THE APP) ───────────────────────────────────────────
@@ -297,62 +239,7 @@ export async function purchaseGems(productId, gemAmount, onSuccess, onError) {
 }
 
 export async function purchaseVipMembership(onSuccess, onError) {
-  if (!isNative) {
-    return simulateStoreKitVipCheckout(onSuccess, onError);
-  }
-
-  try {
-    const Purchases = window.Capacitor?.Plugins?.Purchases;
-    if (!Purchases) throw new Error("Purchases plugin not found on window.Capacitor.Plugins");
-    
-    // Configure once dynamically on demand
-    try {
-      await Purchases.configure({
-        apiKey: REVENUECAT_CONFIG.apiKey,
-        appUserID: auth.currentUser.uid
-      });
-    } catch (e) {}
-
-    const productId = REVENUECAT_CONFIG.vipProductId;
-    const productsResponse = await Purchases.getProducts({ productIdentifiers: [productId] });
-    const products = productsResponse.products || [];
-    const product = products.find(p => p.identifier === productId);
-    if (!product) {
-      throw new Error(`VIP Subscription product ${productId} not found in StoreKit catalog.`);
-    }
-
-    const purchaseResponse = await Purchases.purchaseStoreProduct({ product });
-    const customerInfo = purchaseResponse.customerInfo || purchaseResponse;
-    
-    // Verify entitlement state
-    const hasVip = customerInfo.entitlements.active[REVENUECAT_CONFIG.entitlementId] !== undefined;
-    if (hasVip) {
-      window.isPlayhausVip = true;
-      await updateDoc(doc(db, "users", auth.currentUser.uid), { isVip: true });
-      await onSuccess();
-    } else {
-      if (onError) onError("Subscription validation failed. Please contact Support.");
-    }
-  } catch (err) {
-    // Check if the user cancelled the subscription payment sheet
-    if (err && (err.userCancelled || err.code === 1 || err.code === "1" || err.code === "PurchaseCancelledError")) {
-      console.log("[Playhaus Purchases] User cancelled the native VIP subscription purchase.");
-      if (onError) onError("Purchase cancelled");
-      return;
-    }
-
-    console.warn("[Playhaus Purchases] Native RevenueCat subscription purchase failed:", err);
-
-    if (isPlaceholderKey()) {
-      console.log("[Playhaus Purchases] Default API key in use. Falling back to simulated VIP checkout sheet...");
-      return simulateStoreKitVipCheckout(onSuccess, onError);
-    }
-
-    // Propagate the real purchase failure to the UI
-    const errorMsg = err.message || "Purchase failed. Please try again.";
-    alert(`[Playhaus Billing Error] Subscription failed:\n${errorMsg}`);
-    if (onError) onError(errorMsg);
-  }
+  if (onError) onError("VIP membership is no longer active.");
 }
 
 // ── WEB SANDBOX SIMULATORS & PREMIUM VISUAL FALLBACKS ────────────────────────
@@ -420,31 +307,5 @@ function simulateStoreKitCheckout(productId, gemAmount, onSuccess, onError) {
 
 // 3. Web StoreKit Recurring VIP Subscription Simulator
 function simulateStoreKitVipCheckout(onSuccess, onError) {
-  const checkoutModal = document.getElementById('checkout-modal');
-  const checkoutStatus = document.getElementById('checkout-status');
-  const checkoutDesc = document.getElementById('checkout-desc');
-
-  if (!checkoutModal) return;
-
-  checkoutModal.style.display = 'flex';
-  checkoutStatus.innerText = "Contacting App Store...";
-  checkoutDesc.innerText = "Fetching recurring plan 'fun.playhaus.vip_monthly' ($4.99/mo) sheet.";
-
-  setTimeout(() => {
-    checkoutStatus.innerText = "Authorize VIP Club Subscription...";
-    checkoutDesc.innerText = "Verify Monthly Subscription: $4.99/month. Double click side button to subscribe via Apple Pay.";
-
-    setTimeout(async () => {
-      try {
-        window.isPlayhausVip = true;
-        await updateDoc(doc(db, "users", auth.currentUser.uid), { isVip: true });
-        await onSuccess();
-        checkoutModal.style.display = 'none';
-      } catch (err) {
-        console.error(err);
-        checkoutModal.style.display = 'none';
-        onError(err.message);
-      }
-    }, 3500);
-  }, 1500);
+  if (onError) onError("VIP membership is no longer active.");
 }
